@@ -3,21 +3,12 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 
 /* ═══════════════════════════════════════════
    圖片設定
-   /public/images/
-   • 1.png        = 序章圖
-   • s1~s5.png    = 五個典故的「學習漫畫」（有文字）
-   • q1~q5.png    = 五題的「關卡圖」（無文字）
+   1-1： /public/images/1.png（序章）、s1~s10.png（學習）、q1~q10.png（測驗）
+   2-1： /public/images/2-1 0.png（序章）、2-1 1~10.png（學習）、2-1 s1~s10.png（測驗）
    ═══════════════════════════════════════════ */
-const USE_IMAGES = true
-const IMG_BASE   = '/images/'
-const introImg   = IMG_BASE + '1.png'
-const storyImg   = (i) => `${IMG_BASE}s${i + 1}.png`   // 學習漫畫
-const quizImg    = (i) => `${IMG_BASE}q${i + 1}.png`   // 關卡無字圖
+const IMG_BASE = '/images/'
 
-/* ═══════════════════════════════════════════
-   題庫：五個成語（老師提供典故）
-   ═══════════════════════════════════════════ */
-const IDIOMS = [
+const IDIOMS_1_1 = [
   {
     idiom: '一言九鼎',
     blanks: [3],
@@ -101,31 +92,130 @@ const IDIOMS = [
 ]
 
 /* C 級提示 */
+
+const IDIOMS_2_1 = [
+  {
+    idiom: '千方百計',
+    blanks: [0, 2],
+    meaning: '形容費盡心機，想盡一切辦法、計謀。',
+    kidStory: '宋代彭龜年勸皇帝，朝中有些壞人會「千方百計」蒙蔽皇上，想盡各種辦法、計謀達到目的，提醒皇帝不要輕易聽信讒言。',
+    fullStory: '「千方百計」的「方」和「計」，指的是方法和計謀，「千」和「百」，則都是用來表很多，所以「千方百計」就是用了很多的方法和計謀。此一成語可見於宋代彭龜年的〈論小人疑間兩宮乞車駕過宮面質疏〉。彭龜年，字子壽，清江人。南宋乾道進士，歷任煥章閣待制、知江陵府，遷湖北安撫使。諡忠肅。在朝言事，善惡是非，辨析甚嚴。他的〈論小人疑間兩宮乞車駕過宮面質疏〉，即是勸諫君王應以古代聖君為榜樣，當朝中小人費盡心機，想盡一切辦法、計謀，想要蒙蔽聖上的時候，不要輕易聽信讒言。他批評朝中奸佞小人「千方百計誤陛下之聽」，使皇上無法省察群臣的諫言。「千方百計」這句成語可能出於此，就用來形容費盡心機，想盡一切辦法、計謀。',
+    emoji: '🧠', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '歷史故事',
+    mildDistract: ['萬','種','法','門'], hardDistract: ['干','計','汁','十']
+  },
+  {
+    idiom: '始作俑者',
+    blanks: [3],
+    meaning: '比喻首創惡例的人。',
+    kidStory: '古人曾用真人陪葬，後來改用木頭或泥土做的人偶（俑）代替。孔子仍然很生氣，說第一個發明用「俑」陪葬的人一定會遭報應，因為這個念頭本身就很殘忍。',
+    fullStory: '「始作俑者」的「俑」，指的是古代用來殉葬的人偶。「始作俑者」則是指發明以俑陪葬的人。在殷周時期，貴族或有身分地位的人，死後往往會以活人陪葬，例如春秋時的秦武公，死時陪葬者多達六十餘人，秦穆公死時陪葬者更多達百餘人。後來，以活人殉葬的風俗逐漸被廢除，改以木製或土製人偶取而代之，即所謂的「俑葬」。孔子對於這樣的習俗極為厭惡，他認為用像人的俑陪葬，在意念上其實與用真人陪葬沒有差別，都是非常殘忍的，所以他說：「始作俑者，其無後乎！」就是指責最初那個發明以俑陪葬的人，一定會得到報應，絕子絕孫。後來孟子向梁惠王談為政之道時曾引用孔子的這句話。在此，「始作俑者」仍是指最初那個發明以俑陪葬的人，後來「始作俑者」則被用來比喻首創惡例的人。',
+    emoji: '⚱️', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '聖賢故事',
+    mildDistract: ['人','事','物','者'], hardDistract: ['甬','桶','俑','誦']
+  },
+  {
+    idiom: '白頭偕老',
+    blanks: [2, 3],
+    meaning: '用來形容夫妻恩愛到老，現今多用為祝賀新婚的賀詞。',
+    kidStory: '「白頭」出自一首古詩，希望有個真心相待的人能一起生活到老。「偕老」出自《詩經》，寫一對相愛的夫妻約定要一起白頭到老。兩個詞合起來就是「白頭偕老」，祝福夫妻恩愛一輩子。',
+    fullStory: '「白頭偕老」係由「白頭」及「偕老」二語組合而成。「白頭」是出自樂府古辭〈白頭吟〉二首之一，內容是說夫妻二人原本相愛，後來丈夫變心，妻子便寫了這首詩，與之決絕。詩中提到，希望能有一個真心相待的人，可以共同生活，直到白頭，永不相離。「偕老」則是出自《詩經．鄭風．女曰雞鳴》，詩歌內容是寫一對夫妻歡樂美好的家庭生活。兩人十分相愛，並且誓約相守到白頭。後來這兩個典源被合用成「白頭偕老」，用來形容夫妻恩愛到老。現今這個成語多用為祝賀新婚的賀詞，也常用作「白頭到老」。',
+    emoji: '💑', bg: 'linear-gradient(160deg,#ffe0ec,#ffc0d6)', tag: '詩詞典故',
+    mildDistract: ['髮','首','終','久'], hardDistract: ['楷','皆','偕','階']
+  },
+  {
+    idiom: '借刀殺人',
+    blanks: [0, 1],
+    meaning: '比喻假他人之手去害人。',
+    kidStory: '東漢的禰衡很有才華但脾氣不好。曹操不想親自動手殺他，就把他送給別人，最後禰衡真的被別人殺了。曹操沒有動手，卻等於是借別人的刀達成目的，這就是「借刀殺人」。',
+    fullStory: '「借刀殺人」指借別人的刀來殺人。例如在《後漢書．禰衡傳》裡有一則故事：東漢末年，有個名叫禰衡的年輕人，他相當有才華，但脾氣不好，常常得罪人。曹操本來很喜歡他，但後來被他傲慢的態度觸怒了，氣得想殺掉他。但又因為他聲名在外，怕遭來非議，於是將他送給荊州刺史劉表。劉表之前也聽聞禰衡的才華過人，對他十分禮遇。但禰衡仍不改暴躁的脾氣，以致劉表也受不了他，於是就將他送給黃祖。有一次黃祖在宴請賓客時，禰衡當場和他起了衝突，而且出言不遜，黃祖一怒之下就將他殺了。曹操當初把禰衡送給別人就是想借別人的手殺他，後來果然成真。這就是「借刀殺人」。後來，「借刀殺人」就用來比喻假他人之手去害人。',
+    emoji: '🗡️', bg: 'linear-gradient(160deg,#d4e0ff,#aec4f0)', tag: '歷史故事',
+    mildDistract: ['用','拿','取','使'], hardDistract: ['惜','措','錯','借']
+  },
+  {
+    idiom: '賞心悅目',
+    blanks: [0, 2],
+    meaning: '用來形容情景美好，使心目都感到快樂舒暢。',
+    kidStory: '「賞心」是說能和好朋友一起做美好的事，心情很愉快。「悅目」是說衣服容貌整齊得體，能讓眼睛看了很舒服。兩個詞合起來，就是形容景象美好、讓人心情愉快。',
+    fullStory: '「賞心悅目」係由「賞心」及「悅目」二語組合而成。「賞心」見於南朝宋．謝靈運〈擬魏太子鄴中集詩八首并序〉。謝靈運認為：美好的時光、宜人的景色、愉悅的心情、歡樂的事情，這四種世間樂事一向最難同時具備，但是能和許多優秀的文人一起唱和應酬，這四者便同時都享受到了。「悅目」一詞見於漢．劉向《說苑．卷一九．修文》。劉向認為：衣服容貌是用來愉悅眼目，談吐應對是用來愉悅耳朵，嗜好行為是用來愉悅心志。後來這兩個詞語被合用成「賞心悅目」，用來形容情景美好，使心目都感到快樂舒暢。',
+    emoji: '🌸', bg: 'linear-gradient(160deg,#c8f0e0,#9be0c9)', tag: '詩詞典故',
+    mildDistract: ['歡','喜','樂','爽'], hardDistract: ['賞','嘗','當','裳']
+  },
+  {
+    idiom: '日新月異',
+    blanks: [0, 1],
+    meaning: '用來形容發展或進步快速，不斷出現新事物或新現象。',
+    kidStory: '古書說：「如果一天讓自己更好，就能天天更好，並一直持續進步。」後來這句話演變成「日新月異」，用來形容進步得非常快，每天都有新變化。',
+    fullStory: '在古代的儒者，認為一個人應敦品勵學才可成為身心兼修的大家。特別是對品德的涵養，更是古人所重視的。所以在《禮記．大學》中，有一段記錄個人品德修養的銘文：「苟日新，日日新，又日新。」意思是說：「如果能夠一天使品德更新，那就能天天使品德更新，且一直持續不斷地更新。」《書經》的〈康誥〉篇說這是「鼓勵人民振作、自新。」因此，君子無不盡力修養自己的品德，以期能達到完善的境界。典源只見「日新」，後來更見結合「月異」之「日新月異」一語，用來形容發展或進步快速，不斷出現新事物或新現象。',
+    emoji: '🌅', bg: 'linear-gradient(160deg,#fff4c4,#ffe08f)', tag: '經典語錄',
+    mildDistract: ['天','年','週','歲'], hardDistract: ['曰','白','舊','昔']
+  },
+  {
+    idiom: '緣木求魚',
+    blanks: [0, 1],
+    meaning: '用來比喻用錯方法，徒勞無功。',
+    kidStory: '孟子告訴齊宣王，如果不從照顧愛護百姓開始做起，卻想靠武力稱霸天下，就像爬到樹上去抓魚一樣，方法錯了，是不可能成功的。',
+    fullStory: '戰國時的齊宣王，因為仰慕春秋時齊桓公與晉文公的霸業，很想效法他們，便向孟子請教有關他們的事蹟。孟子說他沒聽說過，但可以為齊宣王講述如何以仁德統治天下。孟子認為，要以仁德統治天下，最重要的就是要知道去照顧、愛護百姓。可以先從尊敬自己的父兄、愛護自己的子弟開始，然後推及別人的父兄子弟，這樣就能治國、平天下了。如果不從這基礎開始做起，就想開疆闢土，使其他諸侯歸順而稱霸天下的話，正如同爬到樹上去抓魚，是不可能達成的。後來《孟子》原文的「緣木求魚」演變成一句成語，用來比喻用錯方法，徒勞無功。',
+    emoji: '🐟', bg: 'linear-gradient(160deg,#c4ecff,#8fd4f0)', tag: '聖賢故事',
+    mildDistract: ['爬','抓','摘','找'], hardDistract: ['椽','緣','原','源']
+  },
+  {
+    idiom: '赴湯蹈火',
+    blanks: [0, 2],
+    meaning: '用來比喻奮不顧身，不避艱險。',
+    kidStory: '西漢的鼂錯建議皇帝，要獎賞奮勇守城、攻城的將士，這樣將士才願意冒著生命危險，不怕滾燙的水、猛烈的火，勇敢為國家效力，這就是「赴湯蹈火」的由來。',
+    fullStory: '鼂錯為西漢潁川人，文帝時，奉命記錄和整理已失傳的《尚書》，後屢屢升遷。他曾對邊塞的守備提出建議，主張應用鼓勵的方式激勵將士保衛疆土，他說：「對於能固守城池及戰勝敵人者，要給予爵位以示獎賞；對於能攻陷敵方城池者，要贈予所得的財貨以增加他的財富與權勢。唯有如此，才能使將士們甘願冒著生命的危險，不顧生死的為國效忠。」後來「赴湯蹈火」這句成語就從這裡演變而出，用來比喻奮不顧身，不避艱險。也有學者以為此語應源自《傅子》，東漢末年劉表部下韓嵩曾說：「雖赴湯蹈火，死無辭也。」意思同樣是奮不顧身，不避艱險。',
+    emoji: '🔥', bg: 'linear-gradient(160deg,#ffd4c4,#ff9e8f)', tag: '歷史故事',
+    mildDistract: ['進','踏','跳','衝'], hardDistract: ['赴','付','計','起']
+  },
+  {
+    idiom: '初來乍到',
+    blanks: [1, 3],
+    meaning: '剛來到一個新的地方或環境，對周遭的人地事物還不熟悉。',
+    kidStory: '「初來乍到」是說一個人剛剛來到一個新地方，對周圍的人、事、物都還很陌生，需要時間慢慢熟悉。',
+    fullStory: '「初來乍到」意指剛來到一個新的地方或環境，對周遭的人地事物還不熟悉。這是日常生活中常用的成語，用來形容一個人到了陌生的環境，一切都還在適應、認識的階段。',
+    emoji: '🚪', bg: 'linear-gradient(160deg,#e0f0ff,#a8d4f0)', tag: '生活用語',
+    mildDistract: ['去','走','回','離'], hardDistract: ['乍','詐','作','昨']
+  },
+  {
+    idiom: '弱肉強食',
+    blanks: [0, 2],
+    meaning: '比喻強者欺凌、吞併弱者。',
+    kidStory: '韓愈說，動物們大多躲在深山裡，因為害怕被其他動物傷害，但即使小心翼翼，弱小的動物還是常常變成強壯動物的食物，這就是「弱肉強食」。',
+    fullStory: '唐代由於佛教鼎盛，因此當時的文人及達官貴人，多與僧侶往來，互贈詩文。〈送浮屠文暢師序〉就是韓愈贈予僧文暢的文章。他認為：在天下未教化之初，人民和禽獸是沒有什麼不同的。後來聖人出現，治理天下，人民才得以安逸的生活。就像鳥兒，一低頭就是要覓食；野獸們大多藏身在隱僻的深山，很少出來活動，這都是因為害怕其他的動物會傷害自己。但是這樣的小心翼翼，仍然無法擺脫弱者被強者欺凌的危險，弱者之肉，就是強者的食物。後來「弱肉強食」這句成語就從這裡演變而出，比喻強者欺凌、吞併弱者。',
+    emoji: '🦁', bg: 'linear-gradient(160deg,#f0e0c4,#d4b88f)', tag: '經典語錄',
+    mildDistract: ['小','弱','虛','柔'], hardDistract: ['肉','肌','內','丙']
+  },
+]
+
+
+/* ═══════════════════════════════════════════
+   單元設定表
+   ═══════════════════════════════════════════ */
+const UNITS = {
+  '1-1': {
+    key: '1-1',
+    title: '1-1 成語驗驗看',
+    idioms: IDIOMS_1_1,
+    introImg: IMG_BASE + '1.png',
+    storyImg: (i) => `${IMG_BASE}s${i + 1}.png`,
+    quizImg:  (i) => `${IMG_BASE}q${i + 1}.png`,
+    introText: '你現在是一位穿梭在各個成語故事之中的穿越者。每打開一扇門，就會走進一個古老的典故世界——有仗劍直言的毛遂、寫詩感恩的孟郊、勸人學習的荀子……'
+  },
+  '2-1': {
+    key: '2-1',
+    title: '2-1 成語驗驗看',
+    idioms: IDIOMS_2_1,
+    introImg: IMG_BASE + '2-1 0.png',
+    storyImg: (i) => `${IMG_BASE}2-1 ${i + 1}.png`,
+    quizImg:  (i) => `${IMG_BASE}2-1 s${i + 1}.png`,
+    introText: '歡迎來到成語驗驗看第二單元！這裡有十個新的成語典故等著你認識——有勸諫君王的忠臣、借刀殺人的權謀、赴湯蹈火的忠義……'
+  }
+}
+
 const POS_NAME  = ['第一字','第二字','第三字','第四字']
 const DISTRACT  = ['風','雨','雲','木','心','手','火','三','百','千','頭','東','西','上','下','大','小','天','日','月']
 
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-function makeTiles(q){
-  const chars=q.idiom.split('')
-  const answers=q.blanks.map(i=>chars[i])
-  let opts=[...answers]
-  const pool=shuffle([...DISTRACT])
-  const target=q.blanks.length+3
-  for(const d of pool){if(opts.length>=target)break;if(!opts.includes(d)&&!chars.includes(d))opts.push(d)}
-  return shuffle(opts).map((ch,k)=>({ch,tid:`t${k}`,used:false}))
-}
-
-/* ═══════════════════════════════════════════
-   四輪漸進回想訓練
-   輪1：挖原本設計的1字，無干擾
-   輪2：挖原本設計的2字（若原本只有1字，額外挖1字），無干擾
-   輪3：四字全挖，無干擾（只有4個正確字，順序打亂）
-   輪1：挖1字，加輕度干擾字
-   輪2：挖2字，加更多輕度干擾字
-   輪3：四字全挖，無干擾（完整重建）
-   輪4：四字全挖，加入形近/音近高辨識度干擾字
-   ═══════════════════════════════════════════ */
 const DRILL_ROUNDS=[
   {id:1,label:'第 1 輪・單字回想',desc:'挖 1 個字，加入一些干擾字，先熟悉位置'},
   {id:2,label:'第 2 輪・雙字回想',desc:'挖 2 個字，干擾字變多，開始需要判斷'},
@@ -137,11 +227,10 @@ function drillBlanks(q,round){
   if(round===1)return [...q.blanks].slice(0,1)
   if(round===2){
     if(q.blanks.length>=2)return q.blanks.slice(0,2)
-    // 原本只挖1字，補一個相鄰位置湊成2字
     const extra=q.blanks[0]===3?2:q.blanks[0]+1
     return shuffle([q.blanks[0],extra]).sort((a,b)=>a-b)
   }
-  return [0,1,2,3] // round 3、4 全挖
+  return [0,1,2,3]
 }
 
 function drillTiles(q,round){
@@ -151,30 +240,24 @@ function drillTiles(q,round){
   let opts=[...answers]
 
   if(round===1){
-    // 第1輪：認字+定位，加2個輕度干擾（同類但語意不合）
     const pool=shuffle([...(q.mildDistract||[])])
     for(const d of pool){if(opts.length>=answers.length+2)break;if(!opts.includes(d)&&!chars.includes(d))opts.push(d)}
   }else if(round===2){
-    // 第2輪：鞏固+初步判斷，加3個輕度干擾
     const pool=shuffle([...(q.mildDistract||[])])
     for(const d of pool){if(opts.length>=answers.length+3)break;if(!opts.includes(d)&&!chars.includes(d))opts.push(d)}
   }else if(round===3){
-    // 第3輪：全字完整重建，無干擾
     opts=[...answers]
   }else{
-    // 第4輪：全字挑戰，用形近/音近/同義字做高辨識度干擾
     const pool=shuffle([...(q.hardDistract||[]),...(q.mildDistract||[])])
     for(const d of pool){if(opts.length>=answers.length+4)break;if(!opts.includes(d)&&!chars.includes(d))opts.push(d)}
   }
   return shuffle(opts).map((ch,k)=>({ch,tid:`d${k}`,used:false}))
 }
 
-/* 診斷（5 題版：每題 20 分） */
-const ROUND_WEIGHT={1:5,2:8,3:10,4:12} // 難度越高權重越高
-const ROUND_MAX=Object.values(ROUND_WEIGHT).reduce((a,b)=>a+b,0)*IDIOMS.length // 350
+const ROUND_WEIGHT={1:5,2:8,3:10,4:12}
 
-function diagnoseFourRounds(drillAnswers){
-  // drillAnswers: [{round,idiom,correct}, ...] 共40筆
+function diagnoseFourRounds(drillAnswers, idiomCount){
+  const ROUND_MAX = Object.values(ROUND_WEIGHT).reduce((a,b)=>a+b,0) * idiomCount
   let rawScore=0
   const roundStats={1:{correct:0,total:0},2:{correct:0,total:0},3:{correct:0,total:0},4:{correct:0,total:0}}
   const wrongIdioms={}
@@ -190,7 +273,6 @@ function diagnoseFourRounds(drillAnswers){
   const totalScore=Math.round((rawScore/ROUND_MAX)*100)
   const totalCorrect=drillAnswers.filter(a=>a.correct).length
 
-  // 找出表現最弱的輪次（正確率最低）
   let weakestRound=1,weakestRate=1
   for(let r=1;r<=4;r++){
     const st=roundStats[r]
@@ -215,13 +297,13 @@ function diagnoseFourRounds(drillAnswers){
   return{totalScore,totalCorrect,roundStats,weakestRound,strengths,weaknesses,topWrong,recommendedLevel:level}
 }
 
-function getRecommendationText(l){
+function getRecommendationText(level){
   const t={
-    C:'建議從 C 級開始：有典故故事和提示，一步一步幫你記住每個成語！',
-    B:'你的表現不錯！B 級有故事情境但沒有提示，幫你鞏固典故理解。',
-    A:'你的成績優秀！A 級只有圖片和意思，考驗你對典故的真正掌握！'
+    C:'你需要加強基礎。建議從 C 級開始，每道題都有提示，幫助你更好地學習！',
+    B:'你的表現不錯！進入 B 級訓練，針對弱點進行強化，鞏固你的知識。',
+    A:'你的成績優秀！挑戰 A 級高難度，沒有故事提示，需要依靠成語意思和圖片推測！'
   }
-  return t[l]
+  return t[level]
 }
 function levelName(l){return l==='A'?'A 級挑戰':l==='B'?'B 級訓練':'C 級基礎'}
 function levelEmoji(l){return l==='A'?'🟢':l==='B'?'🟡':'🔴'}
@@ -229,7 +311,7 @@ function levelEmoji(l){return l==='A'?'🟢':l==='B'?'🟡':'🔴'}
 function ImgWithFallback({src,fallback,alt,className,style}){
   const[err,setErr]=useState(false)
   useEffect(()=>{setErr(false)},[src])
-  if(!USE_IMAGES||err)return <span style={style}>{fallback}</span>
+  if(err)return <span style={style}>{fallback}</span>
   return <img src={src} alt={alt} className={className} style={style} onError={()=>setErr(true)}/>
 }
 
@@ -243,11 +325,11 @@ function ProgressBar({idx,total}){
   )
 }
 
-function Scene({q,qIdx,blankCount}){
+function Scene({q,qIdx,blankCount,quizImgFn}){
   return(
     <div className="scene" style={{background:q.bg}}>
       <span className="twinkle t1">✨</span><span className="twinkle t2">⭐</span><span className="twinkle t3">✨</span>
-      {USE_IMAGES?<ImgWithFallback src={quizImg(qIdx)} fallback={q.emoji} alt={q.idiom} className="scene-img"/>:<span className="scene-emoji">{q.emoji}</span>}
+      <ImgWithFallback src={quizImgFn(qIdx)} fallback={q.emoji} alt={q.idiom} className="scene-img"/>
       <span className="scene-tag">{q.tag}・填{blankCount??q.blanks.length}字</span>
     </div>
   )
@@ -279,64 +361,52 @@ function burst(count=14){
 }
 
 export default function Home(){
-  // 畫面：intro / menu / level1-intro / learn / level1 / diagnosis / level2-select / level2-intro / level2-game
+  // screen: intro / hub-learn-select / hub-learn-list / hub-learn-detail /
+  //         hub-rank-select / rank-level1-intro / rank-learn / rank-drill / rank-diagnosis
   const[screen,setScreen]=useState('intro')
-  const[learnIdx,setLearnIdx]=useState(0)          // 學習階段：第幾個典故
-  const[drillRound,setDrillRound]=useState(1)       // 四輪訓練：第幾輪（1-4）
-  const[drillIdx,setDrillIdx]=useState(0)           // 四輪訓練：第幾題（0-9）
+  const[unit,setUnit]=useState('1-1')
+  const[selectedIdiomIdx,setSelectedIdiomIdx]=useState(null) // 學習模式：選中的成語
+  const[practiceRound,setPracticeRound]=useState(null)       // 學習模式：選中的練習輪次(1-4)
+  const[singleRound,setSingleRound]=useState(null)           // 評級後單輪練習：選定的輪次(1-4)
+
+  const[learnIdx,setLearnIdx]=useState(0)      // 評級系統：學習進度
+  const[drillRound,setDrillRound]=useState(1)
+  const[drillIdx,setDrillIdx]=useState(0)
   const[drillScore,setDrillScore]=useState(0)
-  const[freeIdiomIdx,setFreeIdiomIdx]=useState(null)  // 自由練習：選的成語
-  const[freeRound,setFreeRound]=useState(1)            // 自由練習：選的模式
-  const[qIdx,setQIdx]=useState(0)
-  const[score,setScore]=useState(0)
-  const[answers,setAnswers]=useState([])
-  const[diagnosis,setDiagnosis]=useState(null)
+  const[diagnosis,setDiagnosis]=useState({})   // { '1-1': {...}, '2-1': {...} }
+
   const[placed,setPlaced]=useState({})
   const[tiles,setTiles]=useState([])
   const[result,setResult]=useState(null)
   const[msg,setMsg]=useState('')
   const dragRef=useRef(null)
   const ghostRef=useRef(null)
-  const answersRef=useRef([])
   const drillAnswersRef=useRef([])
 
-  const initQ=useCallback((idx)=>{
-    setPlaced({});setResult(null);setMsg('')
-    setTiles(makeTiles(IDIOMS[idx]))
-  },[])
+  const U = UNITS[unit]
+  const IDIOMS = U.idioms
 
   const initDrillQ=useCallback((round,idx)=>{
     setPlaced({});setResult(null);setMsg('')
     setTiles(drillTiles(IDIOMS[idx],round))
-  },[])
+  },[IDIOMS])
 
   useEffect(()=>{
-  },[qIdx,screen,initQ])
-
-  useEffect(()=>{
-    if(screen==='drill')initDrillQ(drillRound,drillIdx)
+    if(screen==='rank-drill')initDrillQ(drillRound,drillIdx)
   },[drillRound,drillIdx,screen,initDrillQ])
 
-  /* ── 流程 ── */
-  function startLevel1(){setScreen('level1-intro')}
-  function beginLearn(){setLearnIdx(0);setScreen('learn')}
-  function nextLearn(){
-    if(learnIdx<IDIOMS.length-1)setLearnIdx(i=>i+1)
-    else beginDrill()
-  }
-  function prevLearn(){if(learnIdx>0)setLearnIdx(i=>i-1)}
-  function beginDrill(){setDrillRound(1);setDrillIdx(0);setDrillScore(0);drillAnswersRef.current=[];setScreen('drill')}
 
-  function startFreeLearn(idx){setFreeIdiomIdx(idx);setScreen('free-learn')}
-  function startFreeDrill(idx,round){
-    setFreeIdiomIdx(idx);setFreeRound(round)
+
+  /* ── 學習與練習模式 ── */
+  function openIdiom(idx){ setSelectedIdiomIdx(idx); setPracticeRound(null); setScreen('hub-learn-detail') }
+  function startPracticeCycle(){
+    setPracticeRound(1)
     setPlaced({});setResult(null);setMsg('')
-    setTiles(drillTiles(IDIOMS[idx],round))
-    setScreen('free-drill')
+    setTiles(drillTiles(IDIOMS[selectedIdiomIdx],1))
   }
-  function checkFreeDrill(){
-    const q=IDIOMS[freeIdiomIdx]
-    const blanks=drillBlanks(q,freeRound)
+  function checkPractice(){
+    const q=IDIOMS[selectedIdiomIdx]
+    const blanks=drillBlanks(q,practiceRound)
     const chars=q.idiom.split('')
     let allOk=true
     const next={...placed}
@@ -356,8 +426,69 @@ export default function Home(){
       },900)
     }
   }
+  function nextPracticeStep(){
+    if(practiceRound<4){
+      const nr=practiceRound+1
+      setPracticeRound(nr)
+      setPlaced({});setResult(null);setMsg('')
+      setTiles(drillTiles(IDIOMS[selectedIdiomIdx],nr))
+    }else{
+      // 四輪都完成，回到典故頁
+      setPracticeRound(null)
+    }
+  }
+  function retryPractice(){
+    setPlaced({});setResult(null);setMsg('')
+    setTiles(drillTiles(IDIOMS[selectedIdiomIdx],practiceRound))
+  }
 
-  /* ── 拖曳 ── */
+  /* ── 評級後：單輪次練習（從診斷報告進入） ── */
+  function pickRoundToPractice(round){
+    setSingleRound(round)
+    setScreen('rank-pick-idiom')
+  }
+  function pickIdiomForSingleRound(idx){
+    setSelectedIdiomIdx(idx)
+    setPlaced({});setResult(null);setMsg('')
+    setTiles(drillTiles(IDIOMS[idx],singleRound))
+    setScreen('rank-single-practice')
+  }
+  function checkSingleRound(){
+    const q=IDIOMS[selectedIdiomIdx]
+    const blanks=drillBlanks(q,singleRound)
+    const chars=q.idiom.split('')
+    let allOk=true
+    const next={...placed}
+    blanks.forEach(pos=>{const ok=next[pos]?.ch===chars[pos];next[pos]={...next[pos],correct:ok};if(!ok)allOk=false})
+    setPlaced(next)
+    if(allOk){
+      setResult('ok');setMsg(`✦ 答對了！「${q.idiom}」`);burst(10)
+    }else{
+      setResult('err');setMsg('✗ 放錯了，再想想看！')
+      setTimeout(()=>{
+        setPlaced(prev=>{
+          const n={...prev}
+          blanks.forEach(pos=>{if(n[pos]?.correct===false){const tid=n[pos].tid;setTiles(ts=>ts.map(t=>t.tid===tid?{...t,used:false}:t));delete n[pos]}})
+          return n
+        })
+        setResult(null);setMsg('')
+      },900)
+    }
+  }
+  function retrySingleRound(){
+    setPlaced({});setResult(null);setMsg('')
+    setTiles(drillTiles(IDIOMS[selectedIdiomIdx],singleRound))
+  }
+
+  /* ── 評級系統 ── */
+  function beginRankLearn(){setLearnIdx(0);setScreen('rank-learn')}
+  function nextRankLearn(){
+    if(learnIdx<IDIOMS.length-1)setLearnIdx(i=>i+1)
+    else beginRankDrill()
+  }
+  function prevRankLearn(){if(learnIdx>0)setLearnIdx(i=>i-1)}
+  function beginRankDrill(){setDrillRound(1);setDrillIdx(0);setDrillScore(0);drillAnswersRef.current=[];setScreen('rank-drill')}
+
   function handleClickSlot(pos){
     if(!placed[pos]||result!==null)return
     const{tid}=placed[pos]
@@ -375,9 +506,7 @@ export default function Home(){
     setMsg('')
   }
 
-  /* ── 四輪回想訓練（答對才前進，答錯可重試） ── */
-  /* ── 四輪盲測（每題1次機會，累積40題後產出評級） ── */
-  function checkDrill(){
+  function checkRankDrill(){
     const q=IDIOMS[drillIdx]
     const blanks=drillBlanks(q,drillRound)
     const chars=q.idiom.split('')
@@ -398,15 +527,15 @@ export default function Home(){
       }else if(drillRound<4){
         setDrillRound(r=>r+1);setDrillIdx(0);setDrillScore(0)
       }else{
-        setDiagnosis(diagnoseFourRounds(drillAnswersRef.current))
-        setScreen('diagnosis')
+        const res = diagnoseFourRounds(drillAnswersRef.current, IDIOMS.length)
+        setDiagnosis(d=>({...d,[unit]:res}))
+        setScreen('rank-diagnosis')
       }
     },1400)
   }
 
-  /* ── 第二關 ── */
   function onTilePointerDown(e,tile){
-    if(tile.used||(result!==null&&screen==='drill'))return
+    if(tile.used||(result!==null&&screen==='rank-drill'))return
     e.preventDefault();dragRef.current=tile
     const g=document.createElement('div');g.className='tile-ghost';g.textContent=tile.ch
     document.body.appendChild(g);ghostRef.current=g;moveGhost(e.clientX,e.clientY)
@@ -427,23 +556,33 @@ export default function Home(){
   }
   function moveGhost(x,y){if(ghostRef.current){ghostRef.current.style.left=x+'px';ghostRef.current.style.top=y+'px'}}
 
+  const currentDiagnosis = diagnosis[unit]
+  const rankQ = IDIOMS[drillIdx]
+  const filledRank = Object.keys(placed).length
+  const canCheckRank = rankQ && filledRank===drillBlanks(rankQ,drillRound).length && result===null
 
-  const q=IDIOMS[qIdx]
-  const filled=Object.keys(placed).length
-  const canCheck=filled===q.blanks.length&&result===null
-  const learn=IDIOMS[learnIdx]
+  const selIdiom = selectedIdiomIdx!==null ? IDIOMS[selectedIdiomIdx] : null
+  const filledPractice = Object.keys(placed).length
+  const canCheckPractice = practiceRound && selIdiom && filledPractice===drillBlanks(selIdiom,practiceRound).length && result===null
+
+  const PRACTICE_MODES=[
+    {round:1,emoji:'1️⃣',label:'挖1字',desc:'輕度干擾'},
+    {round:2,emoji:'2️⃣',label:'挖2字',desc:'輕度干擾'},
+    {round:3,emoji:'🀄',label:'全字挖空',desc:'無干擾'},
+    {round:4,emoji:'🔥',label:'全字挑戰',desc:'相似字干擾'},
+  ]
 
   return(
     <>
-      <Head><title>成語穿越者・典故學習館</title><meta name="viewport" content="width=device-width, initial-scale=1"/></Head>
+      <Head><title>成語驗驗看</title><meta name="viewport" content="width=device-width, initial-scale=1"/></Head>
 
       <div className="sidebar">
         <div className="sidebar-header">🗺️ 關卡選單</div>
         <button className="sidebar-back" onClick={()=>setScreen('intro')}>🏠 返回首頁</button>
-        <div style={{margin:'16px 12px 8px',fontSize:'.85rem',color:'var(--gold-dim)',fontWeight:700,textAlign:'center'}}>關卡</div>
-        <div className={`sidebar-item${['menu','level1-intro','learn','drill','diagnosis'].includes(screen)?' active':''}`} onClick={()=>setScreen('menu')}>成語驗驗看 1-1</div>
-        <div className={`sidebar-item${['free-select','free-learn','free-drill'].includes(screen)?' active':''}`} onClick={()=>setScreen('free-select')}>🎯 自由練習</div>
-        <div className={`sidebar-item${screen.startsWith('level2')?' active':''}`} onClick={()=>{if(diagnosis)setScreen('level2-rules')}} style={{opacity:diagnosis?1:0.4,cursor:diagnosis?'pointer':'not-allowed'}}>第二關：分級訓練 {!diagnosis&&'🔒'}</div>
+
+        <div style={{margin:'16px 12px 8px',fontSize:'.85rem',color:'var(--gold-dim)',fontWeight:700,textAlign:'center'}}>模式</div>
+        <div className={`sidebar-item${['hub-learn-select','hub-learn-list','hub-learn-detail'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-learn-select')}>📖 學習與練習</div>
+        <div className={`sidebar-item${['hub-rank-select','rank-level1-intro','rank-learn','rank-drill','rank-diagnosis','rank-pick-idiom','rank-single-practice'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 評級系統</div>
       </div>
 
       <div className="cloud c1"/><div className="cloud c2"/><div className="cloud c3"/>
@@ -453,126 +592,121 @@ export default function Home(){
         {/* ════ 序章 ════ */}
         <section className={`screen intro-screen${screen==='intro'?' show':''}`}>
           <div className="intro">
-            <div className="portal"><ImgWithFallback src={introImg} fallback="🌀" alt="序章" style={{width:280,height:280,objectFit:'contain',borderRadius:24}}/></div>
-            <h1>成語穿越者</h1>
+            <div className="portal"><ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="序章" style={{width:280,height:280,objectFit:'contain',borderRadius:24}}/></div>
+            <h1>成語驗驗看</h1>
             <div className="scroll-box">
-              <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每打開一扇門，就會走進一個古老的<span className="hl2">典故世界</span>——<br/>有仗劍直言的毛遂、寫詩感恩的孟郊、勸人學習的荀子……<br/><br/>請先<span className="hl">讀懂每個典故</span>，<br/>再把散落的字拼回成語，證明你真的學會了！</p>
+              <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每打開一扇門，就會走進一個古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，證明你真的學會了！</p>
             </div>
-            <button className="btn btn-go" onClick={()=>setScreen('menu')}>🚪　推開第一扇門</button>
+            <button className="btn btn-go" onClick={()=>setScreen('hub-learn-select')}>🚪　推開第一扇門</button>
           </div>
         </section>
 
-        {/* ════ 地圖 ════ */}
-        <section className={`screen${screen==='menu'?' show':''}`}>
-          <div className="menu-head"><h2>🗺️ 成語故事地圖</h2><p>選擇關卡，開始你的成語冒險吧！</p></div>
+        {/* ════ 學習與練習：選單元 ════ */}
+        <section className={`screen${screen==='hub-learn-select'?' show':''}`}>
+          <div className="menu-head"><h2>📖 學習與練習</h2><p>選擇單元，開始認識成語典故</p></div>
           <div className="level-grid">
-            <div className="level-card open" onClick={startLevel1}>
-              <span className="lv-emoji">📖</span><div className="lv-no">成語驗驗看</div><h3>1-1</h3>
-              <div className="lv-desc">先學典故，再進行四輪評級測驗，測出你的理解程度。</div><span className="lv-tag ready">▶ 開始</span>
+            <div className="level-card open" onClick={()=>{setUnit('1-1');setScreen('hub-learn-list')}}>
+              <span className="lv-emoji">📖</span><div className="lv-no">單元</div><h3>1-1</h3>
+              <div className="lv-desc">一言九鼎、寸草春暉、人山人海、水落石出、青出於藍等 10 個成語。多來自歷史故事與詩詞典故，適合初次接觸成語典故的學習。</div><span className="lv-tag ready">▶ 進入</span>
             </div>
-            <div className="level-card open" onClick={()=>setScreen('free-select')}>
-              <span className="lv-emoji">🎯</span><div className="lv-no">自由練習</div><h3>單題重複練習</h3>
-              <div className="lv-desc">自己選成語、選模式，想練哪一題就練哪一題，可以重複練習。</div><span className="lv-tag ready">▶ 選擇練習</span>
+            <div className="level-card open" onClick={()=>{setUnit('2-1');setScreen('hub-learn-list')}}>
+              <span className="lv-emoji">📖</span><div className="lv-no">單元</div><h3>2-1</h3>
+              <div className="lv-desc">千方百計、始作俑者、白頭偕老、借刀殺人、賞心悅目等 10 個成語。多來自聖賢語錄與歷史事件，難度稍進階，適合鞏固後挑戰。</div><span className="lv-tag ready">▶ 進入</span>
             </div>
           </div>
         </section>
 
-        {/* ════ 自由選關 ════ */}
-        <section className={`screen${screen==='free-select'?' show':''}`}>
-          <div className="menu-head"><h2>🎯 自由練習</h2><p>選擇任何一個成語，用任何模式重複練習</p></div>
+        {/* ════ 學習與練習：成語清單 ════ */}
+        <section className={`screen${screen==='hub-learn-list'?' show':''}`}>
+          <div className="menu-head"><h2>📖 {unit} 成語清單</h2><p>點選一個成語，開始學習典故</p></div>
           <div className="free-idiom-grid">
             {IDIOMS.map((it,i)=>(
-              <div key={i} className={`free-idiom-card${freeIdiomIdx===i?' selected':''}`} onClick={()=>setFreeIdiomIdx(i)}>
+              <div key={i} className="free-idiom-card" onClick={()=>openIdiom(i)}>
                 <span className="free-idiom-emoji">{it.emoji}</span>
                 <div className="free-idiom-name">{it.idiom}</div>
                 <div className="free-idiom-tag">{it.tag}</div>
               </div>
             ))}
           </div>
-          {freeIdiomIdx!==null&&(
-            <>
-              <p className="section-title">已選擇：{IDIOMS[freeIdiomIdx].emoji} {IDIOMS[freeIdiomIdx].idiom}　選擇練習模式</p>
-              <div className="free-mode-grid">
-                <div className="free-mode-card" onClick={()=>startFreeLearn(freeIdiomIdx)}>
-                  <span className="lv-emoji">📖</span><h3>學習典故</h3><div className="lv-desc">看漫畫和完整原文</div>
-                </div>
-                <div className="free-mode-card" onClick={()=>startFreeDrill(freeIdiomIdx,1)}>
-                  <span className="lv-emoji">1️⃣</span><h3>挖1字</h3><div className="lv-desc">輕度干擾</div>
-                </div>
-                <div className="free-mode-card" onClick={()=>startFreeDrill(freeIdiomIdx,2)}>
-                  <span className="lv-emoji">2️⃣</span><h3>挖2字</h3><div className="lv-desc">輕度干擾</div>
-                </div>
-                <div className="free-mode-card" onClick={()=>startFreeDrill(freeIdiomIdx,3)}>
-                  <span className="lv-emoji">🀄</span><h3>全字挖空</h3><div className="lv-desc">無干擾</div>
-                </div>
-                <div className="free-mode-card" onClick={()=>startFreeDrill(freeIdiomIdx,4)}>
-                  <span className="lv-emoji">🔥</span><h3>全字挑戰</h3><div className="lv-desc">相似字干擾</div>
-                </div>
-              </div>
-            </>
+          <div className="actions"><button className="btn btn-ghost" onClick={()=>setScreen('hub-learn-select')}>← 返回選單元</button></div>
+        </section>
+
+        {/* ════ 學習與練習：典故+練習入口（同一頁） ════ */}
+        <section className={`screen${screen==='hub-learn-detail'?' show':''}`}>
+          {selIdiom&&(
+          <div className="topbar">
+            <button className="back-btn" onClick={()=>setScreen('hub-learn-list')}>← 成語清單</button>
+          </div>
           )}
-          <div className="actions"><button className="btn btn-ghost" onClick={()=>setScreen('menu')}>← 返回地圖</button></div>
-        </section>
-
-        {/* ════ 自由練習：學習單一典故 ════ */}
-        <section className={`screen${screen==='free-learn'?' show':''}`}>
-          <div className="topbar">
-            <button className="back-btn" onClick={()=>setScreen('free-select')}>← 自由練習</button>
-          </div>
-          <div className="card">
-            <div className="level-banner">📖 自由學習：{IDIOMS[freeIdiomIdx??0]?.idiom}</div>
-            <div className="learn-img-box">
-              <ImgWithFallback src={storyImg(freeIdiomIdx??0)} fallback={<div className="learn-placeholder"><span style={{fontSize:'4rem'}}>{IDIOMS[freeIdiomIdx??0]?.emoji}</span><p>（此處放 s{(freeIdiomIdx??0)+1}.png 典故漫畫）</p></div>} alt="典故漫畫" className="learn-img"/>
-            </div>
-            <div className="learn-story">
-              <h3>{IDIOMS[freeIdiomIdx??0]?.emoji} {IDIOMS[freeIdiomIdx??0]?.idiom}</h3>
-              <p className="learn-kid">{IDIOMS[freeIdiomIdx??0]?.kidStory}</p>
-              <p className="meaning">💡 意思：{IDIOMS[freeIdiomIdx??0]?.meaning}</p>
-              <p className="learn-full-label">📜 完整典故原文</p>
-              <p className="learn-full">{IDIOMS[freeIdiomIdx??0]?.fullStory}</p>
-            </div>
-            <div className="actions">
-              <button className="btn btn-go" onClick={()=>setScreen('free-select')}>選擇練習模式 →</button>
-            </div>
-          </div>
-        </section>
-
-        {/* ════ 自由練習：單題挖空（可重複） ════ */}
-        <section className={`screen${screen==='free-drill'?' show':''}`}>
-          <div className="topbar">
-            <button className="back-btn" onClick={()=>setScreen('free-select')}>← 自由練習</button>
-            <div className="score-pill">{freeRound===4?'🔥 全字挑戰':freeRound===3?'🀄 全字挖空':freeRound===2?'2️⃣ 挖2字':'1️⃣ 挖1字'}</div>
-          </div>
-          {freeIdiomIdx!==null&&(
+          {selIdiom&&practiceRound===null&&(
             <div className="card">
-              <div className="level-banner">🎯 自由練習：{IDIOMS[freeIdiomIdx].idiom}</div>
-              <Scene q={IDIOMS[freeIdiomIdx]} qIdx={freeIdiomIdx} blankCount={drillBlanks(IDIOMS[freeIdiomIdx],freeRound).length}/>
-              <p className="story">「{IDIOMS[freeIdiomIdx].kidStory}」</p>
-              <p className="meaning">💡 意思：{IDIOMS[freeIdiomIdx].meaning}</p>
-              <IdiomRow q={IDIOMS[freeIdiomIdx]} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(IDIOMS[freeIdiomIdx],freeRound)}/>
+              <div className="level-banner">📖 {selIdiom.idiom}</div>
+              <div className="learn-img-box">
+                <ImgWithFallback src={U.storyImg(selectedIdiomIdx)} fallback={<div className="learn-placeholder"><span style={{fontSize:'4rem'}}>{selIdiom.emoji}</span><p>（典故漫畫圖片未上傳）</p></div>} alt={selIdiom.idiom+' 典故漫畫'} className="learn-img"/>
+              </div>
+              <div className="learn-story">
+                <h3>{selIdiom.emoji} {selIdiom.idiom}</h3>
+                <p className="learn-kid">{selIdiom.kidStory}</p>
+                <p className="meaning">💡 意思：{selIdiom.meaning}</p>
+                <p className="learn-full-label">📜 完整典故原文</p>
+                <p className="learn-full">{selIdiom.fullStory}</p>
+              </div>
+              <div className="actions" style={{marginTop:24}}>
+                <button className="btn btn-go" onClick={startPracticeCycle}>✏️ 開始練習這個成語 →</button>
+              </div>
+            </div>
+          )}
+          {selIdiom&&practiceRound!==null&&(
+            <div className="card">
+              <div className="drill-round-bar">
+                {PRACTICE_MODES.map(m=>(
+                  <div key={m.round} className={`drill-round-tag${m.round===practiceRound?' active':''}${m.round<practiceRound?' done':''}`}>{m.round<practiceRound?'✓ ':''}{m.label}</div>
+                ))}
+              </div>
+              <div className="level-banner">✏️ {selIdiom.idiom}・{PRACTICE_MODES[practiceRound-1].label}（{practiceRound}/4）</div>
+              <Scene q={selIdiom} qIdx={selectedIdiomIdx} blankCount={drillBlanks(selIdiom,practiceRound).length} quizImgFn={U.quizImg}/>
+              <p className="story">「{selIdiom.kidStory}」</p>
+              <p className="meaning">💡 意思：{selIdiom.meaning}</p>
+              <IdiomRow q={selIdiom} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(selIdiom,practiceRound)}/>
               <div className="bank-label">✦　把下面的字拖到上面的空格　✦</div>
               <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
               <div className="actions">
-                <button className="btn btn-ghost" onClick={()=>initDrillQ(freeRound,freeIdiomIdx)}>🔄 重來</button>
+                {result!=='ok'&&<button className="btn btn-ghost" onClick={retryPractice}>🔄 重來</button>}
                 {result==='ok'
-                  ?<button className="btn btn-grass" onClick={()=>initDrillQ(freeRound,freeIdiomIdx)}>🔁 再練一次</button>
-                  :<button className="btn btn-sun" disabled={Object.keys(placed).length!==drillBlanks(IDIOMS[freeIdiomIdx],freeRound).length||result!==null} onClick={checkFreeDrill}>✅ 拼好了</button>}
+                  ?<button className="btn btn-grass" onClick={nextPracticeStep}>{practiceRound<4?`下一輪：${PRACTICE_MODES[practiceRound].label} →`:'四輪完成！回到典故 🎉'}</button>
+                  :<button className="btn btn-sun" disabled={!canCheckPractice} onClick={checkPractice}>✅ 拼好了</button>}
               </div>
               <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{msg}</div>
               <div className="actions" style={{marginTop:8}}>
-                <button className="btn btn-ghost" onClick={()=>setScreen('free-select')}>🔀 換題目或模式</button>
+                <button className="btn btn-ghost" onClick={()=>setPracticeRound(null)}>📜 回看典故</button>
+                <button className="btn btn-ghost" onClick={()=>setScreen('hub-learn-list')}>🔀 換其他成語</button>
               </div>
             </div>
           )}
         </section>
 
-        {/* ════ 第一關簡短說明 ════ */}
-        <section className={`screen${screen==='level1-intro'?' show':''}`}>
+        {/* ════ 評級系統：選單元 ════ */}
+        <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
+          <div className="menu-head"><h2>📝 評級系統</h2><p>選擇單元，測試你對成語的理解程度</p></div>
+          <div className="level-grid">
+            <div className="level-card open" onClick={()=>{setUnit('1-1');setScreen('rank-level1-intro')}}>
+              <span className="lv-emoji">📝</span><div className="lv-no">單元</div><h3>1-1</h3>
+              <div className="lv-desc">先學典故，再進行四輪評級測驗。</div><span className="lv-tag ready">▶ 開始</span>
+            </div>
+            <div className="level-card open" onClick={()=>{setUnit('2-1');setScreen('rank-level1-intro')}}>
+              <span className="lv-emoji">📝</span><div className="lv-no">單元</div><h3>2-1</h3>
+              <div className="lv-desc">先學典故，再進行四輪評級測驗。</div><span className="lv-tag ready">▶ 開始</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ════ 評級系統：簡短說明 ════ */}
+        <section className={`screen${screen==='rank-level1-intro'?' show':''}`}>
           <div className="diagnosis-screen">
-            <h2>📖 第一關怎麼玩？</h2>
+            <h2>📖 {unit} 評級怎麼玩？</h2>
             <div className="diagnosis-details">
-              <div className="detail-row"><span>第一步：</span><span className="good">📖 學習 10 個成語典故（漫畫＋原文）</span></div>
-              <div className="detail-row"><span>第二步：</span><span className="good">🔁 四輪評級測驗（共 40 題）</span></div>
+              <div className="detail-row"><span>第一步：</span><span className="good">📖 學習 {IDIOMS.length} 個成語典故（漫畫＋原文）</span></div>
+              <div className="detail-row"><span>第二步：</span><span className="good">🔁 四輪評級測驗（共 {IDIOMS.length*4} 題）</span></div>
               <div className="detail-row"><span>測驗規則：</span><span className="warning">每題只有 1 次機會，不能重試</span></div>
             </div>
             <div className="analysis-box">
@@ -588,48 +722,49 @@ export default function Home(){
             </div>
             <div className="recommendation-box">
               <h4>💡 小提醒</h4>
-              <p>認真看每一個典故漫畫，記住故事裡的<b>人物</b>和<b>道理</b>。四輪測驗<b>每題只有一次機會</b>，答對答錯都會自動進入下一題，最後會依你四輪的表現算出評級喔！</p>
+              <p>建議先到「📖 學習與練習」熟悉這些成語，再來挑戰評級測驗，成績會更準確喔！</p>
             </div>
             <div className="actions">
-              <button className="btn btn-ghost" onClick={()=>setScreen('menu')}>← 返回地圖</button>
-              <button className="btn btn-go" onClick={beginLearn}>開始學習典故 →</button>
+              <button className="btn btn-ghost" onClick={()=>setScreen('hub-rank-select')}>← 返回選單元</button>
+              <button className="btn btn-go" onClick={beginRankLearn}>開始學習典故 →</button>
             </div>
           </div>
         </section>
 
-        {/* ════ 學習階段：典故漫畫 ════ */}
-        <section className={`screen${screen==='learn'?' show':''}`}>
+        {/* ════ 評級系統：學習階段 ════ */}
+        <section className={`screen${screen==='rank-learn'?' show':''}`}>
           <div className="topbar">
-            <button className="back-btn" onClick={()=>setScreen('level1-intro')}>← 說明</button>
+            <button className="back-btn" onClick={()=>setScreen('rank-level1-intro')}>← 說明</button>
             <ProgressBar idx={learnIdx} total={IDIOMS.length}/>
             <div className="score-pill">📖 {learnIdx+1}/{IDIOMS.length}</div>
           </div>
           <div className="card">
-            <div className="level-banner">📖 典故學習（{learnIdx+1}/{IDIOMS.length}）：{learn.idiom}</div>
+            <div className="level-banner">📖 典故學習（{learnIdx+1}/{IDIOMS.length}）：{IDIOMS[learnIdx].idiom}</div>
             <div className="learn-img-box">
-              <ImgWithFallback src={storyImg(learnIdx)} fallback={<div className="learn-placeholder"><span style={{fontSize:'4rem'}}>{learn.emoji}</span><p>（此處放 s{learnIdx+1}.png 典故漫畫）</p></div>} alt={learn.idiom+' 典故漫畫'} className="learn-img"/>
+              <ImgWithFallback src={U.storyImg(learnIdx)} fallback={<div className="learn-placeholder"><span style={{fontSize:'4rem'}}>{IDIOMS[learnIdx].emoji}</span><p>（典故漫畫圖片未上傳）</p></div>} alt={IDIOMS[learnIdx].idiom+' 典故漫畫'} className="learn-img"/>
             </div>
             <div className="learn-story">
-              <h3>{learn.emoji} {learn.idiom}</h3>
-              <p className="learn-kid">{learn.kidStory}</p>
-              <p className="meaning">💡 意思：{learn.meaning}</p>
+              <h3>{IDIOMS[learnIdx].emoji} {IDIOMS[learnIdx].idiom}</h3>
+              <p className="learn-kid">{IDIOMS[learnIdx].kidStory}</p>
+              <p className="meaning">💡 意思：{IDIOMS[learnIdx].meaning}</p>
               <p className="learn-full-label">📜 完整典故原文</p>
-              <p className="learn-full">{learn.fullStory}</p>
+              <p className="learn-full">{IDIOMS[learnIdx].fullStory}</p>
             </div>
             <div className="actions">
-              {learnIdx>0&&<button className="btn btn-ghost" onClick={prevLearn}>← 上一個</button>}
-              <button className="btn btn-grass" onClick={nextLearn}>{learnIdx<IDIOMS.length-1?'下一個典故 →':'學完了，開始練習 🔁'}</button>
+              {learnIdx>0&&<button className="btn btn-ghost" onClick={prevRankLearn}>← 上一個</button>}
+              <button className="btn btn-grass" onClick={nextRankLearn}>{learnIdx<IDIOMS.length-1?'下一個典故 →':'學完了，開始測驗 🔁'}</button>
             </div>
           </div>
         </section>
 
-        {/* ════ 四輪回想訓練 ════ */}
-        <section className={`screen${screen==='drill'?' show':''}`}>
+        {/* ════ 評級系統：四輪盲測 ════ */}
+        <section className={`screen${screen==='rank-drill'?' show':''}`}>
           <div className="topbar">
             <div className="score-pill">📝 評級測驗</div>
             <ProgressBar idx={drillIdx} total={IDIOMS.length}/>
             <div className="score-pill">✅ {drillScore}</div>
           </div>
+          {rankQ&&(
           <div className="card">
             <div className="drill-round-bar">
               {DRILL_ROUNDS.map(r=>(
@@ -638,89 +773,104 @@ export default function Home(){
             </div>
             <div className="level-banner">🔁 {DRILL_ROUNDS[drillRound-1].label}（{drillIdx+1}/{IDIOMS.length}）- 每題只有一次機會！</div>
             <p className="drill-desc">{DRILL_ROUNDS[drillRound-1].desc}</p>
-            <Scene q={IDIOMS[drillIdx]} qIdx={drillIdx} blankCount={drillBlanks(IDIOMS[drillIdx],drillRound).length}/>
-            <p className="meaning">💡 意思：{IDIOMS[drillIdx].meaning}</p>
-            <IdiomRow q={IDIOMS[drillIdx]} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(IDIOMS[drillIdx],drillRound)}/>
+            <Scene q={rankQ} qIdx={drillIdx} blankCount={drillBlanks(rankQ,drillRound).length} quizImgFn={U.quizImg}/>
+            <p className="meaning">💡 意思：{rankQ.meaning}</p>
+            <IdiomRow q={rankQ} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(rankQ,drillRound)}/>
             <div className="bank-label">✦　把下面的字拖到上面的空格　✦</div>
             <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
             <div className="actions">
-              <button className="btn btn-sun" disabled={Object.keys(placed).length!==drillBlanks(IDIOMS[drillIdx],drillRound).length||result!==null} onClick={checkDrill}>✅ 提交答案</button>
+              <button className="btn btn-sun" disabled={!canCheckRank} onClick={checkRankDrill}>✅ 提交答案</button>
             </div>
             <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{msg}</div>
           </div>
+          )}
         </section>
 
-        {/* ════ 診斷報告 ════ */}
-        <section className={`screen${screen==='diagnosis'?' show':''}`}>
-          {diagnosis&&(
+        {/* ════ 評級系統：診斷報告 ════ */}
+        <section className={`screen${screen==='rank-diagnosis'?' show':''}`}>
+          {currentDiagnosis&&(
             <div className="diagnosis-screen">
-              <h2>📊 你的成績分析</h2>
-              <div className="score-display"><span className="score-number">{diagnosis.totalScore}</span><span className="score-outof">/ 100 分（共 40 題，答對 {diagnosis.totalCorrect} 題）</span></div>
+              <h2>📊 {unit}・成績分析</h2>
+              <div className="score-display"><span className="score-number">{currentDiagnosis.totalScore}</span><span className="score-outof">/ 100 分（共 {IDIOMS.length*4} 題，答對 {currentDiagnosis.totalCorrect} 題）</span></div>
               <div className="diagnosis-details">
                 {DRILL_ROUNDS.map(r=>{
-                  const st=diagnosis.roundStats[r.id]
+                  const st=currentDiagnosis.roundStats[r.id]
                   const rate=st.total?Math.round((st.correct/st.total)*100):0
                   return <div className="detail-row" key={r.id}><span>{r.label}：</span><span className={rate>=80?'good':'warning'}>{st.correct}/{st.total}（{rate}%）</span></div>
                 })}
               </div>
               <div className="analysis-box">
-                {diagnosis.strengths.length>0&&<div className="strengths"><h4>✅ 表現優秀的部分</h4><ul>{diagnosis.strengths.map((s,i)=><li key={i}>{s}</li>)}</ul></div>}
-                {diagnosis.weaknesses.length>0&&<div className="weaknesses"><h4>⚠️ 需要加強的部分</h4><ul>{diagnosis.weaknesses.map((w,i)=><li key={i}>{w}</li>)}</ul></div>}
-                {diagnosis.topWrong.length>0&&<div className="weaknesses"><h4>📌 較常答錯的成語</h4><ul>{diagnosis.topWrong.map((name,i)=><li key={i}>「{name}」建議多複習</li>)}</ul></div>}
+                {currentDiagnosis.strengths.length>0&&<div className="strengths"><h4>✅ 表現優秀的部分</h4><ul>{currentDiagnosis.strengths.map((s,i)=><li key={i}>{s}</li>)}</ul></div>}
+                {currentDiagnosis.weaknesses.length>0&&<div className="weaknesses"><h4>⚠️ 需要加強的部分</h4><ul>{currentDiagnosis.weaknesses.map((w,i)=><li key={i}>{w}</li>)}</ul></div>}
+                {currentDiagnosis.topWrong.length>0&&<div className="weaknesses"><h4>📌 較常答錯的成語</h4><ul>{currentDiagnosis.topWrong.map((name,i)=><li key={i}>「{name}」建議多複習</li>)}</ul></div>}
               </div>
-              <div className="recommendation-box"><h4>📈 建議等級：{levelName(diagnosis.recommendedLevel)}</h4><p>{getRecommendationText(diagnosis.recommendedLevel)}</p></div>
-              <button className="btn btn-go" onClick={()=>setScreen('level2-rules')}>進入第二關 →</button>
+              <div className="recommendation-box"><h4>📈 建議等級：{levelName(currentDiagnosis.recommendedLevel)}</h4><p>{getRecommendationText(currentDiagnosis.recommendedLevel)}</p></div>
+
+              <p className="section-title">⭐ 根據你的表現，建議優先加強</p>
+              <div className="level-card recommended" onClick={()=>pickRoundToPractice(currentDiagnosis.weakestRound)}>
+                <div className="level-badge">推薦</div>
+                <span className="lv-emoji">🔁</span>
+                <h3>{DRILL_ROUNDS[currentDiagnosis.weakestRound-1].label}</h3>
+                <div className="lv-desc">這是你四輪中表現較弱的部分：{DRILL_ROUNDS[currentDiagnosis.weakestRound-1].desc}</div>
+                <span className="lv-tag ready">▶ 練習這一輪</span>
+              </div>
+
+              <p className="section-title">或自己選擇想加強的輪次</p>
+              <div className="level-cards-grid">
+                {PRACTICE_MODES.map(m=>(
+                  <div key={m.round} className="level-card open" onClick={()=>pickRoundToPractice(m.round)}>
+                    <span className="lv-emoji">{m.emoji}</span><h3>{m.label}</h3><div className="lv-desc">{m.desc}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="actions" style={{marginTop:24}}>
+                <button className="btn btn-ghost" onClick={()=>setScreen('hub-learn-select')}>📖 回去加強練習</button>
+                <button className="btn btn-go" onClick={()=>setScreen('hub-rank-select')}>🔀 挑戰其他單元</button>
+              </div>
             </div>
           )}
         </section>
 
-        {/* ════ 第二關：評級說明（整頁） ════ */}
-        <section className={`screen${screen==='level2-rules'?' show':''}`}>
-          <div className="diagnosis-screen">
-            <h2>📖 評級是怎麼算的？</h2>
-            <div className="recommendation-box">
-              <h4>🎯 你的評級依據</h4>
-              <p>剛才的四輪測驗（共 40 題）已經測出你的成語理解程度。輪次越難，答對的分數佔比越高，因為它更能證明你真的學會了。</p>
-            </div>
-            <div className="diagnosis-details">
-              <div className="detail-row"><span>評分方式：</span><span className="good">四輪共40題，難度越高權重越高，滿分100分</span></div>
-              <div className="detail-row"><span>80 分以上：</span><span className="good">🟢 A 級（掌握良好）</span></div>
-              <div className="detail-row"><span>40～79 分：</span><span className="good">🟡 B 級（部分掌握）</span></div>
-              <div className="detail-row"><span>40 分以下：</span><span className="good">🔴 C 級（需要加強）</span></div>
-            </div>
-            <div className="recommendation-box">
-              <h4>💡 接下來怎麼做？</h4>
-              <p>系統會依照你在<b>四輪中表現最弱的一輪</b>，建議你優先用「自由練習」多加強。自由練習<b>沒有限制</b>，你也可以自己選任何成語、任何模式來反覆練習！</p>
-            </div>
-            <div className="actions">
-              <button className="btn btn-go" onClick={()=>setScreen('level2-select')}>我明白了，看看建議 →</button>
-            </div>
+        {/* ════ 評級後：選成語來練這一輪 ════ */}
+        <section className={`screen${screen==='rank-pick-idiom'?' show':''}`}>
+          <div className="menu-head"><h2>{PRACTICE_MODES[(singleRound||1)-1].emoji} {PRACTICE_MODES[(singleRound||1)-1].label}</h2><p>選一個成語來練習這一輪</p></div>
+          <div className="free-idiom-grid">
+            {IDIOMS.map((it,i)=>(
+              <div key={i} className="free-idiom-card" onClick={()=>pickIdiomForSingleRound(i)}>
+                <span className="free-idiom-emoji">{it.emoji}</span>
+                <div className="free-idiom-name">{it.idiom}</div>
+                <div className="free-idiom-tag">{it.tag}</div>
+              </div>
+            ))}
           </div>
+          <div className="actions"><button className="btn btn-ghost" onClick={()=>setScreen('rank-diagnosis')}>← 返回評級報告</button></div>
         </section>
 
-        {/* ════ 第二關：推薦練習 ════ */}
-        <section className={`screen${screen==='level2-select'?' show':''}`}>
-          <div className="menu-head"><h2>🎯 第二關 - 依評級推薦練習</h2><p>根據你的評級，建議你優先加強的部分</p></div>
-          {diagnosis&&(<>
-            <p className="section-title">⭐ 你的評級：{levelEmoji(diagnosis.recommendedLevel)} {levelName(diagnosis.recommendedLevel)}（{diagnosis.totalScore} 分）</p>
-            <div className="level-card recommended" onClick={()=>setScreen('free-select')}>
-              <div className="level-badge">建議優先練習</div>
-              <span className="lv-emoji">🔁</span>
-              <h3>{DRILL_ROUNDS[diagnosis.weakestRound-1].label}</h3>
-              <div className="lv-desc">這是你四輪中表現較弱的部分：{DRILL_ROUNDS[diagnosis.weakestRound-1].desc}</div>
-              <span className="lv-tag ready">▶ 前往自由練習</span>
-            </div>
-            {diagnosis.topWrong.length>0&&(
-              <div className="recommendation-box" style={{maxWidth:760,width:'100%',margin:'16px auto'}}>
-                <h4>📌 建議優先複習的成語</h4>
-                <p>{diagnosis.topWrong.join('、')}</p>
+        {/* ════ 評級後：單輪次練習 ════ */}
+        <section className={`screen${screen==='rank-single-practice'?' show':''}`}>
+          {selectedIdiomIdx!==null&&singleRound&&(
+            <div className="card">
+              <div className="level-banner">✏️ {IDIOMS[selectedIdiomIdx].idiom}・{PRACTICE_MODES[singleRound-1].label}</div>
+              <Scene q={IDIOMS[selectedIdiomIdx]} qIdx={selectedIdiomIdx} blankCount={drillBlanks(IDIOMS[selectedIdiomIdx],singleRound).length} quizImgFn={U.quizImg}/>
+              <p className="story">「{IDIOMS[selectedIdiomIdx].kidStory}」</p>
+              <p className="meaning">💡 意思：{IDIOMS[selectedIdiomIdx].meaning}</p>
+              <IdiomRow q={IDIOMS[selectedIdiomIdx]} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(IDIOMS[selectedIdiomIdx],singleRound)}/>
+              <div className="bank-label">✦　把下面的字拖到上面的空格　✦</div>
+              <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
+              <div className="actions">
+                <button className="btn btn-ghost" onClick={retrySingleRound}>🔄 重來</button>
+                {result==='ok'
+                  ?<button className="btn btn-grass" onClick={retrySingleRound}>🔁 再練一次</button>
+                  :<button className="btn btn-sun" disabled={Object.keys(placed).length!==drillBlanks(IDIOMS[selectedIdiomIdx],singleRound).length||result!==null} onClick={checkSingleRound}>✅ 拼好了</button>}
               </div>
-            )}
-            <p className="section-title">或前往自由練習，自己選擇成語和模式</p>
-            <div className="actions">
-              <button className="btn btn-go" onClick={()=>setScreen('free-select')}>🎯 前往自由練習 →</button>
+              <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{msg}</div>
+              <div className="actions" style={{marginTop:8}}>
+                <button className="btn btn-ghost" onClick={()=>setScreen('rank-pick-idiom')}>🔀 換其他成語</button>
+                <button className="btn btn-ghost" onClick={()=>setScreen('rank-diagnosis')}>📊 返回評級報告</button>
+              </div>
             </div>
-          </>)}
+          )}
         </section>
 
       </div>
