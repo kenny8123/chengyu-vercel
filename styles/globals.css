@@ -215,3 +215,77 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 @media (max-width:700px){
   .free-idiom-grid,.free-mode-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ═══════════════════════════════════════════
+   穿越特效：畫面切換時的時空門閃光
+   ═══════════════════════════════════════════ */
+.portal-flash{position:fixed;inset:0;z-index:500;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.9) 0%,rgba(255,201,77,.55) 32%,rgba(155,126,222,.25) 55%,transparent 72%);
+  animation:portalPulse .5s ease-out forwards}
+@keyframes portalPulse{0%{opacity:0;transform:scale(.25)}30%{opacity:1}100%{opacity:0;transform:scale(1.7)}}
+
+/* 序章時空門：旋轉光環，強化「穿越」感 */
+.portal{position:relative;z-index:2}
+.portal::before{content:"";position:absolute;inset:-26px;border-radius:50%;
+  background:conic-gradient(from 0deg,var(--sun),var(--berry),var(--sky-blue),var(--grass),var(--sun));
+  opacity:.4;filter:blur(9px);animation:portalSpin 7s linear infinite;z-index:-1}
+@keyframes portalSpin{to{transform:rotate(360deg)}}
+
+/* ═══════════════════════════════════════════
+   導覽機器人「鼎鼎」
+   ═══════════════════════════════════════════ */
+.guide-wrap{position:fixed;right:20px;bottom:20px;z-index:300;display:flex;flex-direction:column;align-items:flex-end;gap:10px;max-width:280px}
+.guide-avatar{width:64px;height:64px;flex:0 0 auto;border-radius:50%;background:linear-gradient(135deg,var(--grape),#7b5bc4);
+  border:3px solid #fff;box-shadow:0 8px 20px rgba(90,61,43,.32);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;animation:guideFloat 3s ease-in-out infinite;align-self:flex-end}
+.guide-avatar:active{transform:scale(.92)}
+.guide-face{font-size:2rem;line-height:1}
+@keyframes guideFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.guide-bubble{background:#fff;border-radius:18px 18px 4px 18px;padding:14px 40px 14px 18px;
+  box-shadow:0 10px 24px rgba(90,61,43,.25);position:relative;animation:fadeUp .35s ease}
+.guide-bubble p{font-size:.92rem;line-height:1.7;color:var(--choc);font-weight:600}
+.guide-close{position:absolute;top:6px;right:8px;background:none;border:none;font-size:1.1rem;color:var(--choc-soft);cursor:pointer;line-height:1;padding:4px}
+
+/* ═══════════════════════════════════════════
+   文字舒適度：Aa 大小切換
+   ═══════════════════════════════════════════ */
+.text-scale-ctrl{position:fixed;top:16px;right:20px;z-index:300;background:#fff;border-radius:16px;padding:6px 8px;
+  display:flex;align-items:center;gap:4px;box-shadow:0 6px 14px rgba(90,61,43,.18)}
+.text-scale-ctrl .ts-label{font-weight:800;color:var(--choc-soft);font-size:.8rem;margin:0 2px 0 4px}
+.text-scale-ctrl button{border:none;background:#f0e4d0;color:var(--choc-soft);font-weight:700;font-size:.78rem;padding:6px 10px;border-radius:10px;cursor:pointer;transition:.15s}
+.text-scale-ctrl button.active{background:var(--berry);color:#fff}
+
+.text-scale-sm .learn-kid{font-size:1rem}
+.text-scale-sm .learn-full{font-size:.88rem}
+.text-scale-sm .story{font-size:1.05rem}
+.text-scale-sm .meaning{font-size:.9rem}
+.text-scale-sm .scroll-box p{font-size:1.2rem}
+.text-scale-lg .learn-kid{font-size:1.32rem;line-height:2.1}
+.text-scale-lg .learn-full{font-size:1.15rem;line-height:2.1}
+.text-scale-lg .story{font-size:1.38rem}
+.text-scale-lg .meaning{font-size:1.12rem}
+.text-scale-lg .scroll-box p{font-size:1.55rem}
+
+@media (max-width:600px){
+  .text-scale-ctrl{top:auto;bottom:96px;right:12px;padding:5px 6px}
+  .guide-wrap{right:12px;bottom:12px;max-width:220px}
+  .guide-avatar{width:52px;height:52px}
+  .guide-face{font-size:1.6rem}
+  .guide-bubble{padding:12px 34px 12px 14px}
+  .guide-bubble p{font-size:.85rem}
+}
+
+/* ═══════════════════════════════════════════
+   點擊互動加強：卡片邀請感與按壓回饋
+   ═══════════════════════════════════════════ */
+.level-card.open{animation:cardInvite 3.6s ease-in-out infinite}
+.level-card.open:hover{box-shadow:0 8px 0 rgba(90,61,43,.12),0 0 0 4px rgba(126,201,143,.35)}
+.level-card.open:active,.free-idiom-card:active,.free-mode-card:active{transform:scale(.96) translateY(0)}
+@keyframes cardInvite{0%,100%{box-shadow:0 8px 0 rgba(90,61,43,.12)}50%{box-shadow:0 8px 0 rgba(90,61,43,.12),0 0 18px rgba(126,201,143,.45)}}
+.free-idiom-card:hover{box-shadow:0 6px 0 rgba(90,61,43,.1),0 0 14px rgba(255,126,157,.4)}
+
+/* 評級系統：已完成的成績記錄 */
+.lv-done-badge{margin-top:10px;font-size:.8rem;font-weight:700;color:var(--grass-dark);background:#eefaf1;border-radius:10px;padding:6px 10px}
+.lv-view-btn{display:block;width:100%;margin-top:10px;background:#fff;border:2px solid var(--grape);color:var(--grape);font-weight:700;font-size:.82rem;border-radius:12px;padding:8px 10px;cursor:pointer;transition:.15s;font-family:inherit}
+.lv-view-btn:hover{background:var(--grape);color:#fff}
+.lv-view-btn:active{transform:scale(.96)}
