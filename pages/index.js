@@ -186,6 +186,99 @@ const IDIOMS_2_1 = [
   },
 ]
 
+const IDIOMS_3_1 = [
+  {
+    idiom: '禮尚往來',
+    blanks: [0, 2],
+    meaning: '比喻別人以禮相待，也要以禮回報。',
+    kidStory: '《禮記》說，古人受到別人的恩惠，也要回報別人的恩惠，這樣才合乎禮節。如果只收禮卻不回禮，或只回禮卻沒收過禮，都不合乎禮，這就是「禮尚往來」的由來。',
+    fullStory: '《禮記》是儒家典籍之一，由漢朝戴聖所輯，為十三經之一，內容多是孔子的弟子及後學所記。書中所記載的，都是上古時期的禮俗儀式和儒家理想中的政治制度。在《禮記．曲禮上》中提到，上古時代人心純樸，凡事沒什麼準則，只照著內心的誠意來行為；到了文明時代，就講究施與受間的互相往來，受到別人的恩惠，也要回報別人的恩惠。如果受到恩惠卻不報答，就不合乎禮；如果受人報答卻沒有給人恩惠，也於禮不合。人與人的關係，因為禮的作用而能保持和諧，如果沒有禮，就會發生危機。所以禮是一定要學習的。「禮尚往來」比喻別人以禮相待，也要以禮回報。',
+    emoji: '🎁', bg: 'linear-gradient(160deg,#ffe0ec,#ffc0d6)', tag: '經典語錄',
+    mildDistract: ['敬','待','恩','情'], hardDistract: ['尚','當','當','裳']
+  },
+  {
+    idiom: '爭先恐後',
+    blanks: [0, 2],
+    meaning: '指競相爭先，惟恐落後。',
+    kidStory: '晉國和楚國搶著要先歃血結盟，這是「爭先」；後來王莽掌權，各諸侯搶著討好他、爭相奉上印璽，深怕自己落在別人後面，這是「恐後」。兩個故事合起來就是「爭先恐後」。',
+    fullStory: '「爭先恐後」係由「爭先」及「恐後」二語組合而成。「爭先」是出自《左傳．襄公二十七年》，提到晉國與楚國爭執於歃血盟誓的先後。晉國人認為：晉國一向是諸侯的盟主，從來沒有其他國家在晉國之前歃血的。楚國人認為：晉國和楚國的地位是對等的，如果讓晉國一直在先，這就是楚國比晉國弱小了。因雙方爭執不下，於是叔向對趙孟說：「諸侯是歸服於晉國的德行，不是歸服於晉國是否主持盟會。」因此就讓楚國先歃血。「恐後」是出自於《漢書．卷一四．諸侯王表》，內容是說王莽在西漢末年時，已察知漢朝即將走到盡頭，國力衰微，因而心生貪念，以外戚的權勢，作威作福。其他的諸侯王看到這樣的局勢，都紛紛向王莽致上最敬禮，爭相奉上印璽，惟恐落於他人之後。後來這兩個典源被合用成「爭先恐後」，指競相爭先，惟恐落後。',
+    emoji: '🏃', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '歷史故事',
+    mildDistract: ['搶','搏','奪','趕'], hardDistract: ['諍','靜','淨','箏']
+  },
+  {
+    idiom: '立竿見影',
+    blanks: [0, 2],
+    meaning: '比喻迅速收到成效。',
+    kidStory: '古人在陽光下豎立一根竹竿，馬上就能看到竿子的影子，用來測量節氣。因為效果非常快速直接，後來「立竿見影」就用來形容做一件事很快就看到成果。',
+    fullStory: '「立竿見影」本為古代一種測量、訂定節氣的方法。指在陽光下豎立一根竹竿，根據投射日影的長度、方位等觀察自然界的變化。因為在陽光下豎立竹竿，可立即見其影，故「立竿見影」又用來比喻迅速收到成效。此語可見於漢代魏伯陽所作的《參同契》。《參同契》為道教最早系統論述煉丹的典籍，也稱得上是全世界最早的煉丹術理論性著作，全書托易象而論煉丹，其中存在著許多先進的化學觀念，對煉丹術有重大的影響。〈如審遭逢章〉談到修煉的方法。「五行」指的是金、木、水、火、土五種物質，古人認為世界萬事萬物都是由這五種物質所組成，此五種物質以循環的規律相互滋生，但亦相互制約。修煉時若能順應五行，並且專心一意，沒有任何遺漏，則可收快速而立即的功效。後來原文中的「立竿見影」演變為成語，就用來比喻迅速收到成效。',
+    emoji: '☀️', bg: 'linear-gradient(160deg,#fff4c4,#ffe08f)', tag: '自然景象',
+    mildDistract: ['站','放','插','豎'], hardDistract: ['杆','竽','桿','肝']
+  },
+  {
+    idiom: '吳牛喘月',
+    blanks: [0, 3],
+    meaning: '比喻人見到曾受其害的類似事物而過分害怕驚懼，也用來形容天氣酷熱。',
+    kidStory: '南方的水牛很怕熱，晚上看到月亮，會誤以為是太陽升起而嚇得直喘氣。晉朝的滿奮很怕冷，看到窗外寒冷的景象也會發抖，他說自己就像吳牛一樣，看到月亮就喘。',
+    fullStory: '水牛原產於長江、淮水流域一帶，生性怕熱，所以夏天時喜歡泡在水中或待在樹蔭下休息。因為太陽的熱力實在太過強烈，水牛深受其苦，因此有時在晚上看見月亮，誤以為是太陽已經出來，氣溫又要升高，而被嚇得氣喘吁吁。所以在漢代應劭的《風俗演義．佚文》中便有「吳牛望月則喘」之語。後來「吳牛喘月」這句成語就從這裡演變而出，用來比喻人見到曾受其害的類似事物而過分害怕驚懼。也用來形容天氣酷熱。在《世說新語》中有一個關於「吳牛喘月」的故事。晉武帝的臣子滿奮很怕冷，有一次他看到琉璃窗外頭的寒冷景象，即使知道琉璃窗很厚實，不會透風，仍不由得打起寒顫。武帝看到了就笑他，滿奮便很不好意思地回答：「我像吳牛一樣，只要見到了月亮就會氣喘吁吁。」',
+    emoji: '🐃', bg: 'linear-gradient(160deg,#c4ecff,#8fd4f0)', tag: '生活趣談',
+    mildDistract: ['牛','羊','馬','豬'], hardDistract: ['喘','湍','揣','端']
+  },
+  {
+    idiom: '異曲同工',
+    blanks: [0, 2],
+    meaning: '原用來比喻不同人的辭章或言論同樣精彩，後則用於比喻不同的作法收到同樣的功效。',
+    kidStory: '韓愈寫〈進學解〉，藉學生的話說：老師您的文章風格雖然和別的名家不同，但技巧造詣一樣高明。這就是「異曲同工」——曲調不同，但一樣巧妙。',
+    fullStory: '「異曲同工」原作「同工異曲」。「曲」指曲調，「工」指巧妙。韓愈是唐代的著名文人，他精通六經百家，崇尚儒學，排斥佛老，文章自成一家，為後世治古文者所取法。其登進士第後，曾任國子博士、監察御史等職，卻因直言敢諫，屢次被貶，久久不得升遷。韓愈自認才高，不應受此待遇，因此作〈進學解〉一文自嘲。文中敘述一日國子先生教誨學生說：「學業要精進，就要勤勉；學業之所以荒廢，就是因為嬉戲。」學生卻回說：「老師您如此勤勉向學，作品的旨趣，及得上《莊子》、《楚辭》的宏肆深奧，寫作技巧也如同《史記》般豐富，能力比得上揚雄、司馬相如等人，雖然風格不同，但是技巧造詣是一樣的高明。」文中的國子先生即韓愈自稱，韓愈藉著別人的口吻，宣洩自己懷才不遇的憤慨。後來「異曲同工」這句成語就從這裡演變而出，比喻不同的作法收到同樣的功效。',
+    emoji: '🎼', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '詩詞典故',
+    mildDistract: ['歌','詞','調','音'], hardDistract: ['異','翼','冀','翌']
+  },
+  {
+    idiom: '格殺勿論',
+    blanks: [0, 2],
+    meaning: '指殺凶惡的人不以殺人罪論。',
+    kidStory: '《周禮》記載，如果盜賊聚眾搶劫、殺害別人的家人，這些匪徒若因此被殺，殺人的人是無罪的。這就是「格殺勿論」的由來，表示殺凶惡的人不算犯罪。',
+    fullStory: '《周禮》一書相傳為周公所撰，記載了周代的官制。在該書《秋官．朝士》中提到「凡盜賊軍鄉邑及家人，殺之無罪」，漢代鄭眾解釋這句話的意思說：「如果有盜賊聚眾成軍，來攻打搶劫別人的村舍，殺害別人的家人，這些匪徒假如因此被殺，殺人者無罪。這就好像現行法律，無故侵入他人屋裡、強行登上他人之車、強迫他人犯法，如果因此被人格殺，殺人者無罪。」這就是「格殺無論」的典源，這句成語就是用來指殺凶惡的人不以殺人罪論。',
+    emoji: '⚖️', bg: 'linear-gradient(160deg,#d4e0ff,#aec4f0)', tag: '歷史故事',
+    mildDistract: ['打','擊','抓','捕'], hardDistract: ['格','洛','絡','客']
+  },
+  {
+    idiom: '半斤八兩',
+    blanks: [0, 2],
+    meaning: '比喻彼此相當，不相上下。',
+    kidStory: '古代十六兩是一斤，半斤剛好等於八兩，所以「半斤八兩」用來說兩個人或兩件事其實一樣，分不出高下。宋代的戲曲裡已經有人用這句話來形容兩人一樣厲害。',
+    fullStory: '斤、兩都是計算重量的單位。宋制以十六兩為一斤，半斤就等於八兩，所以用「半斤八兩」來比喻兩者相等，彼此一樣。在宋代的戲曲已見使用，如《張協狀元》裡一個粗獷的淨角和一個滑稽的丑角為錢起了爭執，居中調停的末角就說兩人「半斤八兩」，一樣無理。《宋元戲文輯佚．王質》：「伊嬌俊，我鶻伶，算半斤八兩稱兒稱著不沉不輕。」意思是兩人一樣輕巧嬌美，可見此為當時常用的俗語。後來「半斤八兩」就被用來比喻彼此相當，不相上下。',
+    emoji: '⚖️', bg: 'linear-gradient(160deg,#f0e0c4,#d4b88f)', tag: '生活智慧',
+    mildDistract: ['一','兩','三','全'], hardDistract: ['斤','斥','斧','近']
+  },
+  {
+    idiom: '少見多怪',
+    blanks: [0, 2],
+    meaning: '用來譏諷人見識不廣，遇平常之事亦以為驚怪。',
+    kidStory: '有人問佛的相貌為什麼跟一般人差這麼多，牟子回答：「少所見，多所怪，看到駱駝的駝峰以為是腫起的馬背。」意思是見識太少的人，看到平常的事也會覺得很奇怪。',
+    fullStory: '「少見多怪」一語原是譏人因見識狹隘，故而對佛的超凡相貌有所懷疑，以為是過於誇大的傳言。據漢．牟融《理惑論》載，有人問道：「你說佛的相貌有三十二種顯著特徵、八十種細微特徵，這與一般人差太多了，應該不太可能吧！」牟子回答：「俗話說得好：少所見，多所怪，看到駱駝的駝峰以為是腫起的馬背。像堯的眉毛有八種色彩，舜的眼睛有兩個瞳孔……，這不都與平常人有極大差異？所以這些異相是確實存在的，你不能因為自己沒看過就懷疑佛的不凡相貌啊！」牟子以為，若有人因為沒見過異人與佛的超凡相貌，便膚淺地以為那是不可能的，那樣的人與「睹馲駝言馬腫背」者同樣可笑。後來「少見多怪」這句成語就從這裡演變而出，用來譏諷人見識不廣，遇平常之事亦以為驚怪。',
+    emoji: '🐫', bg: 'linear-gradient(160deg,#e0f0ff,#a8d4f0)', tag: '生活趣談',
+    mildDistract: ['多','常','初','偶'], hardDistract: ['怪','恠','塊','拐']
+  },
+  {
+    idiom: '包羅萬象',
+    blanks: [0, 2],
+    meaning: '形容內容豐富，應有盡有。',
+    kidStory: '《黃帝宅經》的序文說，這本書的知識「包羅萬象」，包括日月、乾坤、寒暑、晝夜、陰陽等各方面，內容非常豐富廣泛，什麼都有涵蓋到。',
+    fullStory: '「包羅萬象」是指包含各種事物，形容豐富多樣，與「森羅萬象」一詞同意。「萬象」即是指各式各樣的事物，「包羅萬象」或許出自〈黃帝宅經序〉。《黃帝宅經》是古代風水學的書籍，講述陰陽宅位的風水易理。其書序的作者在文中提到當今流傳不少宅經，教世人宅位風水之學，這些書的主旨雖大同小異，但每本所闡述的頗多不同，若不遍覽則無以會通。有不少人篤信風水，在一知半解之下，死守禁忌，房子蓋好也不敢住，實在可惜！這些知識「包羅萬象」、內容廣泛，包括日月、乾坤、寒暑、雌雄、晝夜、陰陽等各方面，人每天都會接觸到，又是祖先留下來的智慧，一定要好好利用。所以作者除了作序外，還寫了一篇總論，描述這本書的基本理論，讓讀者容易入門。「包羅萬象」這句成語被用來形容內容豐富，應有盡有。',
+    emoji: '🌌', bg: 'linear-gradient(160deg,#c8f0e0,#9be0c9)', tag: '經典語錄',
+    mildDistract: ['含','裝','收','藏'], hardDistract: ['羅','蘿','邏','籮']
+  },
+  {
+    idiom: '莫逆之交',
+    blanks: [0, 1],
+    meaning: '用來形容心意相投、至好無嫌的朋友。',
+    kidStory: '莊子筆下四個好朋友一起討論生死的道理，結果彼此心意相通，相視而笑，就結為好朋友。這種心意完全契合、毫無隔閡的友情，就叫做「莫逆之交」。',
+    fullStory: '莊子是戰國時期道家思想的著名代表人物，他在《莊子》一書中對生命的認識有許多闡述。例如在〈大宗師〉一文裡，記述子祀、子輿、子犁、子來等四人，互相談論道：「誰能把『無』當作頭，把『生』當作背脊，將『死』當作尾脊骨，或者是有誰能知道死生存亡是同為一體的，我就與他做朋友。」結果四個人都心領意會於生命來自於無而至於有，最後又歸於死亡─即無。因而四人相視而笑，彼此心意相通，遂結為至交好友。後來「莫逆之交」這句成語，就從原文「莫逆於心，遂相與為友」演變而出，用來形容心意相投、至好無嫌的朋友。',
+    emoji: '🤝', bg: 'linear-gradient(160deg,#ffe0ec,#ffc0d6)', tag: '聖賢故事',
+    mildDistract: ['順','合','投','契'], hardDistract: ['莫','暮','幕','墓']
+  },
+]
+
 
 /* ═══════════════════════════════════════════
    單元設定表
@@ -193,7 +286,7 @@ const IDIOMS_2_1 = [
 const UNITS = {
   '1-1': {
     key: '1-1',
-    title: '1-1 成語驗驗看',
+    title: '1-1 成語穿越者',
     idioms: IDIOMS_1_1,
     introImg: IMG_BASE + '1.png',
     storyImg: (i) => `${IMG_BASE}s${i + 1}.png`,
@@ -202,12 +295,21 @@ const UNITS = {
   },
   '2-1': {
     key: '2-1',
-    title: '2-1 成語驗驗看',
+    title: '2-1 成語穿越者',
     idioms: IDIOMS_2_1,
     introImg: IMG_BASE + '2-1 0.png',
     storyImg: (i) => `${IMG_BASE}2-1 ${i + 1}.png`,
     quizImg:  (i) => `${IMG_BASE}2-1 s${i + 1}.png`,
-    introText: '歡迎來到成語驗驗看第二單元！這裡有十個新的成語典故等著你認識——有勸諫君王的忠臣、借刀殺人的權謀、赴湯蹈火的忠義……'
+    introText: '歡迎來到成語穿越者第二單元！這裡有十個新的成語典故等著你認識——有勸諫君王的忠臣、借刀殺人的權謀、赴湯蹈火的忠義……'
+  },
+  '3-1': {
+    key: '3-1',
+    title: '3-1 成語穿越者',
+    idioms: IDIOMS_3_1,
+    introImg: IMG_BASE + '3-1-0.png',
+    storyImg: (i) => `${IMG_BASE}3-1-${i + 1}.png`,
+    quizImg:  (i) => `${IMG_BASE}3-1-${i + 1}.png`,
+    introText: '歡迎來到成語穿越者第三單元！這裡有十個新的成語典故等著你認識——有懂得回禮的古人、爭先恐後的諸侯、心意相投的莫逆之交……'
   }
 }
 
@@ -331,10 +433,9 @@ function ProgressBar({idx,total}){
 
 function Scene({q,qIdx,blankCount}){
   return(
-    <div className="scene scene-noimg" style={{background:q.bg}}>
-      <span className="twinkle t1">✨</span><span className="twinkle t2">⭐</span><span className="twinkle t3">✨</span>
-      <span className="scene-emoji-big">{q.emoji}</span>
-      <span className="scene-tag">{q.tag}・填{blankCount??q.blanks.length}字</span>
+    <div className="scene scene-text" style={{background:q.bg}}>
+      <span className="scene-tag-big">📚 {q.tag}</span>
+      <span className="scene-blank-hint">本題填 {blankCount??q.blanks.length} 字</span>
     </div>
   )
 }
@@ -364,6 +465,63 @@ function burst(count=14){
   }
 }
 
+/* ═══════════════════════════════════════════
+   導覽機器人「鼎鼎」－ 依畫面狀態提醒下一步
+   ═══════════════════════════════════════════ */
+function getGuideTip({screen,unit,practiceRound,practiceCycleDone,drillRound,learnIdx,idiomCount,currentDiagnosis}){
+  switch(screen){
+    case 'intro':
+      return '嗨，我是鼎鼎🤖，你的穿越嚮導！準備好了嗎？點下面的門，展開你的成語穿越之旅吧！'
+    case 'hub-learn-select':
+      return '這裡是時空地圖，先選一扇門（單元）走進去看看吧！'
+    case 'hub-learn-list':
+      return `歡迎來到 ${unit} 的時空長廊！點一張卡片，就能打開那段故事的大門。`
+    case 'hub-learn-detail':
+      if(practiceCycleDone)return '太棒了，四輪都完成了！可以回去看看典故，或換下一個成語繼續修煉。'
+      if(practiceRound===null)return '仔細看完典故漫畫和原文後，點「開始練習」，用四輪修煉法把它記牢！'
+      return `第 ${practiceRound} 輪修煉：看清楚上面的線索，把下面的字拖進空格，拼出正確的成語吧！`
+    case 'hub-rank-select':
+      return '想知道自己的成語功力到哪一級嗎？選一個單元，接受評級試煉吧！'
+    case 'rank-level1-intro':
+      return '評級試煉分兩階段：先學典故，再挑戰四輪測驗。測驗每題只有一次機會，仔細作答喔！'
+    case 'rank-learn':
+      return `正在學習第 ${learnIdx+1}/${idiomCount} 個典故，讀熟了就點「下一個」！`
+    case 'rank-drill':
+      return `第 ${drillRound} 輪測驗進行中，每題只有一次機會，看清楚線索再把字拖進空格！`
+    case 'rank-diagnosis':
+      return currentDiagnosis?`你的分數是 ${currentDiagnosis.totalScore} 分！點下面答錯的成語，直接回去複習典故吧！`:'測驗完成了，來看看你的成績分析吧！'
+    default:
+      return '跟著我一步一步探索成語的世界吧！'
+  }
+}
+
+function Guide({tip,open,onToggle}){
+  return(
+    <div className="guide-wrap">
+      {open&&(
+        <div className="guide-bubble">
+          <button className="guide-close" onClick={onToggle} aria-label="收起嚮導">×</button>
+          <p>{tip}</p>
+        </div>
+      )}
+      <button className="guide-avatar" onClick={onToggle} aria-label="打開嚮導">
+        <span className="guide-face">🤖</span>
+      </button>
+    </div>
+  )
+}
+
+function TextScaleControl({scale,onChange}){
+  return(
+    <div className="text-scale-ctrl">
+      <span className="ts-label">Aa</span>
+      <button className={scale==='sm'?'active':''} onClick={()=>onChange('sm')}>小</button>
+      <button className={scale==='md'?'active':''} onClick={()=>onChange('md')}>中</button>
+      <button className={scale==='lg'?'active':''} onClick={()=>onChange('lg')}>大</button>
+    </div>
+  )
+}
+
 export default function Home(){
   // screen: intro / hub-learn-select / hub-learn-list / hub-learn-detail /
   //         hub-rank-select / rank-level1-intro / rank-learn / rank-drill / rank-diagnosis
@@ -386,6 +544,21 @@ export default function Home(){
   const dragRef=useRef(null)
   const ghostRef=useRef(null)
   const drillAnswersRef=useRef([])
+
+  const[guideOpen,setGuideOpen]=useState(true)   // 導覽機器人：泡泡開關
+  const[textScale,setTextScale]=useState('md')   // 文字大小：sm / md / lg
+  const[portalFlash,setPortalFlash]=useState(false)
+  const prevScreenRef=useRef(screen)
+
+  useEffect(()=>{
+    if(prevScreenRef.current!==screen){
+      prevScreenRef.current=screen
+      setGuideOpen(true)
+      setPortalFlash(true)
+      const t=setTimeout(()=>setPortalFlash(false),500)
+      return ()=>clearTimeout(t)
+    }
+  },[screen])
 
   const U = UNITS[unit]
   const IDIOMS = U.idioms
@@ -547,9 +720,11 @@ export default function Home(){
     {round:4,emoji:'🔥',label:'全字挑戰',desc:'相似字干擾'},
   ]
 
+  const guideTip=getGuideTip({screen,unit,practiceRound,practiceCycleDone,drillRound,learnIdx,idiomCount:IDIOMS.length,currentDiagnosis})
+
   return(
     <>
-      <Head><title>成語驗驗看</title><meta name="viewport" content="width=device-width, initial-scale=1"/></Head>
+      <Head><title>成語穿越者</title><meta name="viewport" content="width=device-width, initial-scale=1"/></Head>
 
       <div className="sidebar">
         <div className="sidebar-header">🗺️ 關卡選單</div>
@@ -569,13 +744,18 @@ export default function Home(){
 
       <div className="cloud c1"/><div className="cloud c2"/><div className="cloud c3"/>
 
-      <div className="wrap">
+      {portalFlash&&<div className="portal-flash"/>}
+
+      <TextScaleControl scale={textScale} onChange={setTextScale}/>
+      <Guide tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(o=>!o)}/>
+
+      <div className={`wrap text-scale-${textScale}`}>
 
         {/* ════ 序章 ════ */}
         <section className={`screen intro-screen${screen==='intro'?' show':''}`}>
           <div className="intro">
             <div className="portal"><ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="序章" style={{width:280,height:280,objectFit:'contain',borderRadius:24}}/></div>
-            <h1>成語驗驗看</h1>
+            <h1>成語穿越者</h1>
             <div className="scroll-box">
               <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每打開一扇門，就會走進一個古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，證明你真的學會了！</p>
             </div>
@@ -586,7 +766,7 @@ export default function Home(){
         {/* ════ 學習與練習：選單元 ════ */}
         <section className={`screen${screen==='hub-learn-select'?' show':''}`}>
           <div className="menu-head"><h2>📖 學習與練習</h2><p>選擇單元，開始認識成語典故</p></div>
-          <div className="level-grid">
+          <div className="level-grid cols-3">
             <div className="level-card open" onClick={()=>{setUnit('1-1');setScreen('hub-learn-list')}}>
               <span className="lv-emoji">📖</span><div className="lv-no">單元</div><h3>1-1</h3>
               <div className="lv-desc">一言九鼎、寸草春暉、人山人海、水落石出、青出於藍等 10 個成語。多來自歷史故事與詩詞典故，適合初次接觸成語典故的學習。</div><span className="lv-tag ready">▶ 進入</span>
@@ -594,6 +774,10 @@ export default function Home(){
             <div className="level-card open" onClick={()=>{setUnit('2-1');setScreen('hub-learn-list')}}>
               <span className="lv-emoji">📖</span><div className="lv-no">單元</div><h3>2-1</h3>
               <div className="lv-desc">千方百計、始作俑者、白頭偕老、借刀殺人、賞心悅目等 10 個成語。多來自聖賢語錄與歷史事件，難度稍進階，適合鞏固後挑戰。</div><span className="lv-tag ready">▶ 進入</span>
+            </div>
+            <div className="level-card open" onClick={()=>{setUnit('3-1');setScreen('hub-learn-list')}}>
+              <span className="lv-emoji">📖</span><div className="lv-no">單元</div><h3>3-1</h3>
+              <div className="lv-desc">禮尚往來、爭先恐後、立竿見影、吳牛喘月、異曲同工等 10 個成語。多來自經典禮制與生活趣談，內容更豐富多元。</div><span className="lv-tag ready">▶ 進入</span>
             </div>
           </div>
         </section>
@@ -677,13 +861,17 @@ export default function Home(){
         {/* ════ 評級系統：選單元 ════ */}
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
           <div className="menu-head"><h2>📝 評級系統</h2><p>選擇單元，測試你對成語的理解程度</p></div>
-          <div className="level-grid">
+          <div className="level-grid cols-3">
             <div className="level-card open" onClick={()=>{setUnit('1-1');setScreen('rank-level1-intro')}}>
               <span className="lv-emoji">📝</span><div className="lv-no">單元</div><h3>1-1</h3>
               <div className="lv-desc">先學典故，再進行四輪評級測驗。</div><span className="lv-tag ready">▶ 開始</span>
             </div>
             <div className="level-card open" onClick={()=>{setUnit('2-1');setScreen('rank-level1-intro')}}>
               <span className="lv-emoji">📝</span><div className="lv-no">單元</div><h3>2-1</h3>
+              <div className="lv-desc">先學典故，再進行四輪評級測驗。</div><span className="lv-tag ready">▶ 開始</span>
+            </div>
+            <div className="level-card open" onClick={()=>{setUnit('3-1');setScreen('rank-level1-intro')}}>
+              <span className="lv-emoji">📝</span><div className="lv-no">單元</div><h3>3-1</h3>
               <div className="lv-desc">先學典故，再進行四輪評級測驗。</div><span className="lv-tag ready">▶ 開始</span>
             </div>
           </div>

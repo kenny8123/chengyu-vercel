@@ -61,6 +61,8 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 .menu-head p{color:var(--choc-soft);font-weight:500;margin-top:4px}
 
 .level-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:24px auto 0;width:100%;max-width:760px}
+.level-grid.cols-3{grid-template-columns:repeat(3,1fr);max-width:1000px}
+@media (max-width:700px){.level-grid.cols-3{grid-template-columns:1fr}}
 .level-grid.single{grid-template-columns:minmax(0,360px);justify-content:center}
 .level-card{background:var(--cream);border-radius:24px;padding:22px 20px;text-align:center;position:relative;border:3px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 0 rgba(90,61,43,.12)}
 .level-card.open{border-color:var(--grass)}
@@ -217,5 +219,43 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 }
 
 /* 練習頁純文字場景（不顯示圖片） */
-.scene.scene-noimg{min-height:160px}
-.scene-emoji-big{font-size:5rem;filter:drop-shadow(0 8px 10px rgba(0,0,0,.15));animation:bounce 2.4s ease-in-out infinite}
+.scene.scene-text{min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:22px}
+.scene-tag-big{font-family:'Baloo 2','Noto Sans TC',cursive;font-weight:800;font-size:1.6rem;color:var(--choc);background:rgba(255,255,255,.75);padding:10px 26px;border-radius:20px;letter-spacing:.05em}
+.scene-blank-hint{font-weight:700;color:var(--choc-soft);background:rgba(255,255,255,.6);padding:6px 18px;border-radius:14px;font-size:.95rem}
+
+/* ══ 導覽機器人「鼎鼎」══ */
+.guide-wrap{position:fixed;right:24px;bottom:24px;z-index:200;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.guide-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(160deg,var(--berry),var(--grape));border:4px solid #fff;box-shadow:0 8px 20px rgba(90,61,43,.25);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;flex-shrink:0}
+.guide-avatar:hover{transform:scale(1.08) rotate(-4deg)}
+.guide-avatar:active{transform:scale(.95)}
+.guide-face{font-size:2rem;filter:drop-shadow(0 2px 3px rgba(0,0,0,.2))}
+.guide-bubble{position:relative;max-width:280px;background:#fff;border:3px solid var(--sun);border-radius:20px 20px 4px 20px;padding:16px 34px 16px 18px;box-shadow:0 10px 26px rgba(90,61,43,.22);animation:guidePop .25s ease}
+.guide-bubble p{margin:0;font-size:.95rem;line-height:1.65;color:var(--choc);font-weight:600}
+.guide-close{position:absolute;top:8px;right:10px;background:none;border:none;font-size:1.1rem;line-height:1;color:var(--choc-soft);cursor:pointer;padding:2px 6px;border-radius:8px}
+.guide-close:hover{background:#f0e4d0}
+@keyframes guidePop{from{opacity:0;transform:translateY(10px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media (max-width:600px){
+  .guide-wrap{right:14px;bottom:14px}
+  .guide-avatar{width:52px;height:52px}
+  .guide-face{font-size:1.6rem}
+  .guide-bubble{max-width:calc(100vw - 100px)}
+}
+
+/* ══ 文字大小控制 ══ */
+.text-scale-ctrl{position:fixed;left:270px;top:16px;z-index:150;display:flex;align-items:center;gap:6px;background:#fff;border-radius:16px;padding:6px 10px;box-shadow:0 4px 12px rgba(90,61,43,.15)}
+.text-scale-ctrl .ts-label{font-weight:800;color:var(--choc-soft);font-size:.85rem;margin-right:2px}
+.text-scale-ctrl button{border:none;background:#f0e4d0;color:var(--choc);font-weight:700;font-size:.82rem;padding:5px 10px;border-radius:10px;cursor:pointer;transition:.15s}
+.text-scale-ctrl button.active{background:var(--berry);color:#fff}
+.text-scale-ctrl button:hover:not(.active){background:#e6d6ba}
+@media (max-width:900px){.text-scale-ctrl{left:220px}}
+@media (max-width:600px){.text-scale-ctrl{position:static;margin:0 auto 10px;width:fit-content}}
+
+/* 文字縮放套用範圍 */
+.wrap.text-scale-sm{font-size:.9rem}
+.wrap.text-scale-lg{font-size:1.15rem}
+.wrap.text-scale-lg .learn-kid,.wrap.text-scale-lg .learn-full,.wrap.text-scale-lg .story,.wrap.text-scale-lg .meaning{font-size:1.2em}
+.wrap.text-scale-sm .learn-kid,.wrap.text-scale-sm .learn-full,.wrap.text-scale-sm .story,.wrap.text-scale-sm .meaning{font-size:.92em}
+
+/* ══ 過場閃光 ══ */
+.portal-flash{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.85),rgba(255,255,255,0) 60%);z-index:300;pointer-events:none;animation:flashFade .5s ease-out forwards}
+@keyframes flashFade{from{opacity:1}to{opacity:0}}
