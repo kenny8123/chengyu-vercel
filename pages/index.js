@@ -1070,7 +1070,7 @@ export default function Home(){
             return (
             <div className="diagnosis-screen">
               <h2>📊 {U.displayName}・成績{viewingRecord && `（${formatHistoryDate(viewingRecord.date)}）`}</h2>
-              <div className="score-display"><span className="score-number">{d.totalScore}</span><span className="score-outof">分</span></div>
+              <div className="score-display"><span className="score-number">{d.totalScore}</span><span className="score-outof">/ 100 分（共 {IDIOMS.length*4} 題，答對 {d.totalCorrect} 題）</span></div>
 
               {d.roundStats&&(
                 <div className="diagnosis-details">
