@@ -62,7 +62,9 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 
 .level-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:24px auto 0;width:100%;max-width:760px}
 .level-grid.cols-3{grid-template-columns:repeat(3,1fr);max-width:1000px}
-@media (max-width:700px){.level-grid.cols-3{grid-template-columns:1fr}}
+.level-grid.cols-4{grid-template-columns:repeat(4,1fr);max-width:1200px}
+@media (max-width:700px){.level-grid.cols-3,.level-grid.cols-4{grid-template-columns:1fr}}
+@media (min-width:701px) and (max-width:1000px){.level-grid.cols-4{grid-template-columns:repeat(2,1fr)}}
 .level-grid.single{grid-template-columns:minmax(0,360px);justify-content:center}
 .level-card{background:var(--cream);border-radius:24px;padding:22px 20px;text-align:center;position:relative;border:3px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 0 rgba(90,61,43,.12)}
 .level-card.open{border-color:var(--grass)}
@@ -220,8 +222,8 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 
 /* 練習頁純文字場景（不顯示圖片） */
 .scene.scene-text{min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;border-radius:22px}
-.scene-tag-big{font-family:'Baloo 2','Noto Sans TC',cursive;font-weight:800;font-size:1.6rem;color:var(--choc);background:rgba(255,255,255,.75);padding:10px 26px;border-radius:20px;letter-spacing:.05em}
-.scene-blank-hint{font-weight:700;color:var(--choc-soft);background:rgba(255,255,255,.6);padding:6px 18px;border-radius:14px;font-size:.95rem}
+.scene-meaning-main{font-family:'Noto Sans TC',sans-serif;font-weight:700;font-size:1.15rem;line-height:1.7;color:var(--choc);background:rgba(255,255,255,.8);padding:16px 22px;border-radius:18px;margin:0;max-width:90%;text-align:center}
+.scene-blank-hint{font-weight:700;color:var(--choc-soft);background:rgba(255,255,255,.6);padding:6px 18px;border-radius:14px;font-size:.9rem}
 
 /* ══ 導覽機器人「鼎鼎」══ */
 .guide-wrap{position:fixed;right:24px;bottom:24px;z-index:200;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
