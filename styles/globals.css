@@ -272,3 +272,5 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 .history-date{font-weight:600;color:var(--choc-soft)}
 .history-score{font-weight:800;color:var(--berry-dark);font-size:1.15rem;font-family:'Baloo 2',cursive}
 .history-arrow{font-size:1.3rem;color:var(--choc-soft)}
+.history-inline{margin-top:12px;padding-top:12px;border-top:2px dashed #e0d2bc;display:flex;flex-direction:column;gap:6px}
+.history-inline-row{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:8px 14px;font-size:.85rem}
