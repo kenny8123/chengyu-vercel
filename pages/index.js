@@ -1072,19 +1072,22 @@ export default function Home(){
               <h2>📊 {U.displayName}・成績{viewingRecord && `（${formatHistoryDate(viewingRecord.date)}）`}</h2>
               <div className="score-display"><span className="score-number">{d.totalScore}</span><span className="score-outof">分</span></div>
 
-              <div className="diagnosis-details">
-                {DRILL_ROUNDS.map(r=>{
-                  const st=d.roundStats[r.id]
-                  const rate=st.total?Math.round((st.correct/st.total)*100):0
-                  return <div className="detail-row" key={r.id}><span>{r.label}：</span><span className={rate>=80?'good':'warning'}>{st.correct}/{st.total}（{rate}%）</span></div>
-                })}
-              </div>
+              {d.roundStats&&(
+                <div className="diagnosis-details">
+                  {DRILL_ROUNDS.map(r=>{
+                    const st=d.roundStats[r.id]
+                    if(!st)return null
+                    const rate=st.total?Math.round((st.correct/st.total)*100):0
+                    return <div className="detail-row" key={r.id}><span>{r.label}：</span><span className={rate>=80?'good':'warning'}>{st.correct}/{st.total}（{rate}%）</span></div>
+                  })}
+                </div>
+              )}
 
-              {d.topWrong.length>0?(
+              {(d.topWrong||[]).length>0?(
                 <>
                   <p className="section-title">點下面的成語直接複習</p>
                   <div className="free-idiom-grid">
-                    {d.topWrong.map((w,i)=>{
+                    {(d.topWrong||[]).map((w,i)=>{
                       const it = IDIOMS[w.idx]
                       return it?(
                         <div key={i} className="free-idiom-card" onClick={()=>reviewWrongIdiom(w.idx)}>
