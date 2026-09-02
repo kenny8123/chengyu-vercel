@@ -530,7 +530,8 @@ function saveHistoryRecord(unit, diagnosis){
       date: new Date().toISOString(),
       totalScore: diagnosis.totalScore,
       totalCorrect: diagnosis.totalCorrect,
-      topWrong: diagnosis.topWrong
+      topWrong: diagnosis.topWrong,
+      roundStats: diagnosis.roundStats
     })
     // 最多保留 20 筆
     window.localStorage.setItem(historyKey(unit), JSON.stringify(list.slice(0,20)))
@@ -583,7 +584,7 @@ function IdiomRow({q,placed,onClickSlot,blanksOverride}){
   )
 }
 
-function UnitRankCard({unitKey,displayName,onStart}){
+function UnitRankCard({unitKey,displayName,onStart,onViewRecord}){
   const[history,setHistory]=useState([])
   const[expanded,setExpanded]=useState(false)
   useEffect(()=>{
@@ -605,9 +606,10 @@ function UnitRankCard({unitKey,displayName,onStart}){
       {expanded&&history.length>0&&(
         <div className="history-inline">
           {history.slice(0,5).map((rec,i)=>(
-            <div key={i} className="history-inline-row">
+            <div key={i} className="history-inline-row" onClick={()=>onViewRecord(rec)}>
               <span className="history-date">{formatHistoryDate(rec.date)}</span>
               <span className="history-score">{rec.totalScore} 分</span>
+              <span className="history-arrow">›</span>
             </div>
           ))}
         </div>
@@ -694,6 +696,7 @@ export default function Home(){
   const[drillIdx,setDrillIdx]=useState(0)
   const[drillScore,setDrillScore]=useState(0)
   const[diagnosis,setDiagnosis]=useState({})   // { '1-1': {...}, '2-1': {...} }
+  const[viewingRecord,setViewingRecord]=useState(null) // 從歷史記錄點進來查看的那一筆（null代表看最新測驗結果）
 
   const[placed,setPlaced]=useState({})
   const[tiles,setTiles]=useState([])
@@ -789,6 +792,12 @@ export default function Home(){
   /* ── 評級系統 ── */
   function beginRankDrill(){setDrillRound(1);setDrillIdx(0);setDrillScore(0);drillAnswersRef.current=[];setScreen('rank-drill')}
 
+  function viewHistoryRecord(u, record){
+    setUnit(u)
+    setViewingRecord(record)
+    setScreen('rank-diagnosis')
+  }
+
   function handleClickSlot(pos){
     if(!placed[pos]||result!==null)return
     const{tid}=placed[pos]
@@ -830,6 +839,7 @@ export default function Home(){
         const res = diagnoseFourRounds(drillAnswersRef.current, IDIOMS)
         setDiagnosis(d=>({...d,[unit]:res}))
         saveHistoryRecord(unit, res)
+        setViewingRecord(null)
         setScreen('rank-diagnosis')
       }
     },1400)
@@ -1017,10 +1027,10 @@ export default function Home(){
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
           <div className="menu-head"><h2>📝 評級系統</h2><p>選擇單元，測試你對成語的理解程度</p></div>
           <div className="level-grid cols-4">
-            <UnitRankCard unitKey="1-1" displayName="單元一" onStart={()=>{setUnit('1-1');beginRankDrill()}}/>
-            <UnitRankCard unitKey="2-1" displayName="單元二" onStart={()=>{setUnit('2-1');beginRankDrill()}}/>
-            <UnitRankCard unitKey="3-1" displayName="單元三" onStart={()=>{setUnit('3-1');beginRankDrill()}}/>
-            <UnitRankCard unitKey="4-1" displayName="單元四" onStart={()=>{setUnit('4-1');beginRankDrill()}}/>
+            <UnitRankCard unitKey="1-1" displayName="單元一" onStart={()=>{setUnit('1-1');beginRankDrill()}} onViewRecord={(rec)=>viewHistoryRecord('1-1',rec)}/>
+            <UnitRankCard unitKey="2-1" displayName="單元二" onStart={()=>{setUnit('2-1');beginRankDrill()}} onViewRecord={(rec)=>viewHistoryRecord('2-1',rec)}/>
+            <UnitRankCard unitKey="3-1" displayName="單元三" onStart={()=>{setUnit('3-1');beginRankDrill()}} onViewRecord={(rec)=>viewHistoryRecord('3-1',rec)}/>
+            <UnitRankCard unitKey="4-1" displayName="單元四" onStart={()=>{setUnit('4-1');beginRankDrill()}} onViewRecord={(rec)=>viewHistoryRecord('4-1',rec)}/>
           </div>
         </section>
 
@@ -1054,24 +1064,27 @@ export default function Home(){
 
         {/* ════ 評級系統：診斷報告 ════ */}
         <section className={`screen${screen==='rank-diagnosis'?' show':''}`}>
-          {currentDiagnosis&&(
+          {(() => {
+            const d = viewingRecord || currentDiagnosis
+            if(!d) return null
+            return (
             <div className="diagnosis-screen">
-              <h2>📊 {U.displayName}・成績</h2>
-              <div className="score-display"><span className="score-number">{currentDiagnosis.totalScore}</span><span className="score-outof">分</span></div>
+              <h2>📊 {U.displayName}・成績{viewingRecord && `（${formatHistoryDate(viewingRecord.date)}）`}</h2>
+              <div className="score-display"><span className="score-number">{d.totalScore}</span><span className="score-outof">分</span></div>
 
               <div className="diagnosis-details">
                 {DRILL_ROUNDS.map(r=>{
-                  const st=currentDiagnosis.roundStats[r.id]
+                  const st=d.roundStats[r.id]
                   const rate=st.total?Math.round((st.correct/st.total)*100):0
                   return <div className="detail-row" key={r.id}><span>{r.label}：</span><span className={rate>=80?'good':'warning'}>{st.correct}/{st.total}（{rate}%）</span></div>
                 })}
               </div>
 
-              {currentDiagnosis.topWrong.length>0?(
+              {d.topWrong.length>0?(
                 <>
                   <p className="section-title">點下面的成語直接複習</p>
                   <div className="free-idiom-grid">
-                    {currentDiagnosis.topWrong.map((w,i)=>{
+                    {d.topWrong.map((w,i)=>{
                       const it = IDIOMS[w.idx]
                       return it?(
                         <div key={i} className="free-idiom-card" onClick={()=>reviewWrongIdiom(w.idx)}>
@@ -1086,8 +1099,14 @@ export default function Home(){
               ):(
                 <p className="section-title">🎉 全部答對！</p>
               )}
+              {viewingRecord && (
+                <div className="actions" style={{marginTop:20}}>
+                  <button className="btn btn-ghost" onClick={()=>{setViewingRecord(null);setScreen('hub-rank-select')}}>← 返回選單元</button>
+                </div>
+              )}
             </div>
-          )}
+            )
+          })()}
         </section>
 
       </div>
