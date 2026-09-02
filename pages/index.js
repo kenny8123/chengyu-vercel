@@ -976,7 +976,7 @@ export default function Home(){
                 <p className="learn-full">{selIdiom.fullStory}</p>
               </div>
               <div className="actions" style={{marginTop:24}}>
-                <button className="btn btn-go" onClick={startPracticeCycle}>✏️ 開始練習這個成語 →</button>
+                <button className="btn btn-go" onClick={startPracticeCycle}>✏️ 開始練習成語 →</button>
               </div>
             </div>
           )}
