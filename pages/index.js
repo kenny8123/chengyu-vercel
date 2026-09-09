@@ -586,7 +586,6 @@ function Scene({q,qIdx,blankCount}){
   return(
     <div className="scene scene-text" style={{background:q.bg}}>
       <p className="scene-meaning-main">{q.meaning}</p>
-      <span className="scene-blank-hint">填 {blankCount??q.blanks.length} 字</span>
     </div>
   )
 }
