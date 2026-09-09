@@ -504,9 +504,8 @@ function diagnoseQuiz(answers){
       rawScore+=ROUND_WEIGHT[a.round]
     }else{
       const key=`${a.unitKey}_${a.idiomIdx}`
-      if(!wrongMap[key])wrongMap[key]={count:0,rounds:[],unitKey:a.unitKey,idiomIdx:a.idiomIdx}
+      if(!wrongMap[key])wrongMap[key]={count:0,unitKey:a.unitKey,idiomIdx:a.idiomIdx}
       wrongMap[key].count++
-      wrongMap[key].rounds.push(a.round)
     }
   })
   const totalScore = maxScore?Math.round((rawScore/maxScore)*100):0
@@ -517,22 +516,12 @@ function diagnoseQuiz(answers){
     .slice(0,5)
     .map(w=>({
       count:w.count,
-      rounds:w.rounds,
       unitKey:w.unitKey,
       idiomIdx:w.idiomIdx,
       idiom:UNITS[w.unitKey].idioms[w.idiomIdx]
     }))
 
-  // 最弱階段：正確率最低的那個階段（有作答過、且不是全對才回報）
-  let weakestRound=null, worstRate=101
-  ;[1,2,3,4].forEach(r=>{
-    const st=roundStats[r]
-    if(!st.total)return
-    const rate=(st.correct/st.total)*100
-    if(rate<worstRate&&rate<100){worstRate=rate;weakestRound=r}
-  })
-
-  return {totalScore, totalCorrect, totalQuestions:total, roundStats, topWrong, weakestRound}
+  return {totalScore, totalCorrect, totalQuestions:total, roundStats, topWrong}
 }
 
 /* ═══════════════════════════════════════════
@@ -556,8 +545,6 @@ function saveHistoryRecord(unit, diagnosis){
       date: new Date().toISOString(),
       totalScore: diagnosis.totalScore,
       totalCorrect: diagnosis.totalCorrect,
-      totalQuestions: diagnosis.totalQuestions,
-      weakestRound: diagnosis.weakestRound,
       topWrong: diagnosis.topWrong,
       roundStats: diagnosis.roundStats
     })
@@ -655,7 +642,7 @@ function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
     case 'home':
       return '嗨，我是鼎鼎🤖！點選一個單元，展開成語清單吧！'
     case 'hub-learn-detail':
-      if(practiceCycleDone)return '四個階段都完成了！可以換下一個成語繼續。'
+      if(practiceCycleDone)return '四輪都完成了！可以換下一個成語繼續。'
       if(practiceRound===null)return '看完典故後，點「開始練習」吧！'
       return `第 ${practiceRound} 階段：把字拖進空格吧！`
     case 'hub-rank-select':
@@ -702,8 +689,8 @@ export default function Home(){
   const[screen,setScreen]=useState('home')
   const[unit,setUnit]=useState('1-1')
   const[selectedIdiomIdx,setSelectedIdiomIdx]=useState(null) // 學習模式：選中的成語
-  const[practiceRound,setPracticeRound]=useState(null)       // 學習模式：選中的練習階段(1-4)
-  const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四階段是否已跑完
+  const[practiceRound,setPracticeRound]=useState(null)       // 學習模式：選中的練習輪次(1-4)
+  const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四輪是否已跑完
 
   const[quizMode,setQuizMode]=useState(null)   // 評鑒系統：'a'（自由選題）或 'b'（隨機40題）
   const[quizQueue,setQuizQueue]=useState([])   // [{unitKey,idiomIdx,round}]
@@ -719,6 +706,8 @@ export default function Home(){
   const dragRef=useRef(null)
   const ghostRef=useRef(null)
   const quizAnswersRef=useRef([])
+  const practiceMistakesRef=useRef({1:0,2:0,3:0,4:0}) // 一鍵四階段練習：各階段答錯次數
+  const[practiceMistakes,setPracticeMistakes]=useState(null) // 練習完成後用來顯示的錯誤次數快照
 
   const[guideOpen,setGuideOpen]=useState(true)   // 導覽機器人：泡泡開關
   const[textScale,setTextScale]=useState('md')   // 文字大小：sm / md / lg
@@ -759,10 +748,12 @@ export default function Home(){
 
 
   /* ── 學習與練習模式 ── */
-  function openIdiom(unitKey,idx){ setUnit(unitKey); setSelectedIdiomIdx(idx); setPracticeRound(null); setPracticeCycleDone(false); setScreen('hub-learn-detail') }
+  function openIdiom(unitKey,idx){ setUnit(unitKey); setSelectedIdiomIdx(idx); setPracticeRound(null); setPracticeCycleDone(false); setPracticeMistakes(null); setScreen('hub-learn-detail') }
   function startPracticeCycle(){
     setPracticeRound(1)
     setPracticeCycleDone(false)
+    practiceMistakesRef.current={1:0,2:0,3:0,4:0}
+    setPracticeMistakes(null)
     setPlaced({});setResult(null);setMsg('')
     setTiles(drillTiles(IDIOMS[selectedIdiomIdx],1))
   }
@@ -777,6 +768,7 @@ export default function Home(){
     if(allOk){
       setResult('ok');setMsg(`✦ 答對了！「${q.idiom}」`);burst(10)
     }else{
+      practiceMistakesRef.current[practiceRound]=(practiceMistakesRef.current[practiceRound]||0)+1
       setResult('err');setMsg('✗ 放錯了，再想想看！')
       setTimeout(()=>{
         setPlaced(prev=>{
@@ -795,7 +787,8 @@ export default function Home(){
       setPlaced({});setResult(null);setMsg('')
       setTiles(drillTiles(IDIOMS[selectedIdiomIdx],nr))
     }else{
-      // 四個階段都完成，留在原地顯示完成訊息，不自動跳轉
+      // 四輪都完成，留在原地顯示完成訊息，不自動跳轉
+      setPracticeMistakes({...practiceMistakesRef.current})
       setPracticeCycleDone(true)
     }
   }
@@ -804,7 +797,7 @@ export default function Home(){
     setTiles(drillTiles(IDIOMS[selectedIdiomIdx],practiceRound))
   }
 
-  /* ── 評鑒後：點錯題直接跳去該成語的典故頁複習 ── */
+  /* ── 評級後：點錯題直接跳去該成語的典故頁複習 ── */
   function reviewWrongIdiom(unitKey,idx){
     setUnit(unitKey)
     setSelectedIdiomIdx(idx)
@@ -878,6 +871,7 @@ export default function Home(){
         const res = diagnoseQuiz(quizAnswersRef.current)
         setDiagnosis(res)
         saveHistoryRecord(key, res)
+        setViewingUnit(key)
         setViewingRecord(null)
         setScreen('rank-diagnosis')
       }
@@ -934,7 +928,7 @@ export default function Home(){
         </>)}
         {screen==='rank-drill'&&(
           <div style={{margin:'16px 12px',fontSize:'.8rem',color:'var(--gold-dim)',textAlign:'center',lineHeight:1.6}}>
-            📝 評鑒測驗進行中<br/>完成測驗後可切換其他模式
+            📝 評級測驗進行中<br/>完成測驗後可切換其他模式
           </div>
         )}
       </div>
@@ -950,13 +944,11 @@ export default function Home(){
 
         {/* ════ 序章 ════ */}
         <section className={`screen${screen==='home'?' show':''}`}>
-          <div className="hero">
-            <ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="時空穿越者" className="hero-img"/>
-            <div className="hero-content">
-              <h1 className="hero-title">時空穿越者</h1>
-              <div className="scroll-box">
-                <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每個單元都是一段古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，證明你真的學會了！</p>
-              </div>
+          <div className="intro-compact">
+            <div className="portal-small"><ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="序章" style={{width:140,height:140,objectFit:'contain',borderRadius:20}}/></div>
+            <h1>時空穿越者</h1>
+            <div className="scroll-box">
+              <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每個單元都是一段古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，證明你真的學會了！</p>
             </div>
           </div>
 
@@ -1032,8 +1024,30 @@ export default function Home(){
           {selIdiom&&practiceCycleDone&&(
             <div className="card finish-inner">
               <div className="big">🏆</div>
-              <h2>「{selIdiom.idiom}」四階段練習完成！</h2>
-              <p>你已經完成第一階段、第二階段、第三階段、第四階段的練習。</p>
+              <h2>四輪練習完成！</h2>
+              <p>你已經完成第一階段至第四階段的練習。</p>
+              {practiceMistakes&&(()=>{
+                const total = Object.values(practiceMistakes).reduce((a,b)=>a+b,0)
+                let weakest=null,weakestCount=0
+                for(let r=1;r<=4;r++){
+                  if(practiceMistakes[r]>weakestCount){weakestCount=practiceMistakes[r];weakest=r}
+                }
+                const comment = total===0
+                  ? '🌟 太厲害了，全部一次就答對！'
+                  : total<=2
+                  ? '👍 表現不錯，只有一點小失誤！'
+                  : '💪 多練習幾次，會越來越熟練！'
+                return(
+                  <div className="recommendation-box" style={{marginTop:14,maxWidth:480,marginLeft:'auto',marginRight:'auto'}}>
+                    <p style={{margin:0,fontWeight:700}}>{comment}</p>
+                    {weakest&&(
+                      <p style={{margin:'8px 0 0',color:'var(--berry-dark)',fontWeight:700}}>
+                        📌 第{weakest}階段答錯較多（{weakestCount}次），可以再多練習這一階段！
+                      </p>
+                    )}
+                  </div>
+                )
+              })()}
               <div className="actions">
                 <button className="btn btn-ghost" onClick={()=>{setPracticeRound(null);setPracticeCycleDone(false)}}>📜 回看典故</button>
                 <button className="btn btn-grass" onClick={startPracticeCycle}>🔁 再練一次</button>
@@ -1109,12 +1123,6 @@ export default function Home(){
                 </div>
               )}
 
-              {d.weakestRound&&(
-                <p className="weak-round-tip">
-                  📌 你在「{DRILL_ROUNDS[d.weakestRound-1].label}」錯得最多，建議多練習這個階段。
-                </p>
-              )}
-
               {(d.topWrong||[]).length>0?(
                 <>
                   <p className="section-title">點下面的成語直接複習</p>
@@ -1125,7 +1133,7 @@ export default function Home(){
                         <div key={i} className="free-idiom-card" onClick={()=>reviewWrongIdiom(w.unitKey,w.idiomIdx)}>
                           <span className="free-idiom-emoji">{it.emoji}</span>
                           <div className="free-idiom-name">{it.idiom}</div>
-                          <div className="free-idiom-tag">{w.count>1?`答錯 ${w.count} 次`:(w.rounds&&w.rounds[0]?`${DRILL_ROUNDS[w.rounds[0]-1].label}答錯`:'答錯')}</div>
+                          <div className="free-idiom-tag">答錯 {w.count} 次</div>
                         </div>
                       ):null
                     })}
