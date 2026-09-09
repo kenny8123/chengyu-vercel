@@ -642,7 +642,7 @@ function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
     case 'home':
       return '嗨，我是鼎鼎🤖！點選一個單元，展開成語清單吧！'
     case 'hub-learn-detail':
-      if(practiceCycleDone)return '四輪都完成了！可以換下一個成語繼續。'
+      if(practiceCycleDone)return '四個階段都完成了！可以換下一個成語繼續。'
       if(practiceRound===null)return '看完典故後，點「開始練習」吧！'
       return `第 ${practiceRound} 階段：把字拖進空格吧！`
     case 'hub-rank-select':
@@ -689,8 +689,8 @@ export default function Home(){
   const[screen,setScreen]=useState('home')
   const[unit,setUnit]=useState('1-1')
   const[selectedIdiomIdx,setSelectedIdiomIdx]=useState(null) // 學習模式：選中的成語
-  const[practiceRound,setPracticeRound]=useState(null)       // 學習模式：選中的練習輪次(1-4)
-  const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四輪是否已跑完
+  const[practiceRound,setPracticeRound]=useState(null)       // 學習模式：選中的練習階段(1-4)
+  const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四階段是否已跑完
 
   const[quizMode,setQuizMode]=useState(null)   // 評鑒系統：'a'（自由選題）或 'b'（隨機40題）
   const[quizQueue,setQuizQueue]=useState([])   // [{unitKey,idiomIdx,round}]
@@ -782,7 +782,7 @@ export default function Home(){
       setPlaced({});setResult(null);setMsg('')
       setTiles(drillTiles(IDIOMS[selectedIdiomIdx],nr))
     }else{
-      // 四輪都完成，留在原地顯示完成訊息，不自動跳轉
+      // 四個階段都完成，留在原地顯示完成訊息，不自動跳轉
       setPracticeCycleDone(true)
     }
   }
@@ -1020,8 +1020,8 @@ export default function Home(){
           {selIdiom&&practiceCycleDone&&(
             <div className="card finish-inner">
               <div className="big">🏆</div>
-              <h2>「{selIdiom.idiom}」四輪練習完成！</h2>
-              <p>你已經完成挖1字、挖2字、全字挖空、全字挑戰四輪練習。</p>
+              <h2>「{selIdiom.idiom}」四階段練習完成！</h2>
+              <p>你已經完成第一階段、第二階段、第三階段、第四階段的練習。</p>
               <div className="actions">
                 <button className="btn btn-ghost" onClick={()=>{setPracticeRound(null);setPracticeCycleDone(false)}}>📜 回看典故</button>
                 <button className="btn btn-grass" onClick={startPracticeCycle}>🔁 再練一次</button>

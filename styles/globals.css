@@ -193,7 +193,7 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 /* 完整典故（直接展開） */
 .learn-full-label{margin-top:16px;font-weight:700;color:var(--choc);font-size:1rem}
 
-/* 四輪回想訓練 */
+/* 四階段回想訓練 */
 .drill-round-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
 .drill-round-tag{background:#ece0cc;color:#8a7a62;font-size:.78rem;font-weight:700;padding:6px 14px;border-radius:14px;transition:.3s}
 .drill-round-tag.active{background:var(--berry);color:#fff;transform:scale(1.06)}
