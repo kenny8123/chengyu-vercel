@@ -689,7 +689,6 @@ export default function Home(){
   //         hub-rank-select / rank-mode-a-select / rank-drill / rank-diagnosis
   const[screen,setScreen]=useState('home')
   const[unit,setUnit]=useState('1-1')
-  const[expandedUnit,setExpandedUnit]=useState(null) // 首頁：目前展開的單元('1-1'等或null)
   const[selectedIdiomIdx,setSelectedIdiomIdx]=useState(null) // 學習模式：選中的成語
   const[practiceRound,setPracticeRound]=useState(null)       // 學習模式：選中的練習輪次(1-4)
   const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四輪是否已跑完
@@ -951,25 +950,22 @@ export default function Home(){
           <div className="unit-accordion">
             {Object.values(UNITS).map(u=>(
               <div key={u.key} className="unit-block">
-                <div className="unit-block-header" onClick={()=>setExpandedUnit(e=>e===u.key?null:u.key)}>
+                <div className="unit-block-header">
                   <span className="lv-emoji">📖</span>
                   <div className="unit-block-title">
                     <h3>{u.displayName}</h3>
                     <p>{u.idioms.map(x=>x.idiom).slice(0,5).join('、')} 等 10 個成語</p>
                   </div>
-                  <span className="unit-block-arrow">{expandedUnit===u.key?'▲':'▼'}</span>
                 </div>
-                {expandedUnit===u.key&&(
-                  <div className="free-idiom-grid unit-block-list">
-                    {u.idioms.map((it,i)=>(
-                      <div key={i} className="free-idiom-card" onClick={()=>openIdiom(u.key,i)}>
-                        <span className="free-idiom-emoji">{it.emoji}</span>
-                        <div className="free-idiom-name">{it.idiom}</div>
-                        <div className="free-idiom-tag">{it.tag}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="free-idiom-grid unit-block-list">
+                  {u.idioms.map((it,i)=>(
+                    <div key={i} className="free-idiom-card" onClick={()=>openIdiom(u.key,i)}>
+                      <span className="free-idiom-emoji">{it.emoji}</span>
+                      <div className="free-idiom-name">{it.idiom}</div>
+                      <div className="free-idiom-tag">{it.tag}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
