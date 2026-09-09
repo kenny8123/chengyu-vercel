@@ -419,7 +419,6 @@ const UNITS = {
   }
 }
 
-const POS_NAME  = ['第一字','第二字','第三字','第四字']
 const DISTRACT  = ['風','雨','雲','木','心','手','火','三','百','千','頭','東','西','上','下','大','小','天','日','月']
 
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -464,49 +463,65 @@ function drillTiles(q,round){
 
 const ROUND_WEIGHT={1:5,2:8,3:10,4:12}
 
-function diagnoseFourRounds(drillAnswers, idioms){
-  const idiomCount = idioms.length
-  const ROUND_MAX = Object.values(ROUND_WEIGHT).reduce((a,b)=>a+b,0) * idiomCount
-  let rawScore=0
+/* ═══════════════════════════════════════════
+   評鑒系統：抽題邏輯
+   模式A「自由選題」：單一單元，10題，每題隨機分配1個階段(1~4)
+   模式B「隨機40題」：橫跨全部單元，40題，每題隨機單元+隨機階段
+   佇列項目格式：{unitKey, idiomIdx, round}
+   ═══════════════════════════════════════════ */
+function buildFreeQuizQueue(unitKey){
+  const idioms = UNITS[unitKey].idioms
+  return idioms.map((_,idx)=>({
+    unitKey,
+    idiomIdx: idx,
+    round: 1+Math.floor(Math.random()*4)
+  }))
+}
+
+function buildFullRandomQueue(){
+  const pool=[]
+  Object.keys(UNITS).forEach(unitKey=>{
+    UNITS[unitKey].idioms.forEach((_,idx)=>{
+      pool.push({unitKey, idiomIdx:idx})
+    })
+  })
+  const shuffled=shuffle(pool).slice(0,40)
+  return shuffled.map(item=>({...item, round:1+Math.floor(Math.random()*4)}))
+}
+
+/* 通用診斷函式：answers = [{unitKey, idiomIdx, round, correct}]，題數不固定 */
+function diagnoseQuiz(answers){
+  const total = answers.length
+  const ROUND_MAX_PER_Q = ROUND_WEIGHT
+  let rawScore=0, maxScore=0
   const roundStats={1:{correct:0,total:0},2:{correct:0,total:0},3:{correct:0,total:0},4:{correct:0,total:0}}
-  const wrongIdioms={}
-  drillAnswers.forEach(a=>{
+  const wrongMap={} // key: `${unitKey}_${idiomIdx}` -> {count, unitKey, idiomIdx}
+  answers.forEach(a=>{
     roundStats[a.round].total++
+    maxScore+=ROUND_WEIGHT[a.round]
     if(a.correct){
       roundStats[a.round].correct++
       rawScore+=ROUND_WEIGHT[a.round]
     }else{
-      wrongIdioms[a.idiom]=(wrongIdioms[a.idiom]||0)+1
+      const key=`${a.unitKey}_${a.idiomIdx}`
+      if(!wrongMap[key])wrongMap[key]={count:0,unitKey:a.unitKey,idiomIdx:a.idiomIdx}
+      wrongMap[key].count++
     }
   })
-  const totalScore=Math.round((rawScore/ROUND_MAX)*100)
-  const totalCorrect=drillAnswers.filter(a=>a.correct).length
+  const totalScore = maxScore?Math.round((rawScore/maxScore)*100):0
+  const totalCorrect = answers.filter(a=>a.correct).length
 
-  let weakestRound=1,weakestRate=1
-  for(let r=1;r<=4;r++){
-    const st=roundStats[r]
-    const rate=st.total?st.correct/st.total:0
-    if(rate<weakestRate){weakestRate=rate;weakestRound=r}
-  }
-
-  const strengths=[],weaknesses=[]
-  for(let r=1;r<=4;r++){
-    const st=roundStats[r]
-    const rate=st.total?Math.round((st.correct/st.total)*100):0
-    const label=DRILL_ROUNDS[r-1].label
-    if(rate>=80)strengths.push(`✅ ${label}表現優秀（${st.correct}/${st.total}，${rate}%）`)
-    else weaknesses.push(`⚠️ ${label}需要加強（${st.correct}/${st.total}，${rate}%）`)
-  }
-  const topWrong=Object.entries(wrongIdioms)
-    .sort((a,b)=>b[1]-a[1])
+  const topWrong = Object.values(wrongMap)
+    .sort((a,b)=>b.count-a.count)
     .slice(0,5)
-    .map(([name,count])=>({name,count,idx:idioms.findIndex(it=>it.idiom===name)}))
+    .map(w=>({
+      count:w.count,
+      unitKey:w.unitKey,
+      idiomIdx:w.idiomIdx,
+      idiom:UNITS[w.unitKey].idioms[w.idiomIdx]
+    }))
 
-  let level='B'
-  if(totalScore>=80)level='A'
-  else if(totalScore<40)level='C'
-
-  return{totalScore,totalCorrect,roundStats,weakestRound,strengths,weaknesses,topWrong,recommendedLevel:level}
+  return {totalScore, totalCorrect, totalQuestions:total, roundStats, topWrong}
 }
 
 /* ═══════════════════════════════════════════
@@ -536,6 +551,12 @@ function saveHistoryRecord(unit, diagnosis){
     // 最多保留 20 筆
     window.localStorage.setItem(historyKey(unit), JSON.stringify(list.slice(0,20)))
   }catch(e){}
+}
+
+function getBestScore(unit){
+  const list = loadHistory(unit)
+  if(list.length===0)return null
+  return list.reduce((best,rec)=>rec.totalScore>best.totalScore?rec:best, list[0])
 }
 
 function formatHistoryDate(iso){
@@ -577,43 +598,28 @@ function IdiomRow({q,placed,onClickSlot,blanksOverride}){
     <div className="idiom-row">
       {chars.map((ch,i)=>blanks.includes(i)?(
         <div key={i} data-pos={i} className={`slot${placed[i]?' filled':''}${placed[i]?.correct===true?' correct':''}${placed[i]?.correct===false?' wrong':''}`} onClick={()=>onClickSlot(i)}>
-          {placed[i]?.ch??''}<span className="pos-hint">{POS_NAME[i]}</span>
+          {placed[i]?.ch??''}
         </div>
       ):<div key={i} className="fixed-char">{ch}</div>)}
     </div>
   )
 }
 
-function UnitRankCard({unitKey,displayName,onStart,onViewRecord}){
-  const[history,setHistory]=useState([])
-  const[expanded,setExpanded]=useState(false)
+function ModeCard({modeKey,displayName,desc,onStart}){
+  const[best,setBest]=useState(null)
   useEffect(()=>{
-    setHistory(loadHistory(unitKey))
-  },[unitKey])
-  const lastRecord = history.length>0?history[0]:null
+    setBest(getBestScore(modeKey))
+  },[modeKey])
   return(
-    <div className="level-card open">
+    <div className="level-card open" onClick={onStart}>
       <span className="lv-emoji">📝</span><h3>{displayName}</h3>
-      {lastRecord?(
-        <div className="lv-last-score">上次成績：{lastRecord.totalScore} 分</div>
+      <div className="lv-desc">{desc}</div>
+      {best?(
+        <div className="lv-last-score">🏆 最佳成績：{best.totalScore} 分</div>
       ):(
         <div className="lv-desc">尚未測驗過</div>
       )}
-      <div className="actions" style={{marginTop:10,flexWrap:'wrap'}}>
-        <button className="btn btn-sun" onClick={onStart}>▶ 開始測驗</button>
-        {history.length>0&&<button className="btn btn-ghost" onClick={()=>setExpanded(e=>!e)}>{expanded?'▲ 收起':'📊 歷史成績'}</button>}
-      </div>
-      {expanded&&history.length>0&&(
-        <div className="history-inline">
-          {history.slice(0,5).map((rec,i)=>(
-            <div key={i} className="history-inline-row" onClick={()=>onViewRecord(rec)}>
-              <span className="history-date">{formatHistoryDate(rec.date)}</span>
-              <span className="history-score">{rec.totalScore} 分</span>
-              <span className="history-arrow">›</span>
-            </div>
-          ))}
-        </div>
-      )}
+      <span className="lv-tag ready">▶ 開始</span>
     </div>
   )
 }
@@ -632,24 +638,20 @@ function burst(count=14){
 /* ═══════════════════════════════════════════
    導覽機器人「鼎鼎」－ 依畫面狀態提醒下一步
    ═══════════════════════════════════════════ */
-function getGuideTip({screen,unit,practiceRound,practiceCycleDone,drillRound,learnIdx,idiomCount,currentDiagnosis}){
+function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
   switch(screen){
-    case 'intro':
-      return '嗨，我是鼎鼎🤖！點下面的門，開始成語穿越之旅吧！'
-    case 'hub-learn-select':
-      return '選一扇門（單元）走進去看看吧！'
-    case 'hub-learn-list':
-      return `點一張卡片，打開這段成語的故事吧！`
+    case 'home':
+      return '嗨，我是鼎鼎🤖！點選一個單元，展開成語清單吧！'
     case 'hub-learn-detail':
       if(practiceCycleDone)return '四輪都完成了！可以換下一個成語繼續。'
       if(practiceRound===null)return '看完典故後，點「開始練習」吧！'
       return `第 ${practiceRound} 階段：把字拖進空格吧！`
     case 'hub-rank-select':
-      return '選一個單元，開始評級測驗吧！'
+      return '選一個模式，開始評鑒測驗吧！'
     case 'rank-drill':
       return `每題只有一次機會，看清楚再把字拖進空格！`
     case 'rank-diagnosis':
-      return currentDiagnosis?`你的分數是 ${currentDiagnosis.totalScore} 分！`:'來看看你的成績吧！'
+      return '來看看你的成績吧！'
     default:
       return '跟著我一起探索成語的世界吧！'
   }
@@ -683,19 +685,20 @@ function TextScaleControl({scale,onChange}){
 }
 
 export default function Home(){
-  // screen: intro / hub-learn-select / hub-learn-list / hub-learn-detail /
-  //         hub-rank-select / rank-drill / rank-diagnosis
-  const[screen,setScreen]=useState('intro')
+  // screen: home / hub-learn-detail /
+  //         hub-rank-select / rank-mode-a-select / rank-drill / rank-diagnosis
+  const[screen,setScreen]=useState('home')
   const[unit,setUnit]=useState('1-1')
+  const[expandedUnit,setExpandedUnit]=useState(null) // 首頁：目前展開的單元('1-1'等或null)
   const[selectedIdiomIdx,setSelectedIdiomIdx]=useState(null) // 學習模式：選中的成語
   const[practiceRound,setPracticeRound]=useState(null)       // 學習模式：選中的練習輪次(1-4)
   const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四輪是否已跑完
 
-  const[learnIdx,setLearnIdx]=useState(0)      // 評級系統：學習進度
-  const[drillRound,setDrillRound]=useState(1)
-  const[drillIdx,setDrillIdx]=useState(0)
-  const[drillScore,setDrillScore]=useState(0)
-  const[diagnosis,setDiagnosis]=useState({})   // { '1-1': {...}, '2-1': {...} }
+  const[quizMode,setQuizMode]=useState(null)   // 評鑒系統：'a'（自由選題）或 'b'（隨機40題）
+  const[quizQueue,setQuizQueue]=useState([])   // [{unitKey,idiomIdx,round}]
+  const[quizIdx,setQuizIdx]=useState(0)
+  const[quizScore,setQuizScore]=useState(0)
+  const[diagnosis,setDiagnosis]=useState(null) // 最新一次評鑒結果
   const[viewingRecord,setViewingRecord]=useState(null) // 從歷史記錄點進來查看的那一筆（null代表看最新測驗結果）
 
   const[placed,setPlaced]=useState({})
@@ -704,7 +707,7 @@ export default function Home(){
   const[msg,setMsg]=useState('')
   const dragRef=useRef(null)
   const ghostRef=useRef(null)
-  const drillAnswersRef=useRef([])
+  const quizAnswersRef=useRef([])
 
   const[guideOpen,setGuideOpen]=useState(true)   // 導覽機器人：泡泡開關
   const[textScale,setTextScale]=useState('md')   // 文字大小：sm / md / lg
@@ -724,19 +727,28 @@ export default function Home(){
   const U = UNITS[unit]
   const IDIOMS = U.idioms
 
+  const currentQuizItem = quizQueue[quizIdx] || null
+  const quizIdiom = currentQuizItem ? UNITS[currentQuizItem.unitKey].idioms[currentQuizItem.idiomIdx] : null
+
   const initDrillQ=useCallback((round,idx)=>{
     setPlaced({});setResult(null);setMsg('')
     setTiles(drillTiles(IDIOMS[idx],round))
   },[IDIOMS])
 
-  useEffect(()=>{
-    if(screen==='rank-drill')initDrillQ(drillRound,drillIdx)
-  },[drillRound,drillIdx,screen,initDrillQ])
+  const initQuizQ=useCallback((item)=>{
+    if(!item)return
+    setPlaced({});setResult(null);setMsg('')
+    const q = UNITS[item.unitKey].idioms[item.idiomIdx]
+    setTiles(drillTiles(q,item.round))
+  },[])
 
+  useEffect(()=>{
+    if(screen==='rank-drill')initQuizQ(currentQuizItem)
+  },[quizIdx,quizQueue,screen])
 
 
   /* ── 學習與練習模式 ── */
-  function openIdiom(idx){ setSelectedIdiomIdx(idx); setPracticeRound(null); setPracticeCycleDone(false); setScreen('hub-learn-detail') }
+  function openIdiom(unitKey,idx){ setUnit(unitKey); setSelectedIdiomIdx(idx); setPracticeRound(null); setPracticeCycleDone(false); setScreen('hub-learn-detail') }
   function startPracticeCycle(){
     setPracticeRound(1)
     setPracticeCycleDone(false)
@@ -782,20 +794,35 @@ export default function Home(){
   }
 
   /* ── 評級後：點錯題直接跳去該成語的典故頁複習 ── */
-  function reviewWrongIdiom(idx){
+  function reviewWrongIdiom(unitKey,idx){
+    setUnit(unitKey)
     setSelectedIdiomIdx(idx)
     setPracticeRound(null)
     setPracticeCycleDone(false)
     setScreen('hub-learn-detail')
   }
 
-  /* ── 評級系統 ── */
-  function beginRankDrill(){setDrillRound(1);setDrillIdx(0);setDrillScore(0);drillAnswersRef.current=[];setScreen('rank-drill')}
+  /* ── 評鑒系統 ── */
+  function startQuizModeA(unitKey){
+    const queue = buildFreeQuizQueue(unitKey)
+    setQuizMode('a')
+    setQuizQueue(queue)
+    setQuizIdx(0)
+    setQuizScore(0)
+    quizAnswersRef.current=[]
+    setViewingRecord(null)
+    setScreen('rank-drill')
+  }
 
-  function viewHistoryRecord(u, record){
-    setUnit(u)
-    setViewingRecord(record)
-    setScreen('rank-diagnosis')
+  function startQuizModeB(){
+    const queue = buildFullRandomQueue()
+    setQuizMode('b')
+    setQuizQueue(queue)
+    setQuizIdx(0)
+    setQuizScore(0)
+    quizAnswersRef.current=[]
+    setViewingRecord(null)
+    setScreen('rank-drill')
   }
 
   function handleClickSlot(pos){
@@ -815,30 +842,32 @@ export default function Home(){
     setMsg('')
   }
 
-  function checkRankDrill(){
-    const q=IDIOMS[drillIdx]
-    const blanks=drillBlanks(q,drillRound)
+  function checkQuizAnswer(){
+    const item = currentQuizItem
+    if(!item)return
+    const q = UNITS[item.unitKey].idioms[item.idiomIdx]
+    const blanks=drillBlanks(q,item.round)
     const chars=q.idiom.split('')
     let allOk=true
     const next={...placed}
     blanks.forEach(pos=>{const ok=next[pos]?.ch===chars[pos];next[pos]={...next[pos],correct:ok};if(!ok)allOk=false})
     setPlaced(next)
-    drillAnswersRef.current.push({round:drillRound,idiom:q.idiom,correct:allOk})
+    quizAnswersRef.current.push({unitKey:item.unitKey,idiomIdx:item.idiomIdx,round:item.round,correct:allOk})
     if(allOk){
-      setDrillScore(s=>s+1)
-      setResult('ok');setMsg(`✦ 答對了！「${q.idiom}」`);burst(10)
+      setQuizScore(s=>s+1)
+      setResult('ok');setMsg('✦ 答對了！');burst(10)
     }else{
-      setResult('err');setMsg(`✗ 答錯了，正確答案是「${q.idiom}」`)
+      setResult('err');setMsg('✗ 答錯了')
     }
     setTimeout(()=>{
-      if(drillIdx<IDIOMS.length-1){
-        setDrillIdx(i=>i+1)
-      }else if(drillRound<4){
-        setDrillRound(r=>r+1);setDrillIdx(0);setDrillScore(0)
+      if(quizIdx<quizQueue.length-1){
+        setQuizIdx(i=>i+1)
       }else{
-        const res = diagnoseFourRounds(drillAnswersRef.current, IDIOMS)
-        setDiagnosis(d=>({...d,[unit]:res}))
-        saveHistoryRecord(unit, res)
+        const key = quizMode==='a' ? item.unitKey : 'full-random'
+        const res = diagnoseQuiz(quizAnswersRef.current)
+        setDiagnosis(res)
+        saveHistoryRecord(key, res)
+        setViewingUnit(key)
         setViewingRecord(null)
         setScreen('rank-diagnosis')
       }
@@ -867,11 +896,6 @@ export default function Home(){
   }
   function moveGhost(x,y){if(ghostRef.current){ghostRef.current.style.left=x+'px';ghostRef.current.style.top=y+'px'}}
 
-  const currentDiagnosis = diagnosis[unit]
-  const rankQ = IDIOMS[drillIdx]
-  const filledRank = Object.keys(placed).length
-  const canCheckRank = rankQ && filledRank===drillBlanks(rankQ,drillRound).length && result===null
-
   const selIdiom = selectedIdiomIdx!==null ? IDIOMS[selectedIdiomIdx] : null
   const filledPractice = Object.keys(placed).length
   const canCheckPractice = practiceRound && selIdiom && filledPractice===drillBlanks(selIdiom,practiceRound).length && result===null
@@ -883,7 +907,7 @@ export default function Home(){
     {round:4,label:'第四階段'},
   ]
 
-  const guideTip=getGuideTip({screen,unit,practiceRound,practiceCycleDone,drillRound,learnIdx,idiomCount:IDIOMS.length,currentDiagnosis})
+  const guideTip=getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount:IDIOMS.length})
 
   return(
     <>
@@ -891,12 +915,12 @@ export default function Home(){
 
       <div className="sidebar">
         <div className="sidebar-header">🗺️ 關卡選單</div>
-        <button className="sidebar-back" onClick={()=>setScreen('intro')}>🏠 返回首頁</button>
+        <button className="sidebar-back" onClick={()=>setScreen('home')}>🏠 返回首頁</button>
 
         {screen!=='rank-drill'&&(<>
           <div style={{margin:'16px 12px 8px',fontSize:'.85rem',color:'var(--gold-dim)',fontWeight:700,textAlign:'center'}}>模式</div>
-          <div className={`sidebar-item${['hub-learn-select','hub-learn-list','hub-learn-detail'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-learn-select')}>📖 學習與練習</div>
-          <div className={`sidebar-item${['hub-rank-select','rank-diagnosis'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 評級系統</div>
+          <div className={`sidebar-item${['home','hub-learn-detail'].includes(screen)?' active':''}`} onClick={()=>setScreen('home')}>📖 學習與練習</div>
+          <div className={`sidebar-item${['hub-rank-select','rank-mode-a-select','rank-diagnosis'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 評鑒系統</div>
         </>)}
         {screen==='rank-drill'&&(
           <div style={{margin:'16px 12px',fontSize:'.8rem',color:'var(--gold-dim)',textAlign:'center',lineHeight:1.6}}>
@@ -915,60 +939,47 @@ export default function Home(){
       <div className={`wrap text-scale-${textScale}`}>
 
         {/* ════ 序章 ════ */}
-        <section className={`screen intro-screen${screen==='intro'?' show':''}`}>
-          <div className="intro">
-            <div className="portal"><ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="序章" style={{width:280,height:280,objectFit:'contain',borderRadius:24}}/></div>
-            <h1>成語穿越者</h1>
+        <section className={`screen${screen==='home'?' show':''}`}>
+          <div className="intro-compact">
+            <div className="portal-small"><ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="序章" style={{width:140,height:140,objectFit:'contain',borderRadius:20}}/></div>
+            <h1>時空穿越者</h1>
             <div className="scroll-box">
-              <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每打開一扇門，就會走進一個古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，證明你真的學會了！</p>
-            </div>
-            <button className="btn btn-go" onClick={()=>setScreen('hub-learn-select')}>🚪　推開第一扇門</button>
-          </div>
-        </section>
-
-        {/* ════ 學習與練習：選單元 ════ */}
-        <section className={`screen${screen==='hub-learn-select'?' show':''}`}>
-          <div className="menu-head"><h2>📖 學習與練習</h2><p>選擇單元，開始認識成語典故</p></div>
-          <div className="level-grid cols-4">
-            <div className="level-card open" onClick={()=>{setUnit('1-1');setScreen('hub-learn-list')}}>
-              <span className="lv-emoji">📖</span><h3>單元一</h3>
-              <div className="lv-desc">一言九鼎、寸草春暉、人山人海、水落石出、青出於藍等 10 個成語。多來自歷史故事與詩詞典故，適合初次接觸成語典故的學習。</div><span className="lv-tag ready">▶ 進入</span>
-            </div>
-            <div className="level-card open" onClick={()=>{setUnit('2-1');setScreen('hub-learn-list')}}>
-              <span className="lv-emoji">📖</span><h3>單元二</h3>
-              <div className="lv-desc">千方百計、始作俑者、白頭偕老、借刀殺人、賞心悅目等 10 個成語。多來自聖賢語錄與歷史事件，難度稍進階，適合鞏固後挑戰。</div><span className="lv-tag ready">▶ 進入</span>
-            </div>
-            <div className="level-card open" onClick={()=>{setUnit('3-1');setScreen('hub-learn-list')}}>
-              <span className="lv-emoji">📖</span><h3>單元三</h3>
-              <div className="lv-desc">禮尚往來、爭先恐後、立竿見影、吳牛喘月、異曲同工等 10 個成語。多來自經典禮制與生活趣談，內容更豐富多元。</div><span className="lv-tag ready">▶ 進入</span>
-            </div>
-            <div className="level-card open" onClick={()=>{setUnit('4-1');setScreen('hub-learn-list')}}>
-              <span className="lv-emoji">📖</span><h3>單元四</h3>
-              <div className="lv-desc">天衣無縫、土崩瓦解、博古通今、各有千秋、與虎謀皮等 10 個成語。多來自史書與寓言故事，內容深入，適合進階挑戰。</div><span className="lv-tag ready">▶ 進入</span>
+              <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每個單元都是一段古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，證明你真的學會了！</p>
             </div>
           </div>
-        </section>
 
-        {/* ════ 學習與練習：成語清單 ════ */}
-        <section className={`screen${screen==='hub-learn-list'?' show':''}`}>
-          <div className="menu-head"><h2>📖 {U.displayName} 成語清單</h2><p>點選一個成語，開始學習典故</p></div>
-          <div className="free-idiom-grid">
-            {IDIOMS.map((it,i)=>(
-              <div key={i} className="free-idiom-card" onClick={()=>openIdiom(i)}>
-                <span className="free-idiom-emoji">{it.emoji}</span>
-                <div className="free-idiom-name">{it.idiom}</div>
-                <div className="free-idiom-tag">{it.tag}</div>
+          <div className="unit-accordion">
+            {Object.values(UNITS).map(u=>(
+              <div key={u.key} className="unit-block">
+                <div className="unit-block-header" onClick={()=>setExpandedUnit(e=>e===u.key?null:u.key)}>
+                  <span className="lv-emoji">📖</span>
+                  <div className="unit-block-title">
+                    <h3>{u.displayName}</h3>
+                    <p>{u.idioms.map(x=>x.idiom).slice(0,5).join('、')} 等 10 個成語</p>
+                  </div>
+                  <span className="unit-block-arrow">{expandedUnit===u.key?'▲':'▼'}</span>
+                </div>
+                {expandedUnit===u.key&&(
+                  <div className="free-idiom-grid unit-block-list">
+                    {u.idioms.map((it,i)=>(
+                      <div key={i} className="free-idiom-card" onClick={()=>openIdiom(u.key,i)}>
+                        <span className="free-idiom-emoji">{it.emoji}</span>
+                        <div className="free-idiom-name">{it.idiom}</div>
+                        <div className="free-idiom-tag">{it.tag}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
-          <div className="actions"><button className="btn btn-ghost" onClick={()=>setScreen('hub-learn-select')}>← 返回選單元</button></div>
         </section>
 
         {/* ════ 學習與練習：典故+練習入口（同一頁） ════ */}
         <section className={`screen${screen==='hub-learn-detail'?' show':''}`}>
           {selIdiom&&(
           <div className="topbar">
-            <button className="back-btn" onClick={()=>setScreen('hub-learn-list')}>← 成語清單</button>
+            <button className="back-btn" onClick={()=>setScreen('home')}>← 返回首頁</button>
           </div>
           )}
           {selIdiom&&practiceRound===null&&!practiceCycleDone&&(
@@ -996,7 +1007,7 @@ export default function Home(){
                   <div key={m.round} className={`drill-round-tag${m.round===practiceRound?' active':''}${m.round<practiceRound?' done':''}`}>{m.round<practiceRound?'✓ ':''}{m.label}</div>
                 ))}
               </div>
-              <div className="level-banner">{selIdiom.idiom}・{PRACTICE_MODES[practiceRound-1].label}</div>
+              <div className="level-banner">第{selectedIdiomIdx+1}題・{PRACTICE_MODES[practiceRound-1].label}</div>
               <Scene q={selIdiom} qIdx={selectedIdiomIdx} blankCount={drillBlanks(selIdiom,practiceRound).length}/>
               <IdiomRow q={selIdiom} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(selIdiom,practiceRound)}/>
               <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
@@ -1017,66 +1028,72 @@ export default function Home(){
               <div className="actions">
                 <button className="btn btn-ghost" onClick={()=>{setPracticeRound(null);setPracticeCycleDone(false)}}>📜 回看典故</button>
                 <button className="btn btn-grass" onClick={startPracticeCycle}>🔁 再練一次</button>
-                <button className="btn btn-go" onClick={()=>setScreen('hub-learn-list')}>🔀 換其他成語</button>
+                <button className="btn btn-go" onClick={()=>setScreen('home')}>🔀 換其他成語</button>
               </div>
             </div>
           )}
         </section>
 
-        {/* ════ 評級系統：選單元 ════ */}
+        {/* ════ 評鑒系統：選模式 ════ */}
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
-          <div className="menu-head"><h2>📝 評級系統</h2><p>選擇單元，測試你對成語的理解程度</p></div>
-          <div className="level-grid cols-4">
-            <UnitRankCard unitKey="1-1" displayName="單元一" onStart={()=>{setUnit('1-1');beginRankDrill()}} onViewRecord={(rec)=>viewHistoryRecord('1-1',rec)}/>
-            <UnitRankCard unitKey="2-1" displayName="單元二" onStart={()=>{setUnit('2-1');beginRankDrill()}} onViewRecord={(rec)=>viewHistoryRecord('2-1',rec)}/>
-            <UnitRankCard unitKey="3-1" displayName="單元三" onStart={()=>{setUnit('3-1');beginRankDrill()}} onViewRecord={(rec)=>viewHistoryRecord('3-1',rec)}/>
-            <UnitRankCard unitKey="4-1" displayName="單元四" onStart={()=>{setUnit('4-1');beginRankDrill()}} onViewRecord={(rec)=>viewHistoryRecord('4-1',rec)}/>
+          <div className="menu-head"><h2>📝 評鑒系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
+          <div className="level-grid">
+            <ModeCard modeKey="mode-a" displayName="自由選題" desc="自選一個單元，隨機抽10題（涵蓋四個階段）" onStart={()=>setScreen('rank-mode-a-select')}/>
+            <ModeCard modeKey="full-random" displayName="隨機40題" desc="橫跨全部單元，隨機抽40題，總資料庫大挑戰" onStart={startQuizModeB}/>
           </div>
         </section>
 
-        {/* ════ 評級系統：學習階段 ════ */}
+        {/* ════ 評鑒系統：模式A選單元 ════ */}
+        <section className={`screen${screen==='rank-mode-a-select'?' show':''}`}>
+          <div className="topbar">
+            <button className="back-btn" onClick={()=>setScreen('hub-rank-select')}>← 選模式</button>
+          </div>
+          <div className="menu-head"><h2>📝 自由選題</h2><p>選擇單元，隨機抽10題測驗</p></div>
+          <div className="level-grid cols-4">
+            <ModeCard modeKey="1-1" displayName="單元一" desc="隨機抽10題" onStart={()=>startQuizModeA('1-1')}/>
+            <ModeCard modeKey="2-1" displayName="單元二" desc="隨機抽10題" onStart={()=>startQuizModeA('2-1')}/>
+            <ModeCard modeKey="3-1" displayName="單元三" desc="隨機抽10題" onStart={()=>startQuizModeA('3-1')}/>
+            <ModeCard modeKey="4-1" displayName="單元四" desc="隨機抽10題" onStart={()=>startQuizModeA('4-1')}/>
+          </div>
+        </section>
 
-        {/* ════ 評級系統：四輪盲測 ════ */}
+        {/* ════ 評鑒系統：評測作答 ════ */}
         <section className={`screen${screen==='rank-drill'?' show':''}`}>
           <div className="topbar">
-            <div className="score-pill">📝 評級測驗</div>
-            <ProgressBar idx={drillIdx} total={IDIOMS.length}/>
-            <div className="score-pill">✅ {drillScore}</div>
+            <div className="score-pill">📝 評鑒測驗</div>
+            <ProgressBar idx={quizIdx} total={quizQueue.length}/>
+            <div className="score-pill">✅ {quizScore}</div>
           </div>
-          {rankQ&&(
+          {quizIdiom&&currentQuizItem&&(
           <div className="card">
-            <div className="drill-round-bar">
-              {DRILL_ROUNDS.map(r=>(
-                <div key={r.id} className={`drill-round-tag${r.id===drillRound?' active':''}${r.id<drillRound?' done':''}`}>{r.id<drillRound?'✓ ':''}{r.label}</div>
-              ))}
-            </div>
-            <div className="level-banner">{DRILL_ROUNDS[drillRound-1].label}（{drillIdx+1}/{IDIOMS.length}）</div>
-            <Scene q={rankQ} qIdx={drillIdx} blankCount={drillBlanks(rankQ,drillRound).length}/>
-            <IdiomRow q={rankQ} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(rankQ,drillRound)}/>
+            <div className="level-banner">第{quizIdx+1}題・{DRILL_ROUNDS[currentQuizItem.round-1].label}</div>
+            <Scene q={quizIdiom} qIdx={currentQuizItem.idiomIdx} blankCount={drillBlanks(quizIdiom,currentQuizItem.round).length}/>
+            <IdiomRow q={quizIdiom} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(quizIdiom,currentQuizItem.round)}/>
             <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
             <div className="actions">
-              <button className="btn btn-sun" disabled={!canCheckRank} onClick={checkRankDrill}>✅ 提交答案</button>
+              <button className="btn btn-sun" disabled={Object.keys(placed).length!==drillBlanks(quizIdiom,currentQuizItem.round).length||result!==null} onClick={checkQuizAnswer}>✅ 提交答案</button>
             </div>
             <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{msg}</div>
           </div>
           )}
         </section>
 
-        {/* ════ 評級系統：診斷報告 ════ */}
+        {/* ════ 評鑒系統：診斷報告 ════ */}
         <section className={`screen${screen==='rank-diagnosis'?' show':''}`}>
           {(() => {
-            const d = viewingRecord || currentDiagnosis
+            const d = viewingRecord || diagnosis
             if(!d) return null
+            const totalQ = d.totalQuestions || (d.roundStats?Object.values(d.roundStats).reduce((a,st)=>a+st.total,0):0)
             return (
             <div className="diagnosis-screen">
-              <h2>📊 {U.displayName}・成績{viewingRecord && `（${formatHistoryDate(viewingRecord.date)}）`}</h2>
-              <div className="score-display"><span className="score-number">{d.totalScore}</span><span className="score-outof">/ 100 分（共 {IDIOMS.length*4} 題，答對 {d.totalCorrect} 題）</span></div>
+              <h2>📊 成績{viewingRecord && `（${formatHistoryDate(viewingRecord.date)}）`}</h2>
+              <div className="score-display"><span className="score-number">{d.totalScore}</span><span className="score-outof">/ 100 分（共 {totalQ} 題，答對 {d.totalCorrect} 題）</span></div>
 
               {d.roundStats&&(
                 <div className="diagnosis-details">
                   {DRILL_ROUNDS.map(r=>{
                     const st=d.roundStats[r.id]
-                    if(!st)return null
+                    if(!st||!st.total)return null
                     const rate=st.total?Math.round((st.correct/st.total)*100):0
                     return <div className="detail-row" key={r.id}><span>{r.label}：</span><span className={rate>=80?'good':'warning'}>{st.correct}/{st.total}（{rate}%）</span></div>
                   })}
@@ -1088,9 +1105,9 @@ export default function Home(){
                   <p className="section-title">點下面的成語直接複習</p>
                   <div className="free-idiom-grid">
                     {(d.topWrong||[]).map((w,i)=>{
-                      const it = IDIOMS[w.idx]
+                      const it = w.idiom || UNITS[w.unitKey]?.idioms[w.idiomIdx]
                       return it?(
-                        <div key={i} className="free-idiom-card" onClick={()=>reviewWrongIdiom(w.idx)}>
+                        <div key={i} className="free-idiom-card" onClick={()=>reviewWrongIdiom(w.unitKey,w.idiomIdx)}>
                           <span className="free-idiom-emoji">{it.emoji}</span>
                           <div className="free-idiom-name">{it.idiom}</div>
                           <div className="free-idiom-tag">答錯 {w.count} 次</div>
@@ -1102,11 +1119,9 @@ export default function Home(){
               ):(
                 <p className="section-title">🎉 全部答對！</p>
               )}
-              {viewingRecord && (
-                <div className="actions" style={{marginTop:20}}>
-                  <button className="btn btn-ghost" onClick={()=>{setViewingRecord(null);setScreen('hub-rank-select')}}>← 返回選單元</button>
-                </div>
-              )}
+              <div className="actions" style={{marginTop:20}}>
+                <button className="btn btn-ghost" onClick={()=>{setViewingRecord(null);setScreen('hub-rank-select')}}>← 返回評鑒系統</button>
+              </div>
             </div>
             )
           })()}
