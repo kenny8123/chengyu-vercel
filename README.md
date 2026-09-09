@@ -54,3 +54,15 @@
 - 練習完成畫面文字統一改為「四階段」命名：
   標題「四階段練習完成！」、說明「你已經完成第一階段～第四階段的練習。」，
   導覽機器人提示同步改為「四個階段都完成了」。
+
+## Bug 修正：評鑒測驗做完卡住不跳成績頁
+原因：先前重構移除了 viewingUnit state，但 checkQuizAnswer 最後一題的分支
+仍呼叫 setViewingUnit(key)，setTimeout 內拋出 ReferenceError，
+導致 setScreen('rank-diagnosis') 沒被執行，畫面停在最後一題。
+已移除該行呼叫。
+
+## 成績頁強化
+- 新增「你在第X階段錯得最多」的提示句（正確率最低且非全對的階段）
+- 錯題卡片：只錯一次時顯示「第X階段答錯」，錯多次才顯示「答錯 N 次」
+- 歷史記錄一併存入 totalQuestions 與 weakestRound
+- 側邊欄「評級測驗進行中」統一改為「評鑒測驗進行中」

@@ -150,6 +150,7 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 .detail-row:last-child{border-bottom:none}
 .detail-row .good{color:var(--grass-dark);font-weight:700}
 .detail-row .warning{color:var(--berry-dark);font-weight:700}
+.weak-round-tip{background:#fff4e0;border:3px dashed var(--sun);border-radius:16px;padding:14px 20px;margin:4px 0 8px;font-weight:700;color:var(--choc);font-size:1.05rem;text-align:center}
 .analysis-box{margin:24px 0;text-align:left}
 .strengths,.weaknesses{background:#fff;border-radius:12px;padding:18px 20px;margin-bottom:14px;box-shadow:0 4px 0 rgba(90,61,43,.08)}
 .strengths{border-left:5px solid var(--grass)}

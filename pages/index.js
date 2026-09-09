@@ -504,8 +504,9 @@ function diagnoseQuiz(answers){
       rawScore+=ROUND_WEIGHT[a.round]
     }else{
       const key=`${a.unitKey}_${a.idiomIdx}`
-      if(!wrongMap[key])wrongMap[key]={count:0,unitKey:a.unitKey,idiomIdx:a.idiomIdx}
+      if(!wrongMap[key])wrongMap[key]={count:0,rounds:[],unitKey:a.unitKey,idiomIdx:a.idiomIdx}
       wrongMap[key].count++
+      wrongMap[key].rounds.push(a.round)
     }
   })
   const totalScore = maxScore?Math.round((rawScore/maxScore)*100):0
@@ -516,12 +517,22 @@ function diagnoseQuiz(answers){
     .slice(0,5)
     .map(w=>({
       count:w.count,
+      rounds:w.rounds,
       unitKey:w.unitKey,
       idiomIdx:w.idiomIdx,
       idiom:UNITS[w.unitKey].idioms[w.idiomIdx]
     }))
 
-  return {totalScore, totalCorrect, totalQuestions:total, roundStats, topWrong}
+  // 最弱階段：正確率最低的那個階段（有作答過、且不是全對才回報）
+  let weakestRound=null, worstRate=101
+  ;[1,2,3,4].forEach(r=>{
+    const st=roundStats[r]
+    if(!st.total)return
+    const rate=(st.correct/st.total)*100
+    if(rate<worstRate&&rate<100){worstRate=rate;weakestRound=r}
+  })
+
+  return {totalScore, totalCorrect, totalQuestions:total, roundStats, topWrong, weakestRound}
 }
 
 /* ═══════════════════════════════════════════
@@ -545,6 +556,8 @@ function saveHistoryRecord(unit, diagnosis){
       date: new Date().toISOString(),
       totalScore: diagnosis.totalScore,
       totalCorrect: diagnosis.totalCorrect,
+      totalQuestions: diagnosis.totalQuestions,
+      weakestRound: diagnosis.weakestRound,
       topWrong: diagnosis.topWrong,
       roundStats: diagnosis.roundStats
     })
@@ -791,7 +804,7 @@ export default function Home(){
     setTiles(drillTiles(IDIOMS[selectedIdiomIdx],practiceRound))
   }
 
-  /* ── 評級後：點錯題直接跳去該成語的典故頁複習 ── */
+  /* ── 評鑒後：點錯題直接跳去該成語的典故頁複習 ── */
   function reviewWrongIdiom(unitKey,idx){
     setUnit(unitKey)
     setSelectedIdiomIdx(idx)
@@ -865,7 +878,6 @@ export default function Home(){
         const res = diagnoseQuiz(quizAnswersRef.current)
         setDiagnosis(res)
         saveHistoryRecord(key, res)
-        setViewingUnit(key)
         setViewingRecord(null)
         setScreen('rank-diagnosis')
       }
@@ -922,7 +934,7 @@ export default function Home(){
         </>)}
         {screen==='rank-drill'&&(
           <div style={{margin:'16px 12px',fontSize:'.8rem',color:'var(--gold-dim)',textAlign:'center',lineHeight:1.6}}>
-            📝 評級測驗進行中<br/>完成測驗後可切換其他模式
+            📝 評鑒測驗進行中<br/>完成測驗後可切換其他模式
           </div>
         )}
       </div>
@@ -1097,6 +1109,12 @@ export default function Home(){
                 </div>
               )}
 
+              {d.weakestRound&&(
+                <p className="weak-round-tip">
+                  📌 你在「{DRILL_ROUNDS[d.weakestRound-1].label}」錯得最多，建議多練習這個階段。
+                </p>
+              )}
+
               {(d.topWrong||[]).length>0?(
                 <>
                   <p className="section-title">點下面的成語直接複習</p>
@@ -1107,7 +1125,7 @@ export default function Home(){
                         <div key={i} className="free-idiom-card" onClick={()=>reviewWrongIdiom(w.unitKey,w.idiomIdx)}>
                           <span className="free-idiom-emoji">{it.emoji}</span>
                           <div className="free-idiom-name">{it.idiom}</div>
-                          <div className="free-idiom-tag">答錯 {w.count} 次</div>
+                          <div className="free-idiom-tag">{w.count>1?`答錯 ${w.count} 次`:(w.rounds&&w.rounds[0]?`${DRILL_ROUNDS[w.rounds[0]-1].label}答錯`:'答錯')}</div>
                         </div>
                       ):null
                     })}
