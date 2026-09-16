@@ -1,0 +1,218 @@
+- generic [active] [ref=f7e1]:
+  - generic [ref=f7e2]:
+    - generic [ref=f7e3]:
+      - generic [ref=f7e4]: 🗺️ 關卡選單
+      - button "🏠 返回首頁" [ref=f7e5] [cursor=pointer]
+      - generic [ref=f7e6]: 模式
+      - generic [ref=f7e7] [cursor=pointer]: 📖 學習與練習
+      - generic [ref=f7e8] [cursor=pointer]: 📝 評鑒系統
+    - generic [ref=f7e9]:
+      - generic [ref=f7e10]: Aa
+      - button "小" [ref=f7e11] [cursor=pointer]
+      - button "中" [ref=f7e12] [cursor=pointer]
+      - button "大" [ref=f7e13] [cursor=pointer]
+    - generic [ref=f7e14]:
+      - generic [ref=f7e15]:
+        - button "收起嚮導" [ref=f7e16] [cursor=pointer]: ×
+        - paragraph [ref=f7e17]: 嗨，我是鼎鼎！點選一個單元，展開成語清單吧！
+      - button "打開嚮導" [ref=f7e18] [cursor=pointer]:
+        - generic [ref=f7e19]: 鼎
+    - generic [ref=f7e20]:
+      - generic [ref=f7e21]:
+        - generic [ref=f7e22]:
+          - text: 穿
+          - img "時空穿越者" [ref=f7e23]
+          - generic [ref=f7e24]:
+            - heading "時空穿越者" [level=1] [ref=f7e25]
+            - paragraph [ref=f7e27]: 你現在是一位穿梭在各個成語故事之中的穿越者。每個單元都是一段古老的典故世界——請先讀懂每個典故，再透過反覆練習，證明你真的學會了！
+        - generic [ref=f7e28]:
+          - generic [ref=f7e29]:
+            - generic [ref=f7e30]:
+              - generic [ref=f7e31]: 📖
+              - generic [ref=f7e32]:
+                - heading "單元一" [level=3] [ref=f7e33]
+                - paragraph [ref=f7e34]: 一言九鼎、寸草春暉、人山人海、水落石出、青出於藍 等 10 個成語
+            - generic [ref=f7e35]:
+              - generic [ref=f7e36] [cursor=pointer]:
+                - generic [ref=f7e37]: 🏺
+                - generic [ref=f7e38]: 一言九鼎
+                - generic [ref=f7e39]: 歷史故事
+              - generic [ref=f7e40] [cursor=pointer]:
+                - generic [ref=f7e41]: 🌱
+                - generic [ref=f7e42]: 寸草春暉
+                - generic [ref=f7e43]: 詩詞典故
+              - generic [ref=f7e44] [cursor=pointer]:
+                - generic [ref=f7e45]: 🏮
+                - generic [ref=f7e46]: 人山人海
+                - generic [ref=f7e47]: 生活景象
+              - generic [ref=f7e48] [cursor=pointer]:
+                - generic [ref=f7e49]: 🪨
+                - generic [ref=f7e50]: 水落石出
+                - generic [ref=f7e51]: 自然景象
+              - generic [ref=f7e52] [cursor=pointer]:
+                - generic [ref=f7e53]: 💙
+                - generic [ref=f7e54]: 青出於藍
+                - generic [ref=f7e55]: 勵志學習
+              - generic [ref=f7e56] [cursor=pointer]:
+                - generic [ref=f7e57]: 🌊
+                - generic [ref=f7e58]: 滄海桑田
+                - generic [ref=f7e59]: 神話傳說
+              - generic [ref=f7e60] [cursor=pointer]:
+                - generic [ref=f7e61]: 🤐
+                - generic [ref=f7e62]: 守口如瓶
+                - generic [ref=f7e63]: 生活智慧
+              - generic [ref=f7e64] [cursor=pointer]:
+                - generic [ref=f7e65]: 🐎
+                - generic [ref=f7e66]: 分道揚鑣
+                - generic [ref=f7e67]: 歷史故事
+              - generic [ref=f7e68] [cursor=pointer]:
+                - generic [ref=f7e69]: 😰
+                - generic [ref=f7e70]: 手足無措
+                - generic [ref=f7e71]: 聖賢故事
+              - generic [ref=f7e72] [cursor=pointer]:
+                - generic [ref=f7e73]: 📚
+                - generic [ref=f7e74]: 刮目相看
+                - generic [ref=f7e75]: 三國故事
+          - generic [ref=f7e76]:
+            - generic [ref=f7e77]:
+              - generic [ref=f7e78]: 📖
+              - generic [ref=f7e79]:
+                - heading "單元二" [level=3] [ref=f7e80]
+                - paragraph [ref=f7e81]: 千方百計、始作俑者、白頭偕老、借刀殺人、賞心悅目 等 10 個成語
+            - generic [ref=f7e82]:
+              - generic [ref=f7e83] [cursor=pointer]:
+                - generic [ref=f7e84]: 🧠
+                - generic [ref=f7e85]: 千方百計
+                - generic [ref=f7e86]: 歷史故事
+              - generic [ref=f7e87] [cursor=pointer]:
+                - generic [ref=f7e88]: ⚱️
+                - generic [ref=f7e89]: 始作俑者
+                - generic [ref=f7e90]: 聖賢故事
+              - generic [ref=f7e91] [cursor=pointer]:
+                - generic [ref=f7e92]: 💑
+                - generic [ref=f7e93]: 白頭偕老
+                - generic [ref=f7e94]: 詩詞典故
+              - generic [ref=f7e95] [cursor=pointer]:
+                - generic [ref=f7e96]: 🗡️
+                - generic [ref=f7e97]: 借刀殺人
+                - generic [ref=f7e98]: 歷史故事
+              - generic [ref=f7e99] [cursor=pointer]:
+                - generic [ref=f7e100]: 🌸
+                - generic [ref=f7e101]: 賞心悅目
+                - generic [ref=f7e102]: 詩詞典故
+              - generic [ref=f7e103] [cursor=pointer]:
+                - generic [ref=f7e104]: 🌅
+                - generic [ref=f7e105]: 日新月異
+                - generic [ref=f7e106]: 經典語錄
+              - generic [ref=f7e107] [cursor=pointer]:
+                - generic [ref=f7e108]: 🐟
+                - generic [ref=f7e109]: 緣木求魚
+                - generic [ref=f7e110]: 聖賢故事
+              - generic [ref=f7e111] [cursor=pointer]:
+                - generic [ref=f7e112]: 🔥
+                - generic [ref=f7e113]: 赴湯蹈火
+                - generic [ref=f7e114]: 歷史故事
+              - generic [ref=f7e115] [cursor=pointer]:
+                - generic [ref=f7e116]: 🚪
+                - generic [ref=f7e117]: 初來乍到
+                - generic [ref=f7e118]: 生活用語
+              - generic [ref=f7e119] [cursor=pointer]:
+                - generic [ref=f7e120]: 🦁
+                - generic [ref=f7e121]: 弱肉強食
+                - generic [ref=f7e122]: 經典語錄
+          - generic [ref=f7e123]:
+            - generic [ref=f7e124]:
+              - generic [ref=f7e125]: 📖
+              - generic [ref=f7e126]:
+                - heading "單元三" [level=3] [ref=f7e127]
+                - paragraph [ref=f7e128]: 禮尚往來、爭先恐後、立竿見影、吳牛喘月、異曲同工 等 10 個成語
+            - generic [ref=f7e129]:
+              - generic [ref=f7e130] [cursor=pointer]:
+                - generic [ref=f7e131]: 🎁
+                - generic [ref=f7e132]: 禮尚往來
+                - generic [ref=f7e133]: 經典語錄
+              - generic [ref=f7e134] [cursor=pointer]:
+                - generic [ref=f7e135]: 🏃
+                - generic [ref=f7e136]: 爭先恐後
+                - generic [ref=f7e137]: 歷史故事
+              - generic [ref=f7e138] [cursor=pointer]:
+                - generic [ref=f7e139]: ☀️
+                - generic [ref=f7e140]: 立竿見影
+                - generic [ref=f7e141]: 自然景象
+              - generic [ref=f7e142] [cursor=pointer]:
+                - generic [ref=f7e143]: 🐃
+                - generic [ref=f7e144]: 吳牛喘月
+                - generic [ref=f7e145]: 生活趣談
+              - generic [ref=f7e146] [cursor=pointer]:
+                - generic [ref=f7e147]: 🎼
+                - generic [ref=f7e148]: 異曲同工
+                - generic [ref=f7e149]: 詩詞典故
+              - generic [ref=f7e150] [cursor=pointer]:
+                - generic [ref=f7e151]: ⚖️
+                - generic [ref=f7e152]: 格殺勿論
+                - generic [ref=f7e153]: 歷史故事
+              - generic [ref=f7e154] [cursor=pointer]:
+                - generic [ref=f7e155]: ⚖️
+                - generic [ref=f7e156]: 半斤八兩
+                - generic [ref=f7e157]: 生活智慧
+              - generic [ref=f7e158] [cursor=pointer]:
+                - generic [ref=f7e159]: 🐫
+                - generic [ref=f7e160]: 少見多怪
+                - generic [ref=f7e161]: 生活趣談
+              - generic [ref=f7e162] [cursor=pointer]:
+                - generic [ref=f7e163]: 🌌
+                - generic [ref=f7e164]: 包羅萬象
+                - generic [ref=f7e165]: 經典語錄
+              - generic [ref=f7e166] [cursor=pointer]:
+                - generic [ref=f7e167]: 🤝
+                - generic [ref=f7e168]: 莫逆之交
+                - generic [ref=f7e169]: 聖賢故事
+          - generic [ref=f7e170]:
+            - generic [ref=f7e171]:
+              - generic [ref=f7e172]: 📖
+              - generic [ref=f7e173]:
+                - heading "單元四" [level=3] [ref=f7e174]
+                - paragraph [ref=f7e175]: 天衣無縫、土崩瓦解、博古通今、各有千秋、與虎謀皮 等 10 個成語
+            - generic [ref=f7e176]:
+              - generic [ref=f7e177] [cursor=pointer]:
+                - generic [ref=f7e178]: 👘
+                - generic [ref=f7e179]: 天衣無縫
+                - generic [ref=f7e180]: 神話傳說
+              - generic [ref=f7e181] [cursor=pointer]:
+                - generic [ref=f7e182]: 🏚️
+                - generic [ref=f7e183]: 土崩瓦解
+                - generic [ref=f7e184]: 歷史故事
+              - generic [ref=f7e185] [cursor=pointer]:
+                - generic [ref=f7e186]: 📜
+                - generic [ref=f7e187]: 博古通今
+                - generic [ref=f7e188]: 聖賢故事
+              - generic [ref=f7e189] [cursor=pointer]:
+                - generic [ref=f7e190]: 🍂
+                - generic [ref=f7e191]: 各有千秋
+                - generic [ref=f7e192]: 詩詞典故
+              - generic [ref=f7e193] [cursor=pointer]:
+                - generic [ref=f7e194]: 🐯
+                - generic [ref=f7e195]: 與虎謀皮
+                - generic [ref=f7e196]: 寓言故事
+              - generic [ref=f7e197] [cursor=pointer]:
+                - generic [ref=f7e198]: ⛵
+                - generic [ref=f7e199]: 同舟共濟
+                - generic [ref=f7e200]: 兵法典故
+              - generic [ref=f7e201] [cursor=pointer]:
+                - generic [ref=f7e202]: 🚪
+                - generic [ref=f7e203]: 門可羅雀
+                - generic [ref=f7e204]: 歷史故事
+              - generic [ref=f7e205] [cursor=pointer]:
+                - generic [ref=f7e206]: 😌
+                - generic [ref=f7e207]: 若無其事
+                - generic [ref=f7e208]: 生活趣談
+              - generic [ref=f7e209] [cursor=pointer]:
+                - generic [ref=f7e210]: 📖
+                - generic [ref=f7e211]: 目不識丁
+                - generic [ref=f7e212]: 歷史故事
+              - generic [ref=f7e213] [cursor=pointer]:
+                - generic [ref=f7e214]: 🐓
+                - generic [ref=f7e215]: 雞犬不寧
+                - generic [ref=f7e216]: 生活趣談
+      - text: 選 選 選 選 選 選
+  - alert [ref=f7e217]

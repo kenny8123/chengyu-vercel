@@ -1,5 +1,11 @@
 import Head from 'next/head'
+import Image from 'next/image'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import {
+  shuffle, drillBlanks, drillTiles,
+  buildFreeQuizQueue, buildFullRandomQueue,
+  summarisePractice, diagnoseQuiz,
+} from '../lib/idiomLogic'
 
 /* ═══════════════════════════════════════════
    圖片設定
@@ -100,7 +106,7 @@ const IDIOMS_2_1 = [
     meaning: '形容費盡心機，想盡一切辦法、計謀。',
     kidStory: '宋代彭龜年勸皇帝，朝中有些壞人會「千方百計」蒙蔽皇上，想盡各種辦法、計謀達到目的，提醒皇帝不要輕易聽信讒言。',
     fullStory: '「千方百計」的「方」和「計」，指的是方法和計謀，「千」和「百」，則都是用來表很多，所以「千方百計」就是用了很多的方法和計謀。此一成語可見於宋代彭龜年的〈論小人疑間兩宮乞車駕過宮面質疏〉。彭龜年，字子壽，清江人。南宋乾道進士，歷任煥章閣待制、知江陵府，遷湖北安撫使。諡忠肅。在朝言事，善惡是非，辨析甚嚴。他的〈論小人疑間兩宮乞車駕過宮面質疏〉，即是勸諫君王應以古代聖君為榜樣，當朝中小人費盡心機，想盡一切辦法、計謀，想要蒙蔽聖上的時候，不要輕易聽信讒言。他批評朝中奸佞小人「千方百計誤陛下之聽」，使皇上無法省察群臣的諫言。「千方百計」這句成語可能出於此，就用來形容費盡心機，想盡一切辦法、計謀。',
-    emoji: '🧠', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '歷史故事',
+    emoji: '🧠', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '歷史故事',
     mildDistract: ['萬','種','法','門'], hardDistract: ['干','計','汁','十']
   },
   {
@@ -109,7 +115,7 @@ const IDIOMS_2_1 = [
     meaning: '比喻首創惡例的人。',
     kidStory: '古人曾用真人陪葬，後來改用木頭或泥土做的人偶（俑）代替。孔子仍然很生氣，說第一個發明用「俑」陪葬的人一定會遭報應，因為這個念頭本身就很殘忍。',
     fullStory: '「始作俑者」的「俑」，指的是古代用來殉葬的人偶。「始作俑者」則是指發明以俑陪葬的人。在殷周時期，貴族或有身分地位的人，死後往往會以活人陪葬，例如春秋時的秦武公，死時陪葬者多達六十餘人，秦穆公死時陪葬者更多達百餘人。後來，以活人殉葬的風俗逐漸被廢除，改以木製或土製人偶取而代之，即所謂的「俑葬」。孔子對於這樣的習俗極為厭惡，他認為用像人的俑陪葬，在意念上其實與用真人陪葬沒有差別，都是非常殘忍的，所以他說：「始作俑者，其無後乎！」就是指責最初那個發明以俑陪葬的人，一定會得到報應，絕子絕孫。後來孟子向梁惠王談為政之道時曾引用孔子的這句話。在此，「始作俑者」仍是指最初那個發明以俑陪葬的人，後來「始作俑者」則被用來比喻首創惡例的人。',
-    emoji: '⚱️', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '聖賢故事',
+    emoji: '⚱️', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '聖賢故事',
     mildDistract: ['人','事','物','者'], hardDistract: ['甬','桶','俑','誦']
   },
   {
@@ -118,7 +124,7 @@ const IDIOMS_2_1 = [
     meaning: '用來形容夫妻恩愛到老，現今多用為祝賀新婚的賀詞。',
     kidStory: '「白頭」出自一首古詩，希望有個真心相待的人能一起生活到老。「偕老」出自《詩經》，寫一對相愛的夫妻約定要一起白頭到老。兩個詞合起來就是「白頭偕老」，祝福夫妻恩愛一輩子。',
     fullStory: '「白頭偕老」係由「白頭」及「偕老」二語組合而成。「白頭」是出自樂府古辭〈白頭吟〉二首之一，內容是說夫妻二人原本相愛，後來丈夫變心，妻子便寫了這首詩，與之決絕。詩中提到，希望能有一個真心相待的人，可以共同生活，直到白頭，永不相離。「偕老」則是出自《詩經．鄭風．女曰雞鳴》，詩歌內容是寫一對夫妻歡樂美好的家庭生活。兩人十分相愛，並且誓約相守到白頭。後來這兩個典源被合用成「白頭偕老」，用來形容夫妻恩愛到老。現今這個成語多用為祝賀新婚的賀詞，也常用作「白頭到老」。',
-    emoji: '💑', bg: 'linear-gradient(160deg,#ffe0ec,#ffc0d6)', tag: '詩詞典故',
+    emoji: '💑', bg: 'linear-gradient(160deg,#c8f0d0,#9be0ad)', tag: '詩詞典故',
     mildDistract: ['髮','首','終','久'], hardDistract: ['楷','皆','偕','階']
   },
   {
@@ -127,7 +133,7 @@ const IDIOMS_2_1 = [
     meaning: '比喻假他人之手去害人。',
     kidStory: '東漢的禰衡很有才華但脾氣不好。曹操不想親自動手殺他，就把他送給別人，最後禰衡真的被別人殺了。曹操沒有動手，卻等於是借別人的刀達成目的，這就是「借刀殺人」。',
     fullStory: '「借刀殺人」指借別人的刀來殺人。例如在《後漢書．禰衡傳》裡有一則故事：東漢末年，有個名叫禰衡的年輕人，他相當有才華，但脾氣不好，常常得罪人。曹操本來很喜歡他，但後來被他傲慢的態度觸怒了，氣得想殺掉他。但又因為他聲名在外，怕遭來非議，於是將他送給荊州刺史劉表。劉表之前也聽聞禰衡的才華過人，對他十分禮遇。但禰衡仍不改暴躁的脾氣，以致劉表也受不了他，於是就將他送給黃祖。有一次黃祖在宴請賓客時，禰衡當場和他起了衝突，而且出言不遜，黃祖一怒之下就將他殺了。曹操當初把禰衡送給別人就是想借別人的手殺他，後來果然成真。這就是「借刀殺人」。後來，「借刀殺人」就用來比喻假他人之手去害人。',
-    emoji: '🗡️', bg: 'linear-gradient(160deg,#d4e0ff,#aec4f0)', tag: '歷史故事',
+    emoji: '🗡️', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '歷史故事',
     mildDistract: ['用','拿','取','使'], hardDistract: ['惜','措','錯','借']
   },
   {
@@ -136,7 +142,7 @@ const IDIOMS_2_1 = [
     meaning: '用來形容情景美好，使心目都感到快樂舒暢。',
     kidStory: '「賞心」是說能和好朋友一起做美好的事，心情很愉快。「悅目」是說衣服容貌整齊得體，能讓眼睛看了很舒服。兩個詞合起來，就是形容景象美好、讓人心情愉快。',
     fullStory: '「賞心悅目」係由「賞心」及「悅目」二語組合而成。「賞心」見於南朝宋．謝靈運〈擬魏太子鄴中集詩八首并序〉。謝靈運認為：美好的時光、宜人的景色、愉悅的心情、歡樂的事情，這四種世間樂事一向最難同時具備，但是能和許多優秀的文人一起唱和應酬，這四者便同時都享受到了。「悅目」一詞見於漢．劉向《說苑．卷一九．修文》。劉向認為：衣服容貌是用來愉悅眼目，談吐應對是用來愉悅耳朵，嗜好行為是用來愉悅心志。後來這兩個詞語被合用成「賞心悅目」，用來形容情景美好，使心目都感到快樂舒暢。',
-    emoji: '🌸', bg: 'linear-gradient(160deg,#c8f0e0,#9be0c9)', tag: '詩詞典故',
+    emoji: '🌸', bg: 'linear-gradient(160deg,#c8f0d0,#9be0ad)', tag: '詩詞典故',
     mildDistract: ['歡','喜','樂','爽'], hardDistract: ['賞','嘗','當','裳']
   },
   {
@@ -154,7 +160,7 @@ const IDIOMS_2_1 = [
     meaning: '用來比喻用錯方法，徒勞無功。',
     kidStory: '孟子告訴齊宣王，如果不從照顧愛護百姓開始做起，卻想靠武力稱霸天下，就像爬到樹上去抓魚一樣，方法錯了，是不可能成功的。',
     fullStory: '戰國時的齊宣王，因為仰慕春秋時齊桓公與晉文公的霸業，很想效法他們，便向孟子請教有關他們的事蹟。孟子說他沒聽說過，但可以為齊宣王講述如何以仁德統治天下。孟子認為，要以仁德統治天下，最重要的就是要知道去照顧、愛護百姓。可以先從尊敬自己的父兄、愛護自己的子弟開始，然後推及別人的父兄子弟，這樣就能治國、平天下了。如果不從這基礎開始做起，就想開疆闢土，使其他諸侯歸順而稱霸天下的話，正如同爬到樹上去抓魚，是不可能達成的。後來《孟子》原文的「緣木求魚」演變成一句成語，用來比喻用錯方法，徒勞無功。',
-    emoji: '🐟', bg: 'linear-gradient(160deg,#c4ecff,#8fd4f0)', tag: '聖賢故事',
+    emoji: '🐟', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '聖賢故事',
     mildDistract: ['爬','抓','摘','找'], hardDistract: ['椽','緣','原','源']
   },
   {
@@ -163,7 +169,7 @@ const IDIOMS_2_1 = [
     meaning: '用來比喻奮不顧身，不避艱險。',
     kidStory: '西漢的鼂錯建議皇帝，要獎賞奮勇守城、攻城的將士，這樣將士才願意冒著生命危險，不怕滾燙的水、猛烈的火，勇敢為國家效力，這就是「赴湯蹈火」的由來。',
     fullStory: '鼂錯為西漢潁川人，文帝時，奉命記錄和整理已失傳的《尚書》，後屢屢升遷。他曾對邊塞的守備提出建議，主張應用鼓勵的方式激勵將士保衛疆土，他說：「對於能固守城池及戰勝敵人者，要給予爵位以示獎賞；對於能攻陷敵方城池者，要贈予所得的財貨以增加他的財富與權勢。唯有如此，才能使將士們甘願冒著生命的危險，不顧生死的為國效忠。」後來「赴湯蹈火」這句成語就從這裡演變而出，用來比喻奮不顧身，不避艱險。也有學者以為此語應源自《傅子》，東漢末年劉表部下韓嵩曾說：「雖赴湯蹈火，死無辭也。」意思同樣是奮不顧身，不避艱險。',
-    emoji: '🔥', bg: 'linear-gradient(160deg,#ffd4c4,#ff9e8f)', tag: '歷史故事',
+    emoji: '🔥', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '歷史故事',
     mildDistract: ['進','踏','跳','衝'], hardDistract: ['赴','付','計','起']
   },
   {
@@ -181,7 +187,7 @@ const IDIOMS_2_1 = [
     meaning: '比喻強者欺凌、吞併弱者。',
     kidStory: '韓愈說，動物們大多躲在深山裡，因為害怕被其他動物傷害，但即使小心翼翼，弱小的動物還是常常變成強壯動物的食物，這就是「弱肉強食」。',
     fullStory: '唐代由於佛教鼎盛，因此當時的文人及達官貴人，多與僧侶往來，互贈詩文。〈送浮屠文暢師序〉就是韓愈贈予僧文暢的文章。他認為：在天下未教化之初，人民和禽獸是沒有什麼不同的。後來聖人出現，治理天下，人民才得以安逸的生活。就像鳥兒，一低頭就是要覓食；野獸們大多藏身在隱僻的深山，很少出來活動，這都是因為害怕其他的動物會傷害自己。但是這樣的小心翼翼，仍然無法擺脫弱者被強者欺凌的危險，弱者之肉，就是強者的食物。後來「弱肉強食」這句成語就從這裡演變而出，比喻強者欺凌、吞併弱者。',
-    emoji: '🦁', bg: 'linear-gradient(160deg,#f0e0c4,#d4b88f)', tag: '經典語錄',
+    emoji: '🦁', bg: 'linear-gradient(160deg,#fff4c4,#ffe08f)', tag: '經典語錄',
     mildDistract: ['小','弱','虛','柔'], hardDistract: ['肉','肌','內','丙']
   },
 ]
@@ -193,7 +199,7 @@ const IDIOMS_3_1 = [
     meaning: '比喻別人以禮相待，也要以禮回報。',
     kidStory: '《禮記》說，古人受到別人的恩惠，也要回報別人的恩惠，這樣才合乎禮節。如果只收禮卻不回禮，或只回禮卻沒收過禮，都不合乎禮，這就是「禮尚往來」的由來。',
     fullStory: '《禮記》是儒家典籍之一，由漢朝戴聖所輯，為十三經之一，內容多是孔子的弟子及後學所記。書中所記載的，都是上古時期的禮俗儀式和儒家理想中的政治制度。在《禮記．曲禮上》中提到，上古時代人心純樸，凡事沒什麼準則，只照著內心的誠意來行為；到了文明時代，就講究施與受間的互相往來，受到別人的恩惠，也要回報別人的恩惠。如果受到恩惠卻不報答，就不合乎禮；如果受人報答卻沒有給人恩惠，也於禮不合。人與人的關係，因為禮的作用而能保持和諧，如果沒有禮，就會發生危機。所以禮是一定要學習的。「禮尚往來」比喻別人以禮相待，也要以禮回報。',
-    emoji: '🎁', bg: 'linear-gradient(160deg,#ffe0ec,#ffc0d6)', tag: '經典語錄',
+    emoji: '🎁', bg: 'linear-gradient(160deg,#fff4c4,#ffe08f)', tag: '經典語錄',
     mildDistract: ['敬','待','恩','情'], hardDistract: ['尚','當','當','裳']
   },
   {
@@ -211,7 +217,7 @@ const IDIOMS_3_1 = [
     meaning: '比喻迅速收到成效。',
     kidStory: '古人在陽光下豎立一根竹竿，馬上就能看到竿子的影子，用來測量節氣。因為效果非常快速直接，後來「立竿見影」就用來形容做一件事很快就看到成果。',
     fullStory: '「立竿見影」本為古代一種測量、訂定節氣的方法。指在陽光下豎立一根竹竿，根據投射日影的長度、方位等觀察自然界的變化。因為在陽光下豎立竹竿，可立即見其影，故「立竿見影」又用來比喻迅速收到成效。此語可見於漢代魏伯陽所作的《參同契》。《參同契》為道教最早系統論述煉丹的典籍，也稱得上是全世界最早的煉丹術理論性著作，全書托易象而論煉丹，其中存在著許多先進的化學觀念，對煉丹術有重大的影響。〈如審遭逢章〉談到修煉的方法。「五行」指的是金、木、水、火、土五種物質，古人認為世界萬事萬物都是由這五種物質所組成，此五種物質以循環的規律相互滋生，但亦相互制約。修煉時若能順應五行，並且專心一意，沒有任何遺漏，則可收快速而立即的功效。後來原文中的「立竿見影」演變為成語，就用來比喻迅速收到成效。',
-    emoji: '☀️', bg: 'linear-gradient(160deg,#fff4c4,#ffe08f)', tag: '自然景象',
+    emoji: '☀️', bg: 'linear-gradient(160deg,#c4ecff,#8fd4f0)', tag: '自然景象',
     mildDistract: ['站','放','插','豎'], hardDistract: ['杆','竽','桿','肝']
   },
   {
@@ -220,7 +226,7 @@ const IDIOMS_3_1 = [
     meaning: '比喻人見到曾受其害的類似事物而過分害怕驚懼，也用來形容天氣酷熱。',
     kidStory: '南方的水牛很怕熱，晚上看到月亮，會誤以為是太陽升起而嚇得直喘氣。晉朝的滿奮很怕冷，看到窗外寒冷的景象也會發抖，他說自己就像吳牛一樣，看到月亮就喘。',
     fullStory: '水牛原產於長江、淮水流域一帶，生性怕熱，所以夏天時喜歡泡在水中或待在樹蔭下休息。因為太陽的熱力實在太過強烈，水牛深受其苦，因此有時在晚上看見月亮，誤以為是太陽已經出來，氣溫又要升高，而被嚇得氣喘吁吁。所以在漢代應劭的《風俗演義．佚文》中便有「吳牛望月則喘」之語。後來「吳牛喘月」這句成語就從這裡演變而出，用來比喻人見到曾受其害的類似事物而過分害怕驚懼。也用來形容天氣酷熱。在《世說新語》中有一個關於「吳牛喘月」的故事。晉武帝的臣子滿奮很怕冷，有一次他看到琉璃窗外頭的寒冷景象，即使知道琉璃窗很厚實，不會透風，仍不由得打起寒顫。武帝看到了就笑他，滿奮便很不好意思地回答：「我像吳牛一樣，只要見到了月亮就會氣喘吁吁。」',
-    emoji: '🐃', bg: 'linear-gradient(160deg,#c4ecff,#8fd4f0)', tag: '生活趣談',
+    emoji: '🐃', bg: 'linear-gradient(160deg,#f0e0c4,#d4b88f)', tag: '生活趣談',
     mildDistract: ['牛','羊','馬','豬'], hardDistract: ['喘','湍','揣','端']
   },
   {
@@ -229,7 +235,7 @@ const IDIOMS_3_1 = [
     meaning: '原用來比喻不同人的辭章或言論同樣精彩，後則用於比喻不同的作法收到同樣的功效。',
     kidStory: '韓愈寫〈進學解〉，藉學生的話說：老師您的文章風格雖然和別的名家不同，但技巧造詣一樣高明。這就是「異曲同工」——曲調不同，但一樣巧妙。',
     fullStory: '「異曲同工」原作「同工異曲」。「曲」指曲調，「工」指巧妙。韓愈是唐代的著名文人，他精通六經百家，崇尚儒學，排斥佛老，文章自成一家，為後世治古文者所取法。其登進士第後，曾任國子博士、監察御史等職，卻因直言敢諫，屢次被貶，久久不得升遷。韓愈自認才高，不應受此待遇，因此作〈進學解〉一文自嘲。文中敘述一日國子先生教誨學生說：「學業要精進，就要勤勉；學業之所以荒廢，就是因為嬉戲。」學生卻回說：「老師您如此勤勉向學，作品的旨趣，及得上《莊子》、《楚辭》的宏肆深奧，寫作技巧也如同《史記》般豐富，能力比得上揚雄、司馬相如等人，雖然風格不同，但是技巧造詣是一樣的高明。」文中的國子先生即韓愈自稱，韓愈藉著別人的口吻，宣洩自己懷才不遇的憤慨。後來「異曲同工」這句成語就從這裡演變而出，比喻不同的作法收到同樣的功效。',
-    emoji: '🎼', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '詩詞典故',
+    emoji: '🎼', bg: 'linear-gradient(160deg,#c8f0d0,#9be0ad)', tag: '詩詞典故',
     mildDistract: ['歌','詞','調','音'], hardDistract: ['異','翼','冀','翌']
   },
   {
@@ -238,7 +244,7 @@ const IDIOMS_3_1 = [
     meaning: '指殺凶惡的人不以殺人罪論。',
     kidStory: '《周禮》記載，如果盜賊聚眾搶劫、殺害別人的家人，這些匪徒若因此被殺，殺人的人是無罪的。這就是「格殺勿論」的由來，表示殺凶惡的人不算犯罪。',
     fullStory: '《周禮》一書相傳為周公所撰，記載了周代的官制。在該書《秋官．朝士》中提到「凡盜賊軍鄉邑及家人，殺之無罪」，漢代鄭眾解釋這句話的意思說：「如果有盜賊聚眾成軍，來攻打搶劫別人的村舍，殺害別人的家人，這些匪徒假如因此被殺，殺人者無罪。這就好像現行法律，無故侵入他人屋裡、強行登上他人之車、強迫他人犯法，如果因此被人格殺，殺人者無罪。」這就是「格殺無論」的典源，這句成語就是用來指殺凶惡的人不以殺人罪論。',
-    emoji: '⚖️', bg: 'linear-gradient(160deg,#d4e0ff,#aec4f0)', tag: '歷史故事',
+    emoji: '⚖️', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '歷史故事',
     mildDistract: ['打','擊','抓','捕'], hardDistract: ['格','洛','絡','客']
   },
   {
@@ -247,7 +253,7 @@ const IDIOMS_3_1 = [
     meaning: '比喻彼此相當，不相上下。',
     kidStory: '古代十六兩是一斤，半斤剛好等於八兩，所以「半斤八兩」用來說兩個人或兩件事其實一樣，分不出高下。宋代的戲曲裡已經有人用這句話來形容兩人一樣厲害。',
     fullStory: '斤、兩都是計算重量的單位。宋制以十六兩為一斤，半斤就等於八兩，所以用「半斤八兩」來比喻兩者相等，彼此一樣。在宋代的戲曲已見使用，如《張協狀元》裡一個粗獷的淨角和一個滑稽的丑角為錢起了爭執，居中調停的末角就說兩人「半斤八兩」，一樣無理。《宋元戲文輯佚．王質》：「伊嬌俊，我鶻伶，算半斤八兩稱兒稱著不沉不輕。」意思是兩人一樣輕巧嬌美，可見此為當時常用的俗語。後來「半斤八兩」就被用來比喻彼此相當，不相上下。',
-    emoji: '⚖️', bg: 'linear-gradient(160deg,#f0e0c4,#d4b88f)', tag: '生活智慧',
+    emoji: '⚖️', bg: 'linear-gradient(160deg,#d4f0c4,#a8e08f)', tag: '生活智慧',
     mildDistract: ['一','兩','三','全'], hardDistract: ['斤','斥','斧','近']
   },
   {
@@ -256,7 +262,7 @@ const IDIOMS_3_1 = [
     meaning: '用來譏諷人見識不廣，遇平常之事亦以為驚怪。',
     kidStory: '有人問佛的相貌為什麼跟一般人差這麼多，牟子回答：「少所見，多所怪，看到駱駝的駝峰以為是腫起的馬背。」意思是見識太少的人，看到平常的事也會覺得很奇怪。',
     fullStory: '「少見多怪」一語原是譏人因見識狹隘，故而對佛的超凡相貌有所懷疑，以為是過於誇大的傳言。據漢．牟融《理惑論》載，有人問道：「你說佛的相貌有三十二種顯著特徵、八十種細微特徵，這與一般人差太多了，應該不太可能吧！」牟子回答：「俗話說得好：少所見，多所怪，看到駱駝的駝峰以為是腫起的馬背。像堯的眉毛有八種色彩，舜的眼睛有兩個瞳孔……，這不都與平常人有極大差異？所以這些異相是確實存在的，你不能因為自己沒看過就懷疑佛的不凡相貌啊！」牟子以為，若有人因為沒見過異人與佛的超凡相貌，便膚淺地以為那是不可能的，那樣的人與「睹馲駝言馬腫背」者同樣可笑。後來「少見多怪」這句成語就從這裡演變而出，用來譏諷人見識不廣，遇平常之事亦以為驚怪。',
-    emoji: '🐫', bg: 'linear-gradient(160deg,#e0f0ff,#a8d4f0)', tag: '生活趣談',
+    emoji: '🐫', bg: 'linear-gradient(160deg,#f0e0c4,#d4b88f)', tag: '生活趣談',
     mildDistract: ['多','常','初','偶'], hardDistract: ['怪','恠','塊','拐']
   },
   {
@@ -265,7 +271,7 @@ const IDIOMS_3_1 = [
     meaning: '形容內容豐富，應有盡有。',
     kidStory: '《黃帝宅經》的序文說，這本書的知識「包羅萬象」，包括日月、乾坤、寒暑、晝夜、陰陽等各方面，內容非常豐富廣泛，什麼都有涵蓋到。',
     fullStory: '「包羅萬象」是指包含各種事物，形容豐富多樣，與「森羅萬象」一詞同意。「萬象」即是指各式各樣的事物，「包羅萬象」或許出自〈黃帝宅經序〉。《黃帝宅經》是古代風水學的書籍，講述陰陽宅位的風水易理。其書序的作者在文中提到當今流傳不少宅經，教世人宅位風水之學，這些書的主旨雖大同小異，但每本所闡述的頗多不同，若不遍覽則無以會通。有不少人篤信風水，在一知半解之下，死守禁忌，房子蓋好也不敢住，實在可惜！這些知識「包羅萬象」、內容廣泛，包括日月、乾坤、寒暑、雌雄、晝夜、陰陽等各方面，人每天都會接觸到，又是祖先留下來的智慧，一定要好好利用。所以作者除了作序外，還寫了一篇總論，描述這本書的基本理論，讓讀者容易入門。「包羅萬象」這句成語被用來形容內容豐富，應有盡有。',
-    emoji: '🌌', bg: 'linear-gradient(160deg,#c8f0e0,#9be0c9)', tag: '經典語錄',
+    emoji: '🌌', bg: 'linear-gradient(160deg,#fff4c4,#ffe08f)', tag: '經典語錄',
     mildDistract: ['含','裝','收','藏'], hardDistract: ['羅','蘿','邏','籮']
   },
   {
@@ -274,7 +280,7 @@ const IDIOMS_3_1 = [
     meaning: '用來形容心意相投、至好無嫌的朋友。',
     kidStory: '莊子筆下四個好朋友一起討論生死的道理，結果彼此心意相通，相視而笑，就結為好朋友。這種心意完全契合、毫無隔閡的友情，就叫做「莫逆之交」。',
     fullStory: '莊子是戰國時期道家思想的著名代表人物，他在《莊子》一書中對生命的認識有許多闡述。例如在〈大宗師〉一文裡，記述子祀、子輿、子犁、子來等四人，互相談論道：「誰能把『無』當作頭，把『生』當作背脊，將『死』當作尾脊骨，或者是有誰能知道死生存亡是同為一體的，我就與他做朋友。」結果四個人都心領意會於生命來自於無而至於有，最後又歸於死亡─即無。因而四人相視而笑，彼此心意相通，遂結為至交好友。後來「莫逆之交」這句成語，就從原文「莫逆於心，遂相與為友」演變而出，用來形容心意相投、至好無嫌的朋友。',
-    emoji: '🤝', bg: 'linear-gradient(160deg,#ffe0ec,#ffc0d6)', tag: '聖賢故事',
+    emoji: '🤝', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '聖賢故事',
     mildDistract: ['順','合','投','契'], hardDistract: ['莫','暮','幕','墓']
   },
 ]
@@ -286,7 +292,7 @@ const IDIOMS_4_1 = [
     meaning: '比喻詩文渾然天成，沒有斧鑿痕跡；亦用於比喻事物或計畫周密完美，沒有一絲破綻或缺點。',
     kidStory: '《神異經》記載，西方的天神賜給人們特別的衣服，這些衣服不是用凡間的針線縫製的，所以完全看不到縫痕，就是「天衣無縫」，用來形容事情做得完美沒有破綻。',
     fullStory: '《神異經》大約是一本漢代的小說。此書是在《山海經》的影響下產生的，不論是在內容、筆法等各方面都有意模仿《山海經》，只是作者另外添加了神仙方術和儒家思想的觀念在其中。《神異經》記載了一段故事：西方邊遠的地方有一些人，他們不必閱讀傳統的典籍巨著，但行為思想，卻能合乎禮儀規範。天神賜給他們衣服，男的穿著紅色衣服，白色腰帶，戴著帽子；女的穿著綠色衣服，戴著華麗的首飾。這些天衣不是用一般凡間針線縫製，所以都沒有縫痕。後來這個故事被濃縮成「天衣無縫」，用來比喻詩文渾然天成，沒有斧鑿痕跡；亦用於比喻事物或計畫周密完美，沒有一絲破綻或缺點。',
-    emoji: '👘', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '神話傳說',
+    emoji: '👘', bg: 'linear-gradient(160deg,#c4ecff,#8fd4f0)', tag: '神話傳說',
     mildDistract: ['地','人','神','仙'], hardDistract: ['縫','逢','蓬','峰']
   },
   {
@@ -295,7 +301,7 @@ const IDIOMS_4_1 = [
     meaning: '比喻澈底潰敗，不可收拾。',
     kidStory: '漢代徐樂勸皇帝，國家最大的危機是「土崩」——人民受不了暴政而群起反抗，這比「瓦解」（政權內部鬥爭）更嚴重。後來這兩個詞合起來，就用來形容徹底崩潰、無法挽回。',
     fullStory: '「土崩」是指土石崩落，則土石之上的東西，必然隨之消解傾覆。「瓦解」則是指磚瓦破碎。磚瓦破碎可以再行修復，較之於土崩，相對損害程度較輕。在漢代，徐樂為勸諫漢武帝的窮兵黷武，所以曾上書談到當時的國家情況，分別用了「土崩」與「瓦解」這兩個語詞，加以說明二者的不同。他特別強調地舉史事說明：「國家最大的憂患，在於土崩，而不在於瓦解。所謂的土崩，就是人民因為不堪暴政之苦，終於群起反抗。所謂的瓦解，就是政權內部的互相鬥爭。土崩將讓舊有的政權遭到推翻，建立新的政權；而瓦解只是造成人事的改變而已。」徐樂希望能惕勵武帝不可一味地窮兵黷武，更應該體諒人民的疾苦。到了班固寫〈秦紀論〉時，「土崩」與「瓦解」已經合用，作為一句成語來使用。後來「土崩瓦解」這句成語就從這裡演變而出，用來比喻澈底潰敗，不可收拾。',
-    emoji: '🏚️', bg: 'linear-gradient(160deg,#f0e0c4,#d4b88f)', tag: '歷史故事',
+    emoji: '🏚️', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '歷史故事',
     mildDistract: ['山','石','磚','牆'], hardDistract: ['崩','棚','蹦','繃']
   },
   {
@@ -304,7 +310,7 @@ const IDIOMS_4_1 = [
     meaning: '用來形容人學問淵博，通曉古今。',
     kidStory: '孔子曾對弟子稱讚老子，說老子學問淵博，通曉古今，又懂禮樂和道德的道理，值得當老師學習。「博古通今」就是形容一個人像老子這樣，古今的學問都懂。',
     fullStory: '「博古通今」原作「博古知今」。「博」、「通」都有見識廣大的意思，一個人如果對於古今之事都能通曉，學問自然十分淵博。《孔子家語．卷三．觀周》中記載著孔子曾對弟子南宮敬叔稱讚老子，說老子的學問淵博，通曉古今，又明白禮樂的源流演變，明白道德的道理，可以作為自己的老師，便要弟子駕車，前往拜訪老子，向他請教禮樂之事。後來「博古通今」這句成語就從這裡演變而出，用來形容人學問淵博，通曉古今。',
-    emoji: '📜', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '聖賢故事',
+    emoji: '📜', bg: 'linear-gradient(160deg,#e6d4ff,#c9aef0)', tag: '聖賢故事',
     mildDistract: ['知','識','明','懂'], hardDistract: ['博','搏','薄','膊']
   },
   {
@@ -313,7 +319,7 @@ const IDIOMS_4_1 = [
     meaning: '用來比喻各有長處和特色，或各有其長期存在的價值。',
     kidStory: '清代詩人趙翼晚年寫詩，感嘆與他同時代的幾位著名學者，雖然都已年老，但每個人在文壇上都曾經有自己的特色和成就，這就是「各有千秋」——每個人都有自己獨特而長久的價值。',
     fullStory: '趙翼為清中葉時期的著名詩人，生於雍正，卒於嘉慶年間，享有八十八歲的高齡，著作不下千卷。乾嘉詩壇中，主要有「性靈」、「格調」、「肌理」等三個詩派，趙翼為「性靈」派的一員大將，崇尚性情自然流露。晚年時，他寫下〈吳穀人祭酒枉過草堂邀稚存味辛同集〉，記敘與吳穀人、洪亮吉、趙懷玉相聚共飲之事。詩中提到袁枚、蔣士銓、王鳴盛、錢大昕等同時期著名學者，然而無論他們曾經多麼顯赫，畢竟已是時過境遷，終將化為塵土。所以在「名流各有千秋在」的時勢下，垂垂老矣者只能帶著昔日榮景，逐漸走向衰逝之途。而其中所用「千秋」一詞，其實早見於漢代李陵〈與蘇武〉詩中，此處「千秋」意指「時間久遠」，爾後才又衍申出「可長久存在」的含意。後來「各有千秋」演變為成語，用來比喻各有長處和特色，或各有其長期存在的價值。',
-    emoji: '🍂', bg: 'linear-gradient(160deg,#fff4c4,#ffe08f)', tag: '詩詞典故',
+    emoji: '🍂', bg: 'linear-gradient(160deg,#c8f0d0,#9be0ad)', tag: '詩詞典故',
     mildDistract: ['都','皆','人','自'], hardDistract: ['秋','秒','愁','揪']
   },
   {
@@ -322,7 +328,7 @@ const IDIOMS_4_1 = [
     meaning: '用來比喻所謀者與對方有利害衝突，事情必辦不成。',
     kidStory: '有個故事說，一個人想找狐狸和羊商量，要牠們的毛皮和肉，結果狐狸和羊都嚇得逃走躲藏。因為找錯了商量的對象，事情當然辦不成。後來這個故事演變成「與虎謀皮」，比喻找了利害衝突的對象商量，注定失敗。',
     fullStory: '「與虎謀皮」的意思是向老虎商量要取牠的皮，皮是老虎的生命必需品，當然牠是不肯了。所以「與虎謀皮」用來比喻所謀者與對方有利害衝突，事情必辦不成。考其典源可能出自《符子》裡一則「與狐謀皮」的寓言。據載，魯定公時，孔子被任命為中都宰，績效卓然。一年以後，定公又想授予孔子司徒一職，但擔心掌握實際政權的三桓不會同意。左丘明於是用一則寓言勸阻定公，他說：「周朝有個人很喜歡皮製的裘衣，也喜歡吃珍奇美味的食物。他分別去和狐狸和羊商量，希望牠們能提供毛皮和羊肉。他話都還沒說完，所有的狐狸就互相引領逃往深山，所有的羊也彼此呼叫著躲藏進茂密的樹林。結果，這個人花了十年都做不成一件皮衣，花了五年也辦不了一場盛宴。這是因為他找錯了商量的對象。」魯定公聽了這個故事，便打消了念頭。而「與狐謀皮」的寓言故事，可能就是後來「與虎謀皮」的出處，只是把「狐」改成「虎」，更強調了「找錯對象」的意思。',
-    emoji: '🐯', bg: 'linear-gradient(160deg,#ffd4c4,#ff9e8f)', tag: '寓言故事',
+    emoji: '🐯', bg: 'linear-gradient(160deg,#d4f0c4,#a8e08f)', tag: '寓言故事',
     mildDistract: ['狐','羊','狼','豹'], hardDistract: ['謀','媒','某','煤']
   },
   {
@@ -331,7 +337,7 @@ const IDIOMS_4_1 = [
     meaning: '用來比喻同心協力，戰勝困難。',
     kidStory: '孫子說，即使是世仇的吳國人和越國人，只要同坐一條船遇到風雨，也會像左右手一樣互相救助，同心協力度過難關。這就是「同舟共濟」，形容大家一起合作克服困難。',
     fullStory: '「同舟共濟」原作「同舟而濟」。《孫子．九地》曾說到用兵要如「率然」。「率然」是生活在會稽常山的大蛇，如果攻擊牠的頭，尾巴就會來救應；攻擊牠的尾巴，頭部就來救應；攻擊牠的腰部，頭尾都會一起來救應。孫子認為善於用兵作戰的，指揮軍隊，也可以用這樣的做法。像吳、越兩國的人，一直是世仇，但是當他們同坐一條船，在遇到風雨的時候，也一定會團結一致，互相救助，如同左右手一般，合作無間，同心協力地度過難關。後來「同舟共濟」這句成語就從這裡演變而出，用來比喻同心協力，戰勝困難。',
-    emoji: '⛵', bg: 'linear-gradient(160deg,#c4ecff,#8fd4f0)', tag: '兵法典故',
+    emoji: '⛵', bg: 'linear-gradient(160deg,#ffd4c4,#ff9e8f)', tag: '兵法典故',
     mildDistract: ['行','走','過','渡'], hardDistract: ['濟','齊','擠','霽']
   },
   {
@@ -340,7 +346,7 @@ const IDIOMS_4_1 = [
     meaning: '用來形容做官的人失勢後賓客稀少的景況，亦可用以泛指一般來客稀少、門庭冷清的景況。',
     kidStory: '漢朝的翟公當官時，家裡賓客絡繹不絕；失去官職後，門外冷清得可以張網捕鳥雀。後來他又復職，賓客又都回來了。這種世態炎涼，就是「門可羅雀」的由來。',
     fullStory: '《史記．汲鄭列傳》中敘述的是漢初汲黯、鄭當時二人事跡。兩人在當時都是位居高官，受到眾人敬畏，每日上門巴結逢迎的人不計其數。但由於他們剛正不阿的個性不適官場，後俱丟官失勢，往日川流不息的賓客也就消失無蹤了。同樣的，歷史上有位翟公，他是漢朝時的大臣，曾經任職廷尉，位高權重。在他任官期間，每天家中賓客亦是絡繹不絕，把大門擠得水洩不通。但當他失去官職後，就不再有人造訪，門外冷冷清清，空曠得似乎可以張開用來捕捉鳥雀的大網。後來，他又官復原職，昔日的賓客又再度登門了。司馬遷以翟公的這段史實，表達了對官場中人情冷暖之感慨。後來「門可羅雀」這句成語就從這裡演變而出，用來形容做官的人失勢後賓客稀少的景況。',
-    emoji: '🚪', bg: 'linear-gradient(160deg,#e0f0ff,#a8d4f0)', tag: '歷史故事',
+    emoji: '🚪', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '歷史故事',
     mildDistract: ['庭','戶','窗','院'], hardDistract: ['羅','蘿','邏','籮']
   },
   {
@@ -349,7 +355,7 @@ const IDIOMS_4_1 = [
     meaning: '用來形容神態鎮靜、自然，明明有重大的事發生，卻能像沒事一樣。',
     kidStory: '清末商人胡雪巖的米廠發生動亂，負責人緊張地通報他，沒想到胡雪巖的反應卻很鎮定，說「不妨事」。這種明明遇到大事卻表現得很平靜的樣子，就是「若無其事」。',
     fullStory: '「若無其事」，意即「好像沒那回事」，一般用在明明有件重大的事發生，但卻能像沒事一樣，舉止與神情都無異於平常。晚清大橋式羽的著作《雪巖外傳》曾用及此成語。胡雪巖為清末大資本家，憑藉著官場中的廣結善緣與個人的獨到眼光，吒叱商場，成為富可敵國的巨商。《雪巖外傳》中記有一事：一年嚴冬，胡雪巖設廠施捨米糧給災民，不料民眾與廠裡的員工起了爭執，最後竟導致動亂。米廠的負責人魏實甫認為事關重大，懷著忐忑不安的心情趕緊通報胡雪巖，沒想到他的反應居然是「若無其事，說不妨事」，先安撫了魏實甫，然後才開始處置此事。「若無其事」這句成語就用來形容神態鎮靜、自然。',
-    emoji: '😌', bg: 'linear-gradient(160deg,#c8f0e0,#9be0c9)', tag: '生活趣談',
+    emoji: '😌', bg: 'linear-gradient(160deg,#f0e0c4,#d4b88f)', tag: '生活趣談',
     mildDistract: ['好','像','似','彷'], hardDistract: ['若','苦','惹','弱']
   },
   {
@@ -358,7 +364,7 @@ const IDIOMS_4_1 = [
     meaning: '用來比喻不識字或毫無學問。',
     kidStory: '唐代官員張弘靖的部下罵士兵：「你們會拉弓射箭有什麼用，還不如去認識一個『丁』字！」意思是說士兵連最簡單的「丁」字都不認識，就是沒學問。後來就用「目不識丁」形容不識字。',
     fullStory: '「目不識丁」原作「不識一丁」。據《舊唐書．卷一二九．張延賞列傳》載，唐代時，張弘靖被任命為幽州節度使，掌管幽州地方的軍政。他的兩個從官韋雍、張宗厚行為囂張跋扈，常吃喝玩樂直到深夜，喝醉酒還要大隊人馬護送他們回家。看到不滿意的事就亂罵大叫，還對士兵說：「現在天下太平，你們會拉弓射箭有什麼用？還不如去認識一個『丁』字來得有用！」因為「丁」字是很容易認識的字，如果連「丁」字都不認識，那就接近文盲了。所以這句話不但誇讚了自己，也取笑了長於武藝的兵士。使得士兵們相當地氣憤，對他們深惡痛絕。後來「目不識丁」這句成語就從這裡演變而出，用來比喻不識字或毫無學問。',
-    emoji: '📖', bg: 'linear-gradient(160deg,#ffe0ec,#ffc0d6)', tag: '歷史故事',
+    emoji: '📖', bg: 'linear-gradient(160deg,#ffe3c4,#ffc98f)', tag: '歷史故事',
     mildDistract: ['耳','口','手','心'], hardDistract: ['丁','了','刁','叮']
   },
   {
@@ -419,10 +425,6 @@ const UNITS = {
   }
 }
 
-const DISTRACT  = ['風','雨','雲','木','心','手','火','三','百','千','頭','東','西','上','下','大','小','天','日','月']
-
-function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-
 const DRILL_ROUNDS=[
   {id:1,label:'第一階段'},
   {id:2,label:'第二階段'},
@@ -430,138 +432,25 @@ const DRILL_ROUNDS=[
   {id:4,label:'第四階段'},
 ]
 
-function drillBlanks(q,round){
-  if(round===1)return [...q.blanks].slice(0,1)
-  if(round===2){
-    if(q.blanks.length>=2)return q.blanks.slice(0,2)
-    const extra=q.blanks[0]===3?2:q.blanks[0]+1
-    return shuffle([q.blanks[0],extra]).sort((a,b)=>a-b)
-  }
-  return [0,1,2,3]
-}
-
-function drillTiles(q,round){
-  const blanks=drillBlanks(q,round)
-  const chars=q.idiom.split('')
-  const answers=blanks.map(i=>chars[i])
-  let opts=[...answers]
-
-  if(round===1){
-    const pool=shuffle([...(q.mildDistract||[])])
-    for(const d of pool){if(opts.length>=answers.length+2)break;if(!opts.includes(d)&&!chars.includes(d))opts.push(d)}
-  }else if(round===2){
-    const pool=shuffle([...(q.mildDistract||[])])
-    for(const d of pool){if(opts.length>=answers.length+3)break;if(!opts.includes(d)&&!chars.includes(d))opts.push(d)}
-  }else if(round===3){
-    opts=[...answers]
-  }else{
-    const pool=shuffle([...(q.hardDistract||[]),...(q.mildDistract||[])])
-    for(const d of pool){if(opts.length>=answers.length+4)break;if(!opts.includes(d)&&!chars.includes(d))opts.push(d)}
-  }
-  return shuffle(opts).map((ch,k)=>({ch,tid:`d${k}`,used:false}))
-}
-
-const ROUND_WEIGHT={1:5,2:8,3:10,4:12}
-
-/* ═══════════════════════════════════════════
-   評鑒系統：抽題邏輯
-   模式A「自由選題」：單一單元，10題，每題隨機分配1個階段(1~4)
-   模式B「隨機40題」：橫跨全部單元，40題，每題隨機單元+隨機階段
-   佇列項目格式：{unitKey, idiomIdx, round}
-   ═══════════════════════════════════════════ */
-function buildFreeQuizQueue(unitKey){
-  const idioms = UNITS[unitKey].idioms
-  return idioms.map((_,idx)=>({
-    unitKey,
-    idiomIdx: idx,
-    round: 1+Math.floor(Math.random()*4)
-  }))
-}
-
-function buildFullRandomQueue(){
-  const pool=[]
-  Object.keys(UNITS).forEach(unitKey=>{
-    UNITS[unitKey].idioms.forEach((_,idx)=>{
-      pool.push({unitKey, idiomIdx:idx})
-    })
-  })
-  const shuffled=shuffle(pool).slice(0,40)
-  return shuffled.map(item=>({...item, round:1+Math.floor(Math.random()*4)}))
-}
-
-/* 練習模式結算：依總錯誤次數給評語，並找出錯最多的階段 */
-function summarisePractice(mistakes){
-  const total=[1,2,3,4].reduce((s,r)=>s+(mistakes[r]||0),0)
-  // 錯最多的階段（同分時取較後面的階段，因為難度較高）
-  let weakest=null,worst=0
-  ;[1,2,3,4].forEach(r=>{ if((mistakes[r]||0)>=worst&&(mistakes[r]||0)>0){worst=mistakes[r];weakest=r} })
-  let emoji,title,comment
-  if(total===0){
-    emoji='🏆';title='完美通關！'
-    comment='四個階段都一次就答對，這個成語你已經記得很牢了。'
-  }else if(total<=2){
-    emoji='🌟';title='表現很好！'
-    comment='只有少數地方卡住，再複習一下就完全掌握了。'
-  }else if(total<=5){
-    emoji='💪';title='繼續加油！'
-    comment='有幾個字的位置還不太熟，建議回看典故，理解每個字的意思會更好記。'
-  }else{
-    emoji='📖';title='再練一次會更好！'
-    comment='這個成語對你來說有點難度，建議先回去把典故故事讀一遍，再重新練習。'
-  }
-  return {total,weakest,worst,emoji,title,comment}
-}
-
-/* 通用診斷函式：answers = [{unitKey, idiomIdx, round, correct}]，題數不固定 */
-function diagnoseQuiz(answers){
-  const total = answers.length
-  const ROUND_MAX_PER_Q = ROUND_WEIGHT
-  let rawScore=0, maxScore=0
-  const roundStats={1:{correct:0,total:0},2:{correct:0,total:0},3:{correct:0,total:0},4:{correct:0,total:0}}
-  const wrongMap={} // key: `${unitKey}_${idiomIdx}` -> {count, unitKey, idiomIdx}
-  answers.forEach(a=>{
-    roundStats[a.round].total++
-    maxScore+=ROUND_WEIGHT[a.round]
-    if(a.correct){
-      roundStats[a.round].correct++
-      rawScore+=ROUND_WEIGHT[a.round]
-    }else{
-      const key=`${a.unitKey}_${a.idiomIdx}`
-      if(!wrongMap[key])wrongMap[key]={count:0,rounds:[],unitKey:a.unitKey,idiomIdx:a.idiomIdx}
-      wrongMap[key].count++
-      wrongMap[key].rounds.push(a.round)
-    }
-  })
-  const totalScore = maxScore?Math.round((rawScore/maxScore)*100):0
-  const totalCorrect = answers.filter(a=>a.correct).length
-
-  const topWrong = Object.values(wrongMap)
-    .sort((a,b)=>b.count-a.count)
-    .slice(0,5)
-    .map(w=>({
-      count:w.count,
-      rounds:w.rounds,
-      unitKey:w.unitKey,
-      idiomIdx:w.idiomIdx,
-      idiom:UNITS[w.unitKey].idioms[w.idiomIdx]
-    }))
-
-  // 最弱階段：正確率最低的那個階段（有作答過、且不是全對才回報）
-  let weakestRound=null, worstRate=101
-  ;[1,2,3,4].forEach(r=>{
-    const st=roundStats[r]
-    if(!st.total)return
-    const rate=(st.correct/st.total)*100
-    if(rate<worstRate&&rate<100){worstRate=rate;weakestRound=r}
-  })
-
-  return {totalScore, totalCorrect, totalQuestions:total, roundStats, topWrong, weakestRound}
-}
-
 /* ═══════════════════════════════════════════
    歷史成績（localStorage）
    ═══════════════════════════════════════════ */
 function historyKey(unit){ return `chengyu_history_${unit}` }
+
+const DONE_IDIOMS_KEY = 'chengyu_done_idioms'
+
+function loadDoneMap(){
+  if(typeof window==='undefined')return {}
+  try{
+    const raw = window.localStorage.getItem(DONE_IDIOMS_KEY)
+    return raw ? JSON.parse(raw) : {}
+  }catch(e){ return {} }
+}
+
+function saveDoneMap(map){
+  if(typeof window==='undefined')return
+  try{ window.localStorage.setItem(DONE_IDIOMS_KEY, JSON.stringify(map)) }catch(e){}
+}
 
 function loadHistory(unit){
   if(typeof window==='undefined')return []
@@ -601,11 +490,14 @@ function formatHistoryDate(iso){
 }
 
 
-function ImgWithFallback({src,fallback,alt,className,style}){
+function ImgWithFallback({src,fallback,alt,className,style,fill=false,priority=false}){
   const[err,setErr]=useState(false)
   useEffect(()=>{setErr(false)},[src])
   if(err)return <span style={style}>{fallback}</span>
-  return <img src={src} alt={alt} className={className} style={style} onError={()=>setErr(true)}/>
+  if(fill){
+    return <Image src={src} alt={alt} fill sizes="(max-width:900px) 100vw, calc(100vw - 260px)" className={className} style={style} priority={priority} onError={()=>setErr(true)}/>
+  }
+  return <img src={src} alt={alt} className={className} style={style} loading="lazy" decoding="async" onError={()=>setErr(true)}/>
 }
 
 function ProgressBar({idx,total}){
@@ -634,6 +526,8 @@ function IdiomRow({q,placed,onClickSlot,blanksOverride}){
       {chars.map((ch,i)=>blanks.includes(i)?(
         <div key={i} data-pos={i} className={`slot${placed[i]?' filled':''}${placed[i]?.correct===true?' correct':''}${placed[i]?.correct===false?' wrong':''}`} onClick={()=>onClickSlot(i)}>
           {placed[i]?.ch??''}
+          {placed[i]?.correct===true&&<span className="slot-feedback-icon" aria-hidden="true">✓</span>}
+          {placed[i]?.correct===false&&<span className="slot-feedback-icon" aria-hidden="true">✕</span>}
         </div>
       ):<div key={i} className="fixed-char">{ch}</div>)}
     </div>
@@ -742,12 +636,26 @@ export default function Home(){
   const[msg,setMsg]=useState('')
   const dragRef=useRef(null)
   const ghostRef=useRef(null)
+  const cleanupDragRef=useRef(()=>{})
   const quizAnswersRef=useRef([])
 
   const[guideOpen,setGuideOpen]=useState(true)   // 導覽機器人：泡泡開關
   const[textScale,setTextScale]=useState('md')   // 文字大小：sm / md / lg
   const[portalFlash,setPortalFlash]=useState(false)
+  const[doneMap,setDoneMap]=useState({})         // 已完成四階段練習的成語（localStorage）
   const prevScreenRef=useRef(screen)
+
+  useEffect(()=>{ setDoneMap(loadDoneMap()) },[])
+
+  function markIdiomDone(unitKey,idx){
+    const key=`${unitKey}_${idx}`
+    setDoneMap(prev=>{
+      if(prev[key])return prev
+      const next={...prev,[key]:true}
+      saveDoneMap(next)
+      return next
+    })
+  }
 
   useEffect(()=>{
     if(prevScreenRef.current!==screen){
@@ -823,6 +731,7 @@ export default function Home(){
     }else{
       // 四個階段都完成，留在原地顯示完成訊息，不自動跳轉
       setPracticeCycleDone(true)
+      markIdiomDone(unit,selectedIdiomIdx)
     }
   }
   function retryPractice(){
@@ -842,7 +751,7 @@ export default function Home(){
 
   /* ── 評鑒系統 ── */
   function startQuizModeA(unitKey){
-    const queue = buildFreeQuizQueue(unitKey)
+    const queue = buildFreeQuizQueue(UNITS,unitKey)
     setQuizMode('a')
     setQuizQueue(queue)
     setQuizIdx(0)
@@ -853,7 +762,7 @@ export default function Home(){
   }
 
   function startQuizModeB(){
-    const queue = buildFullRandomQueue()
+    const queue = buildFullRandomQueue(UNITS)
     setQuizMode('b')
     setQuizQueue(queue)
     setQuizIdx(0)
@@ -902,7 +811,7 @@ export default function Home(){
         setQuizIdx(i=>i+1)
       }else{
         const key = quizMode==='a' ? item.unitKey : 'full-random'
-        const res = diagnoseQuiz(quizAnswersRef.current)
+        const res = diagnoseQuiz(UNITS,quizAnswersRef.current)
         setDiagnosis(res)
         saveHistoryRecord(key, res)
         setViewingRecord(null)
@@ -913,7 +822,9 @@ export default function Home(){
 
   function onTilePointerDown(e,tile){
     if(tile.used||(result!==null&&screen==='rank-drill'))return
-    e.preventDefault();dragRef.current=tile
+    e.preventDefault()
+    cleanupDragRef.current()
+    dragRef.current=tile
     const g=document.createElement('div');g.className='tile-ghost';g.textContent=tile.ch
     document.body.appendChild(g);ghostRef.current=g;moveGhost(e.clientX,e.clientY)
     const onMove=(ev)=>{
@@ -922,14 +833,23 @@ export default function Home(){
       const el=document.elementFromPoint(ev.clientX,ev.clientY);el?.closest('.slot')?.classList.add('over')
     }
     const onUp=(ev)=>{
-      document.removeEventListener('pointermove',onMove);document.removeEventListener('pointerup',onUp)
-      ghostRef.current?.remove();ghostRef.current=null
-      document.querySelectorAll('.slot').forEach(s=>s.classList.remove('over'))
+      endDragCleanup()
       const el=document.elementFromPoint(ev.clientX,ev.clientY);const slot=el?.closest('.slot')
       if(slot&&dragRef.current){const pos=parseInt(slot.dataset.pos);dropInto(pos,dragRef.current)}
       dragRef.current=null
     }
-    document.addEventListener('pointermove',onMove);document.addEventListener('pointerup',onUp)
+    const onCancel=()=>{ endDragCleanup(); dragRef.current=null }
+    function endDragCleanup(){
+      document.removeEventListener('pointermove',onMove)
+      document.removeEventListener('pointerup',onUp)
+      document.removeEventListener('pointercancel',onCancel)
+      ghostRef.current?.remove();ghostRef.current=null
+      document.querySelectorAll('.slot').forEach(s=>s.classList.remove('over'))
+    }
+    cleanupDragRef.current=endDragCleanup
+    document.addEventListener('pointermove',onMove)
+    document.addEventListener('pointerup',onUp)
+    document.addEventListener('pointercancel',onCancel)
   }
   function moveGhost(x,y){if(ghostRef.current){ghostRef.current.style.left=x+'px';ghostRef.current.style.top=y+'px'}}
 
@@ -955,12 +875,12 @@ export default function Home(){
         <button className="sidebar-back" onClick={()=>setScreen('home')}>🏠 返回首頁</button>
 
         {screen!=='rank-drill'&&(<>
-          <div style={{margin:'16px 12px 8px',fontSize:'.85rem',color:'var(--gold-dim)',fontWeight:700,textAlign:'center'}}>模式</div>
+          <div style={{margin:'16px 12px 8px',fontSize:'.85rem',color:'var(--gold-dim)',fontWeight:700,textAlign:'center',whiteSpace:'nowrap',flexShrink:0}}>模式</div>
           <div className={`sidebar-item${['home','hub-learn-detail'].includes(screen)?' active':''}`} onClick={()=>setScreen('home')}>📖 學習與練習</div>
           <div className={`sidebar-item${['hub-rank-select','rank-mode-a-select','rank-diagnosis'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 評鑒系統</div>
         </>)}
         {screen==='rank-drill'&&(
-          <div style={{margin:'16px 12px',fontSize:'.8rem',color:'var(--gold-dim)',textAlign:'center',lineHeight:1.6}}>
+          <div style={{margin:'16px 12px',fontSize:'.8rem',color:'var(--gold-dim)',textAlign:'center',lineHeight:1.6,flexShrink:0}}>
             📝 評鑒測驗進行中<br/>完成測驗後可切換其他模式
           </div>
         )}
@@ -978,7 +898,7 @@ export default function Home(){
         {/* ════ 序章 ════ */}
         <section className={`screen${screen==='home'?' show':''}`}>
           <div className="hero">
-            <ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="時空穿越者" className="hero-img"/>
+            <ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="時空穿越者" className="hero-img" fill priority/>
             <div className="hero-content">
               <h1 className="hero-title">時空穿越者</h1>
               <div className="scroll-box">
@@ -998,13 +918,17 @@ export default function Home(){
                   </div>
                 </div>
                 <div className="free-idiom-grid unit-block-list">
-                  {u.idioms.map((it,i)=>(
-                    <div key={i} className="free-idiom-card" onClick={()=>openIdiom(u.key,i)}>
+                  {u.idioms.map((it,i)=>{
+                    const isDone=!!doneMap[`${u.key}_${i}`]
+                    return(
+                    <div key={i} className={`free-idiom-card${isDone?' done':''}`} onClick={()=>openIdiom(u.key,i)}>
+                      {isDone&&<span className="free-idiom-done-badge" aria-label="已完成練習">✓</span>}
                       <span className="free-idiom-emoji">{it.emoji}</span>
                       <div className="free-idiom-name">{it.idiom}</div>
                       <div className="free-idiom-tag">{it.tag}</div>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             ))}
@@ -1053,7 +977,7 @@ export default function Home(){
                   ?<button className="btn btn-grass" onClick={nextPracticeStep}>{practiceRound<4?`${PRACTICE_MODES[practiceRound].label} →`:'完成 🎉'}</button>
                   :<button className="btn btn-sun" disabled={!canCheckPractice} onClick={checkPractice}>✅ 拼好了</button>}
               </div>
-              <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{msg}</div>
+              <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`} role="status" aria-live="polite">{msg}</div>
             </div>
           )}
           {selIdiom&&practiceCycleDone&&(
@@ -1138,7 +1062,7 @@ export default function Home(){
             <div className="actions">
               <button className="btn btn-sun" disabled={Object.keys(placed).length!==drillBlanks(quizIdiom,currentQuizItem.round).length||result!==null} onClick={checkQuizAnswer}>✅ 提交答案</button>
             </div>
-            <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{msg}</div>
+            <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`} role="status" aria-live="polite">{msg}</div>
           </div>
           )}
         </section>

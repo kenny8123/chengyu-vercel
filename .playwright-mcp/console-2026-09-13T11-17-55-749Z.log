@@ -1,0 +1,10 @@
+[     351ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///./node_modules/react-dom/cjs/react-dom.development.js:29834
+[     424ms] [LOG] [HMR] connected @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/websocket.js:45
+[   80572ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:196
+[   80882ms] [LOG] [Fast Refresh] done in 310ms @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:165
+[   89059ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:196
+[   89283ms] [LOG] [Fast Refresh] done in 223ms @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:165
+[   93186ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:196
+[   93406ms] [LOG] [Fast Refresh] done in 220ms @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:165
+[   96824ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:196
+[   97125ms] [LOG] [Fast Refresh] done in 300ms @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:165

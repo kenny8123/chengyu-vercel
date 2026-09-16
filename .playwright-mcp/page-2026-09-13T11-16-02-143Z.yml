@@ -1,0 +1,44 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - generic [ref=f5e3]:
+      - generic [ref=f5e217]: 🗺️ 關卡選單
+      - button "🏠 返回首頁" [ref=f5e4] [cursor=pointer]
+      - generic [ref=f5e5]: 模式
+      - generic [ref=f5e6] [cursor=pointer]: 📖 學習與練習
+      - generic [ref=f5e7] [cursor=pointer]: 📝 評鑒系統
+    - generic [ref=f5e8]:
+      - generic [ref=f5e9]: Aa
+      - button "小" [ref=f5e10] [cursor=pointer]
+      - button "中" [ref=f5e11] [cursor=pointer]
+      - button "大" [ref=f5e12] [cursor=pointer]
+    - generic [ref=f5e13]:
+      - generic [ref=f5e14]:
+        - button "收起嚮導" [ref=f5e15] [cursor=pointer]: ×
+        - paragraph [ref=f5e16]: 第 1 階段：把字拖進空格吧！
+      - button "打開嚮導" [ref=f5e17] [cursor=pointer]:
+        - generic [ref=f5e18]: 鼎
+    - generic [ref=f5e19]:
+      - text: 穿
+      - generic [ref=f5e218]:
+        - button "← 返回首頁" [ref=f5e220] [cursor=pointer]
+        - generic [ref=f5e233]:
+          - generic [ref=f5e234]:
+            - generic [ref=f5e235]: 第一階段
+            - generic [ref=f5e236]: 第二階段
+            - generic [ref=f5e237]: 第三階段
+            - generic [ref=f5e238]: 第四階段
+          - generic [ref=f5e239]: 第1題・第一階段
+          - paragraph [ref=f5e241]: 形容說話很有分量，或說話很有信用。
+          - generic [ref=f5e242]:
+            - generic [ref=f5e243]: 一
+            - generic [ref=f5e244]: 言
+            - generic [ref=f5e245]: 九
+          - generic [ref=f5e247]:
+            - generic [ref=f5e248]: 鼎
+            - generic [ref=f5e249]: 鐘
+            - generic [ref=f5e250]: 劍
+          - generic [ref=f5e251]:
+            - button "🔄 重來" [ref=f5e252] [cursor=pointer]
+            - button "✅ 拼好了" [disabled] [ref=f5e253]
+      - text: 選 選 選 選 選 選
+  - alert [ref=f5e216]

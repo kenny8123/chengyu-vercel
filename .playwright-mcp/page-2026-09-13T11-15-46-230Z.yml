@@ -1,0 +1,35 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - generic [ref=f5e3]:
+      - generic [ref=f5e217]: 🗺️ 關卡選單
+      - button "🏠 返回首頁" [ref=f5e4] [cursor=pointer]
+      - generic [ref=f5e5]: 模式
+      - generic [ref=f5e6] [cursor=pointer]: 📖 學習與練習
+      - generic [ref=f5e7] [cursor=pointer]: 📝 評鑒系統
+    - generic [ref=f5e8]:
+      - generic [ref=f5e9]: Aa
+      - button "小" [ref=f5e10] [cursor=pointer]
+      - button "中" [ref=f5e11] [cursor=pointer]
+      - button "大" [ref=f5e12] [cursor=pointer]
+    - generic [ref=f5e13]:
+      - generic [ref=f5e14]:
+        - button "收起嚮導" [ref=f5e15] [cursor=pointer]: ×
+        - paragraph [ref=f5e16]: 看完典故後，點「開始練習」吧！
+      - button "打開嚮導" [ref=f5e17] [cursor=pointer]:
+        - generic [ref=f5e18]: 鼎
+    - generic [ref=f5e19]:
+      - text: 穿
+      - generic [ref=f5e218]:
+        - button "← 返回首頁" [ref=f5e220] [cursor=pointer]
+        - generic [ref=f5e221]:
+          - generic [ref=f5e222]: 📖 一言九鼎
+          - img "一言九鼎 典故漫畫" [ref=f5e224]
+          - generic [ref=f5e225]:
+            - heading "🏺 一言九鼎" [level=3] [ref=f5e226]
+            - paragraph [ref=f5e227]: 戰國時，趙國被秦國圍攻，平原君帶毛遂去楚國求救。毛遂勇敢地向楚王分析情勢，說服楚王結盟。平原君稱讚他：「毛先生一句話，比九鼎還有份量！」
+            - paragraph [ref=f5e228]: 💡 意思：形容說話很有分量，或說話很有信用。
+            - paragraph [ref=f5e229]: 📜 完整典故原文
+            - paragraph [ref=f5e230]: 戰國時，秦國攻打趙國，首都邯鄲被圍，情況相當危急。趙王派平原君到楚國求援，想聯合楚國來抵抗秦國。平原君要從門下食客選二十個人一起去楚國，但挑來挑去只挑到十九人，有個叫毛遂的人便自我推薦，平原君就接納他。到了楚國，平原君一直不能說服楚王援助趙國。毛遂仗劍向前，向楚王分析情勢，義正詞嚴，氣勢凌人，楚王便答應與趙國訂立盟約。平原君完成任務回到趙國後，讚賞毛遂說：「毛先生一到楚國，就使我們趙國的地位大大提升，比九鼎大呂還要有份量。毛先生的口才，真是比百萬軍力還要強大。」自此便一直將毛遂奉為上賓。後來「一言九鼎」這句成語就從這裡演變而出，用來形容說話很有分量，後亦用於形容說話很有信用。
+          - button "✏️ 開始練習成語 →" [ref=f5e232] [cursor=pointer]
+      - text: 選 選 選 選 選 選
+  - alert [ref=f5e216]

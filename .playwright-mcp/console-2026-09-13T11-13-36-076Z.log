@@ -1,0 +1,6 @@
+[     347ms] [INFO] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold @ webpack-internal:///./node_modules/react-dom/cjs/react-dom.development.js:29834
+[     425ms] [LOG] [HMR] connected @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/websocket.js:45
+[   41827ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:196
+[   42161ms] [LOG] [Fast Refresh] done in 333ms @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:165
+[   48545ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:196
+[   48770ms] [LOG] [Fast Refresh] done in 225ms @ webpack-internal:///./node_modules/next/dist/client/dev/error-overlay/hot-dev-client.js:165
