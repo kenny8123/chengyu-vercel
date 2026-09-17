@@ -504,7 +504,7 @@ function summarisePractice(mistakes){
     comment='只有少數地方卡住，再複習一下就完全掌握了。'
   }else if(total<=5){
     emoji='💪';title='繼續加油！'
-    comment='有幾個字的位置還不太熟，建議回到典故，理解每個字的意思會更好記。'
+    comment='有幾個字的位置還不太熟，建議回看典故，理解每個字的意思會更好記。'
   }else{
     emoji='📖';title='再練一次會更好！'
     comment='這個成語對你來說有點難度，建議先回去把典故故事讀一遍，再重新練習。'
@@ -945,14 +945,6 @@ export default function Home(){
     return ()=>clearTimeout(t)
   },[canCheckPractice,screen])
 
-  // 練習模式：答對後自動進入下一階段（最後一階段則自動進結算畫面）
-  useEffect(()=>{
-    if(screen!=='hub-learn-detail')return
-    if(practiceRound===null||result!=='ok')return
-    const t=setTimeout(()=>{nextPracticeStep()},1200)
-    return ()=>clearTimeout(t)
-  },[result,practiceRound,screen])
-
   const canCheckQuiz = quizIdiom && currentQuizItem && result===null &&
     Object.keys(placed).length===drillBlanks(quizIdiom,currentQuizItem.round).length
 
@@ -1009,7 +1001,7 @@ export default function Home(){
             <div className="hero-content">
               <h1 className="hero-title">時空穿越者</h1>
               <div className="scroll-box">
-                <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每個單元都是一段古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，<br/><span className="nb">證明你真的學會了！</span></p>
+                <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每個單元都是一段古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，證明你真的學會了！</p>
               </div>
             </div>
           </div>
@@ -1074,11 +1066,10 @@ export default function Home(){
               <Scene q={selIdiom} qIdx={selectedIdiomIdx} blankCount={drillBlanks(selIdiom,practiceRound).length}/>
               <IdiomRow q={selIdiom} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(selIdiom,practiceRound)}/>
               <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
-              {result!=='ok'&&(
-                <div className="actions">
-                  <button className="btn btn-ghost" onClick={retryPractice}>🔄 重來</button>
-                </div>
-              )}
+              <div className="actions">
+                {result!=='ok'&&<button className="btn btn-ghost" onClick={retryPractice}>🔄 重來</button>}
+                {result==='ok'&&<button className="btn btn-grass" onClick={nextPracticeStep}>{practiceRound<4?`${PRACTICE_MODES[practiceRound].label} →`:'完成 🎉'}</button>}
+              </div>
               <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{msg}</div>
             </div>
           )}
@@ -1117,7 +1108,7 @@ export default function Home(){
                 )
               })()}
               <div className="actions">
-                <button className="btn btn-go" onClick={()=>{setPracticeRound(null);setPracticeCycleDone(false);setPracticeMistakes({1:0,2:0,3:0,4:0})}}>📜 回到典故</button>
+                <button className="btn btn-go" onClick={()=>{setPracticeRound(null);setPracticeCycleDone(false);setPracticeMistakes({1:0,2:0,3:0,4:0})}}>📜 回看典故</button>
               </div>
             </div>
           )}
