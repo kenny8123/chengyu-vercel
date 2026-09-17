@@ -268,6 +268,23 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 .portal-flash{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.85),rgba(255,255,255,0) 60%);z-index:300;pointer-events:none;animation:flashFade .5s ease-out forwards}
 @keyframes flashFade{from{opacity:1}to{opacity:0}}
 
+/* ── 慶祝彩帶 ──
+   先前缺少這段樣式，導致 burst() 產生的 div 以一般區塊元素堆在 <body> 最後，
+   在手機上會看到 emoji 沿左側直排並把頁面撐長。改為固定定位往下飄落。 */
+.confetti{
+  position:fixed;top:-10vh;z-index:9999;
+  pointer-events:none;user-select:none;line-height:1;
+  animation-name:confettiFall;animation-timing-function:linear;animation-fill-mode:forwards;
+  will-change:transform,opacity;
+}
+@keyframes confettiFall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  100%{transform:translateY(118vh) rotate(540deg);opacity:.1}
+}
+@media (prefers-reduced-motion:reduce){
+  .confetti{display:none}
+}
+
 /* ══ 評級卡片：上次成績 ══ */
 .lv-last-score{font-weight:700;color:var(--berry-dark);background:#fff0f5;padding:6px 14px;border-radius:12px;font-size:.9rem;margin-top:4px}
 

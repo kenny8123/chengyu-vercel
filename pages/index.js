@@ -664,7 +664,7 @@ function burst(count=14){
   for(let i=0;i<count;i++){
     const el=document.createElement('div')
     el.className='confetti';el.textContent=emo[Math.floor(Math.random()*emo.length)]
-    el.style.left=Math.random()*100+'vw';el.style.animationDuration=(1.5+Math.random()*2)+'s'
+    el.style.left=(4+Math.random()*88)+'vw';el.style.animationDuration=(1.5+Math.random()*2)+'s'
     el.style.animationDelay=(Math.random()*0.5)+'s';el.style.fontSize=(1.2+Math.random()*1.4)+'rem'
     document.body.appendChild(el);setTimeout(()=>el.remove(),4000)
   }

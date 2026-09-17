@@ -95,3 +95,11 @@
 - 1200ms 是為了讓使用者看到綠色正解與「答對了！」訊息；要調整改該 setTimeout
 - 答對時整個按鈕區塊不顯示（含「重來」），避免留下空白
 - 至此練習流程全自動：拖字 → 380ms 自動判定 → 答對 1200ms 自動進下一階段
+
+## Bug 修正：慶祝彩帶把手機版面撐長
+burst() 會建立 class="confetti" 的 div 並設定 left / fontSize / animationDuration，
+但 globals.css 從來沒有 .confetti 這個規則，所以那些 div 變成一般區塊元素，
+堆在 <body> 最後、沿左側直排，並把頁面高度撐出一大片空白（手機上特別明顯）。
+已補上 .confetti（position:fixed + confettiFall 飄落動畫 + pointer-events:none），
+並把 left 的隨機範圍從 0~100vw 收成 4~92vw，避免掉在畫面外。
+另外加上 prefers-reduced-motion 時不顯示。
