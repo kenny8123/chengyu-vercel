@@ -464,7 +464,7 @@ function drillTiles(q,round){
 const ROUND_WEIGHT={1:5,2:8,3:10,4:12}
 
 /* ═══════════════════════════════════════════
-   評鑒系統：抽題邏輯
+   挑戰系統：抽題邏輯
    模式A「自由選題」：單一單元，10題，每題隨機分配1個階段(1~4)
    模式B「隨機40題」：橫跨全部單元，40題，每題隨機單元+隨機階段
    佇列項目格式：{unitKey, idiomIdx, round}
@@ -682,7 +682,7 @@ function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
       if(practiceRound===null)return '看完典故後，點「開始練習」吧！'
       return `第 ${practiceRound} 階段：把字拖進空格吧！`
     case 'hub-rank-select':
-      return '選一個模式，開始評鑒測驗吧！'
+      return '選一個模式，開始挑戰測驗吧！'
     case 'rank-drill':
       return `每題只有一次機會，看清楚再把字拖進空格！`
     case 'rank-diagnosis':
@@ -729,11 +729,11 @@ export default function Home(){
   const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四階段是否已跑完
   const[practiceMistakes,setPracticeMistakes]=useState({1:0,2:0,3:0,4:0}) // 本輪練習各階段答錯次數
 
-  const[quizMode,setQuizMode]=useState(null)   // 評鑒系統：'a'（自由選題）或 'b'（隨機40題）
+  const[quizMode,setQuizMode]=useState(null)   // 挑戰系統：'a'（自由選題）或 'b'（隨機40題）
   const[quizQueue,setQuizQueue]=useState([])   // [{unitKey,idiomIdx,round}]
   const[quizIdx,setQuizIdx]=useState(0)
   const[quizScore,setQuizScore]=useState(0)
-  const[diagnosis,setDiagnosis]=useState(null) // 最新一次評鑒結果
+  const[diagnosis,setDiagnosis]=useState(null) // 最新一次挑戰結果
   const[viewingRecord,setViewingRecord]=useState(null) // 從歷史記錄點進來查看的那一筆（null代表看最新測驗結果）
 
   const[placed,setPlaced]=useState({})
@@ -830,7 +830,7 @@ export default function Home(){
     setTiles(drillTiles(IDIOMS[selectedIdiomIdx],practiceRound))
   }
 
-  /* ── 評鑒後：點錯題直接跳去該成語的典故頁複習 ── */
+  /* ── 挑戰後：點錯題直接跳去該成語的典故頁複習 ── */
   function reviewWrongIdiom(unitKey,idx){
     setUnit(unitKey)
     setSelectedIdiomIdx(idx)
@@ -840,7 +840,7 @@ export default function Home(){
     setScreen('hub-learn-detail')
   }
 
-  /* ── 評鑒系統 ── */
+  /* ── 挑戰系統 ── */
   function startQuizModeA(unitKey){
     const queue = buildFreeQuizQueue(unitKey)
     setQuizMode('a')
@@ -956,7 +956,7 @@ export default function Home(){
   const canCheckQuiz = quizIdiom && currentQuizItem && result===null &&
     Object.keys(placed).length===drillBlanks(quizIdiom,currentQuizItem.round).length
 
-  // 評鑒測驗：同樣自動判定，但延遲較長（每題只有一次機會，留時間反悔改字）
+  // 挑戰測驗：同樣自動判定，但延遲較長（每題只有一次機會，留時間反悔改字）
   useEffect(()=>{
     if(screen!=='rank-drill')return
     if(!canCheckQuiz)return
@@ -979,16 +979,14 @@ export default function Home(){
 
       <div className="sidebar">
         <div className="sidebar-header">🗺️ 關卡選單</div>
-        <button className="sidebar-back" onClick={()=>setScreen('home')}>🏠 返回首頁</button>
 
         {screen!=='rank-drill'&&(<>
-          <div style={{margin:'16px 12px 8px',fontSize:'.85rem',color:'var(--gold-dim)',fontWeight:700,textAlign:'center'}}>模式</div>
           <div className={`sidebar-item${['home','hub-learn-detail'].includes(screen)?' active':''}`} onClick={()=>setScreen('home')}>📖 學習與練習</div>
-          <div className={`sidebar-item${['hub-rank-select','rank-mode-a-select','rank-diagnosis'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 評鑒系統</div>
+          <div className={`sidebar-item${['hub-rank-select','rank-mode-a-select','rank-diagnosis'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 挑戰系統</div>
         </>)}
         {screen==='rank-drill'&&(
           <div style={{margin:'16px 12px',fontSize:'.8rem',color:'var(--gold-dim)',textAlign:'center',lineHeight:1.6}}>
-            📝 評鑒測驗進行中<br/>完成測驗後可切換其他模式
+            📝 挑戰測驗進行中<br/>完成測驗後可切換其他模式
           </div>
         )}
       </div>
@@ -1118,22 +1116,22 @@ export default function Home(){
                 )
               })()}
               <div className="actions">
-                <button className="btn btn-go" onClick={()=>{setPracticeRound(null);setPracticeCycleDone(false);setPracticeMistakes({1:0,2:0,3:0,4:0})}}>📜 回到典故</button>
+                <button className="btn btn-go" onClick={()=>{setPracticeRound(null);setPracticeCycleDone(false);setPracticeMistakes({1:0,2:0,3:0,4:0});setScreen('home')}}>🏠 回到首頁</button>
               </div>
             </div>
           )}
         </section>
 
-        {/* ════ 評鑒系統：選模式 ════ */}
+        {/* ════ 挑戰系統：選模式 ════ */}
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
-          <div className="menu-head"><h2>📝 評鑒系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
+          <div className="menu-head"><h2>📝 挑戰系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
           <div className="level-grid">
             <ModeCard modeKey="mode-a" displayName="自由選題" desc="自選一個單元，隨機抽10題（涵蓋四個階段）" onStart={()=>setScreen('rank-mode-a-select')}/>
             <ModeCard modeKey="full-random" displayName="隨機40題" desc="橫跨全部單元，隨機抽40題，總資料庫大挑戰" onStart={startQuizModeB}/>
           </div>
         </section>
 
-        {/* ════ 評鑒系統：模式A選單元 ════ */}
+        {/* ════ 挑戰系統：模式A選單元 ════ */}
         <section className={`screen${screen==='rank-mode-a-select'?' show':''}`}>
           <div className="topbar">
             <button className="back-btn" onClick={()=>setScreen('hub-rank-select')}>← 選模式</button>
@@ -1147,10 +1145,10 @@ export default function Home(){
           </div>
         </section>
 
-        {/* ════ 評鑒系統：評測作答 ════ */}
+        {/* ════ 挑戰系統：評測作答 ════ */}
         <section className={`screen${screen==='rank-drill'?' show':''}`}>
           <div className="topbar">
-            <div className="score-pill">📝 評鑒測驗</div>
+            <div className="score-pill">📝 挑戰測驗</div>
             <ProgressBar idx={quizIdx} total={quizQueue.length}/>
             <div className="score-pill">✅ {quizScore}</div>
           </div>
@@ -1165,7 +1163,7 @@ export default function Home(){
           )}
         </section>
 
-        {/* ════ 評鑒系統：診斷報告 ════ */}
+        {/* ════ 挑戰系統：診斷報告 ════ */}
         <section className={`screen${screen==='rank-diagnosis'?' show':''}`}>
           {(() => {
             const d = viewingRecord || diagnosis
@@ -1214,7 +1212,7 @@ export default function Home(){
                 <p className="section-title">🎉 全部答對！</p>
               )}
               <div className="actions" style={{marginTop:20}}>
-                <button className="btn btn-ghost" onClick={()=>{setViewingRecord(null);setScreen('hub-rank-select')}}>← 返回評鑒系統</button>
+                <button className="btn btn-ghost" onClick={()=>{setViewingRecord(null);setScreen('hub-rank-select')}}>← 返回挑戰系統</button>
               </div>
             </div>
             )
