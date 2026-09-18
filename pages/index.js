@@ -1003,9 +1003,9 @@ export default function Home(){
         {/* ════ 序章 ════ */}
         <section className={`screen${screen==='home'?' show':''}`}>
           <div className="hero">
-            <ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="時空穿越者" className="hero-img"/>
+            <ImgWithFallback src={UNITS['1-1'].introImg} fallback="🌀" alt="成語穿越者" className="hero-img"/>
             <div className="hero-content">
-              <h1 className="hero-title">時空穿越者</h1>
+              <h1 className="hero-title">成語穿越者</h1>
               <div className="scroll-box">
                 <p>你現在是一位穿梭在各個成語故事之中的<span className="hl">穿越者</span>。<br/>每個單元都是一段古老的<span className="hl2">典故世界</span>——<br/>請先<span className="hl">讀懂每個典故</span>，再透過反覆練習，<br/><span className="nb">證明你真的學會了！</span></p>
               </div>
