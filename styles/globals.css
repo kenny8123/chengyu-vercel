@@ -153,7 +153,9 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 .detail-row:last-child{border-bottom:none}
 .detail-row .good{color:var(--grass-dark);font-weight:700}
 .detail-row .warning{color:var(--berry-dark);font-weight:700}
-.weak-round-tip{background:#fff4e0;border:3px dashed var(--sun);border-radius:16px;padding:14px 20px;margin:4px 0 8px;font-weight:700;color:var(--choc);font-size:1.05rem;text-align:center}
+.weak-round-tip{background:#fff4e0;border:3px dashed var(--sun);border-radius:16px;padding:14px 22px;margin:4px 0 8px;font-weight:700;color:var(--choc);font-size:1.05rem;line-height:1.85;text-align:center;text-wrap:pretty;word-break:keep-all;line-break:strict}
+/* 窄螢幕讓長句可以正常斷行，避免 nowrap 撐破卡片 */
+@media (max-width:520px){.weak-round-tip .nb{white-space:normal}}
 .analysis-box{margin:24px 0;text-align:left}
 .strengths,.weaknesses{background:#fff;border-radius:12px;padding:18px 20px;margin-bottom:14px;box-shadow:0 4px 0 rgba(90,61,43,.08)}
 .strengths{border-left:5px solid var(--grass)}
@@ -266,6 +268,23 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 .portal-flash{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.85),rgba(255,255,255,0) 60%);z-index:300;pointer-events:none;animation:flashFade .5s ease-out forwards}
 @keyframes flashFade{from{opacity:1}to{opacity:0}}
 
+/* ── 慶祝彩帶 ──
+   先前缺少這段樣式，導致 burst() 產生的 div 以一般區塊元素堆在 <body> 最後，
+   在手機上會看到 emoji 沿左側直排並把頁面撐長。改為固定定位往下飄落。 */
+.confetti{
+  position:fixed;top:-10vh;z-index:9999;
+  pointer-events:none;user-select:none;line-height:1;
+  animation-name:confettiFall;animation-timing-function:linear;animation-fill-mode:forwards;
+  will-change:transform,opacity;
+}
+@keyframes confettiFall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  100%{transform:translateY(118vh) rotate(540deg);opacity:.1}
+}
+@media (prefers-reduced-motion:reduce){
+  .confetti{display:none}
+}
+
 /* ══ 評級卡片：上次成績 ══ */
 .lv-last-score{font-weight:700;color:var(--berry-dark);background:#fff0f5;padding:6px 14px;border-radius:12px;font-size:.9rem;margin-top:4px}
 
@@ -302,7 +321,7 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
 }
 .hero-content{
   position:relative;z-index:2;
-  width:min(48%,640px);
+  width:min(52%,700px);
   padding:0 clamp(14px,2.6vw,44px);
   display:flex;flex-direction:column;align-items:center;
   gap:clamp(12px,2.2vw,26px);text-align:center;
@@ -323,7 +342,13 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
   background:rgba(255,250,236,.93);
   box-shadow:0 10px 26px rgba(60,35,10,.28);
 }
-.hero .scroll-box p{font-size:clamp(.86rem,1.02vw,1.12rem);line-height:1.85}
+.hero .scroll-box p{
+  font-size:clamp(.86rem,1.02vw,1.12rem);line-height:1.9;
+  text-wrap:pretty;              /* 支援的瀏覽器會自動避免行尾落單字 */
+  word-break:keep-all;           /* 中文詞不硬拆 */
+  line-break:strict;
+}
+.nb{white-space:nowrap}          /* 短句整句不換行，避免「了！」被擠到下一行 */
 
 /* ── 單元清單 ── */
 .unit-accordion{width:100%;max-width:1600px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
