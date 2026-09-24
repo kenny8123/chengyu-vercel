@@ -172,3 +172,12 @@ burst() 會建立 class="confetti" 的 div 並設定 left / fontSize / animation
 - 對戰思考狀態列：24 → 54px，狀態列改 flex 排版、最小高度 58px
 - 結算比分卡：30 → 96px，改為圖在上、名字在下的直式排列
 要再調整，改 pages/index.js 裡各處 <BotFace size={...}/> 的數字即可。
+
+## 自由選題改版：取消選單元
+流程由「選單元 → 選階段」簡化為「**直接選階段**」。
+- buildFreeQuizQueue(round)：不分單元，從全部 40 個成語隨機抽 10 題（FREE_TOTAL），
+  全部使用玩家指定的階段
+- 移除 'rank-mode-a-select' 畫面與 modeAUnit state，
+  'rank-mode-a-round' 成為第一步，返回鍵直接回模式選單
+- 新增 RoundCard 元件，四張階段卡各自顯示該階段的最佳成績
+- 歷史記錄 key 由單元代號改為 `free-r{階段}`，四個階段分開記錄
