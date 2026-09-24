@@ -383,3 +383,53 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
   .unit-block-header{padding:14px 16px 8px}
   .unit-block-title h3{font-size:1.25rem}
 }
+
+/* ═══════════ AI對決 ═══════════ */
+.battle-scoreboard{display:flex;align-items:center;gap:10px;background:var(--cream);border-radius:999px;padding:6px 14px;box-shadow:0 4px 0 rgba(90,61,43,.12)}
+.bs-side{display:flex;align-items:center;gap:6px}
+.bs-label{font-size:.85rem;font-weight:700;color:var(--choc-soft)}
+.bs-num{font-family:'Baloo 2',cursive;font-weight:800;font-size:1.4rem;line-height:1}
+.bs-me .bs-num{color:var(--grass-dark)}
+.bs-ai .bs-num{color:var(--grape)}
+.bs-vs{font-size:.75rem;font-weight:800;color:var(--gold-dim)}
+.bs-ai.thinking .bs-label{animation:aiBlink 1s ease-in-out infinite}
+@keyframes aiBlink{0%,100%{opacity:1}50%{opacity:.35}}
+
+.battle-timer{display:flex;align-items:center;gap:12px;max-width:760px;width:100%;margin:0 auto 14px}
+.bt-bar{flex:1;height:14px;background:rgba(255,255,255,.65);border-radius:999px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(90,61,43,.18)}
+.bt-fill{height:100%;background:linear-gradient(90deg,var(--grass),var(--grass-dark));border-radius:999px;transition:width .1s linear}
+.bt-fill.urgent{background:linear-gradient(90deg,var(--berry),var(--berry-dark))}
+.bt-num{font-family:'Baloo 2',cursive;font-weight:800;font-size:1.3rem;color:var(--choc);min-width:52px;text-align:right}
+.bt-num.urgent{color:var(--berry-dark);animation:aiBlink .6s ease-in-out infinite}
+
+.battle-ai-status{text-align:center;font-weight:700;font-size:.98rem;margin:10px 0 2px;min-height:1.5em}
+.ai-thinking{color:var(--grape)}
+.ai-wrong{color:var(--grass-dark)}
+.ai-correct{color:var(--berry-dark)}
+.ai-beaten{color:var(--gold-dim)}
+
+.battle-final{display:flex;align-items:stretch;justify-content:center;gap:16px;margin:20px auto 6px;max-width:460px}
+.bf-side{flex:1;background:var(--cream);border-radius:20px;padding:16px 10px;box-shadow:0 6px 0 rgba(90,61,43,.12);border:3px solid transparent}
+.bf-side.bf-winner{border-color:var(--sun);background:#fff4e0}
+.bf-name{font-weight:700;color:var(--choc-soft);font-size:1rem;margin-bottom:4px}
+.bf-score{font-family:'Baloo 2',cursive;font-weight:800;font-size:2.6rem;color:var(--choc);line-height:1}
+.bf-vs{align-self:center;font-family:'Baloo 2',cursive;font-weight:800;color:var(--gold-dim)}
+.bf-total{font-size:.98rem;color:var(--choc-soft);margin-bottom:6px}
+.round-pick-card .lv-desc{min-height:2.6em}
+
+@media (max-width:600px){
+  .battle-scoreboard{padding:4px 10px;gap:6px}
+  .bs-num{font-size:1.15rem}
+  .bs-label{font-size:.75rem}
+  .bt-num{font-size:1.1rem;min-width:44px}
+  .bf-score{font-size:2rem}
+}
+
+/* 小鼎頭像（robot.gif） */
+.bot-face{display:inline-block;object-fit:contain;border-radius:6px}
+.bs-ai.thinking .bot-face{animation:aiBlink 1s ease-in-out infinite}
+
+/* 導覽頭像改放 robot.gif 後的尺寸修正 */
+.guide-face{display:flex;align-items:center;justify-content:center;line-height:1}
+.guide-face .bot-face{width:40px;height:40px;border-radius:50%}
+@media (max-width:600px){.guide-face .bot-face{width:32px;height:32px}}

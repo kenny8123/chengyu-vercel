@@ -465,17 +465,43 @@ const ROUND_WEIGHT={1:5,2:8,3:10,4:12}
 
 /* ═══════════════════════════════════════════
    挑戰系統：抽題邏輯
-   模式A「自由選題」：單一單元，10題，每題隨機分配1個階段(1~4)
-   模式B「隨機40題」：橫跨全部單元，40題，每題隨機單元+隨機階段
+   模式A「自由選題」：自選單元 + 自選階段，該單元10個成語全部用同一階段出題
+   模式B「AI對決」：橫跨全部單元，40題，每題隨機單元+隨機階段，與AI搶答
    佇列項目格式：{unitKey, idiomIdx, round}
    ═══════════════════════════════════════════ */
-function buildFreeQuizQueue(unitKey){
+function buildFreeQuizQueue(unitKey, round){
   const idioms = UNITS[unitKey].idioms
-  return idioms.map((_,idx)=>({
-    unitKey,
-    idiomIdx: idx,
-    round: 1+Math.floor(Math.random()*4)
-  }))
+  return shuffle(idioms.map((_,idx)=>({unitKey, idiomIdx:idx, round})))
+}
+
+/* AI對決設定 */
+/* 各階段的難度說明，選階段畫面用 */
+const ROUND_DESC = {
+  1:'挖 1 個字，最容易',
+  2:'挖 2 個字，稍微難一點',
+  3:'整句挖空，要全部記得',
+  4:'整句挖空＋干擾字，最難',
+}
+
+const BATTLE_SECONDS = 20   // 每題限時
+const BATTLE_TOTAL   = 40   // 總題數
+const BATTLE_ROUND   = 4    // 固定使用第四階段（整句挖空＋干擾字），挑戰模式只考最難的
+const AI_NAME        = '鼎鼎'   // 對手與導覽機器人是同一個角色
+
+/* AI 對手行為模型：模擬國中生的作答速度與正確率
+   階段越後面空格越多、干擾字越多，所以想得越久、也越容易錯 */
+const AI_PROFILE = {
+  1:{min:4000, max: 9000, acc:.90},
+  2:{min:6000, max:12000, acc:.82},
+  3:{min:8000, max:15000, acc:.72},
+  4:{min:9000, max:17000, acc:.62},
+}
+function rollAiTurn(round){
+  const p = AI_PROFILE[round] || AI_PROFILE[1]
+  return {
+    at: p.min + Math.random()*(p.max-p.min),   // 第幾毫秒出手
+    correct: Math.random() < p.acc,            // 這題會不會答對
+  }
 }
 
 function buildFullRandomQueue(){
@@ -485,8 +511,9 @@ function buildFullRandomQueue(){
       pool.push({unitKey, idiomIdx:idx})
     })
   })
-  const shuffled=shuffle(pool).slice(0,40)
-  return shuffled.map(item=>({...item, round:1+Math.floor(Math.random()*4)}))
+  const shuffled=shuffle(pool).slice(0,BATTLE_TOTAL)
+  // AI對決是最高難度的挑戰模式，固定使用第四階段（整句挖空＋干擾字）
+  return shuffled.map(item=>({...item, round: BATTLE_ROUND}))
 }
 
 /* 練習模式結算：依總錯誤次數給評語，並找出錯最多的階段 */
@@ -676,20 +703,30 @@ function burst(count=14){
 function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
   switch(screen){
     case 'home':
-      return '嗨，我是鼎鼎🤖！點選一個單元，展開成語清單吧！'
+      return '嗨，我是鼎鼎！點選一個單元，展開成語清單吧！'
     case 'hub-learn-detail':
       if(practiceCycleDone)return '四個階段都完成了！可以換下一個成語繼續。'
       if(practiceRound===null)return '看完典故後，點「開始練習」吧！'
       return `第 ${practiceRound} 階段：把字拖進空格吧！`
     case 'hub-rank-select':
-      return '選一個模式，開始挑戰測驗吧！'
+      return '選一個模式吧！選 AI 對決的話，對手就是我喔 ⚔️'
     case 'rank-drill':
       return `每題只有一次機會，看清楚再把字拖進空格！`
     case 'rank-diagnosis':
       return '來看看你的成績吧！'
+    case 'battle-drill':
+      return `這次換我當對手！每題 ${BATTLE_SECONDS} 秒，看誰搶得快 ⚔️`
+    case 'battle-result':
+      return '這場結束了！來看看誰搶到比較多分'
     default:
       return '跟著我一起探索成語的世界吧！'
   }
+}
+
+/* 鼎鼎頭像：public/images/robot.gif，檔案不存在時自動退回 🤖 */
+function BotFace({size=22}){
+  return <ImgWithFallback src={IMG_BASE+'robot.gif'} fallback="🤖" alt="鼎鼎"
+    className="bot-face" style={{width:size,height:size,verticalAlign:'-0.18em'}}/>
 }
 
 function Guide({tip,open,onToggle}){
@@ -702,7 +739,7 @@ function Guide({tip,open,onToggle}){
         </div>
       )}
       <button className="guide-avatar" onClick={onToggle} aria-label="打開嚮導">
-        <span className="guide-face">🤖</span>
+        <span className="guide-face"><BotFace size={40}/></span>
       </button>
     </div>
   )
@@ -734,6 +771,15 @@ export default function Home(){
   const[quizIdx,setQuizIdx]=useState(0)
   const[quizScore,setQuizScore]=useState(0)
   const[diagnosis,setDiagnosis]=useState(null) // 最新一次挑戰結果
+  const[modeAUnit,setModeAUnit]=useState(null)         // 模式A：選好的單元，等待選階段
+  const[battleScore,setBattleScore]=useState({me:0,ai:0})
+  const[battleTimeLeft,setBattleTimeLeft]=useState(BATTLE_SECONDS)
+  const[battleMsg,setBattleMsg]=useState('')
+  const[battleAiState,setBattleAiState]=useState('thinking') // thinking | correct | wrong | beaten
+  const[battleFinal,setBattleFinal]=useState(null)           // 對決結算 {me,ai,total,diag}
+  const battleRef=useRef({start:0,aiAt:0,aiCorrect:true,aiDone:false,myDone:false,resolved:false})
+  const battleAnswersRef=useRef([])
+  const battleScoreRef=useRef({me:0,ai:0})
   const[viewingRecord,setViewingRecord]=useState(null) // 從歷史記錄點進來查看的那一筆（null代表看最新測驗結果）
 
   const[placed,setPlaced]=useState({})
@@ -778,7 +824,7 @@ export default function Home(){
   },[])
 
   useEffect(()=>{
-    if(screen==='rank-drill')initQuizQ(currentQuizItem)
+    if(screen==='rank-drill'||screen==='battle-drill')initQuizQ(currentQuizItem)
   },[quizIdx,quizQueue,screen])
 
 
@@ -841,8 +887,8 @@ export default function Home(){
   }
 
   /* ── 挑戰系統 ── */
-  function startQuizModeA(unitKey){
-    const queue = buildFreeQuizQueue(unitKey)
+  function startQuizModeA(unitKey, round){
+    const queue = buildFreeQuizQueue(unitKey, round)
     setQuizMode('a')
     setQuizQueue(queue)
     setQuizIdx(0)
@@ -852,15 +898,90 @@ export default function Home(){
     setScreen('rank-drill')
   }
 
-  function startQuizModeB(){
+  /* ── AI對決 ── */
+  function startBattle(){
     const queue = buildFullRandomQueue()
-    setQuizMode('b')
+    setQuizMode('battle')
     setQuizQueue(queue)
     setQuizIdx(0)
-    setQuizScore(0)
-    quizAnswersRef.current=[]
+    battleAnswersRef.current=[]
+    battleScoreRef.current={me:0,ai:0}
+    setBattleScore({me:0,ai:0})
+    setBattleFinal(null)
+    setBattleMsg('')
     setViewingRecord(null)
-    setScreen('rank-drill')
+    setScreen('battle-drill')
+  }
+
+  /* 結束這一題：winner = 'me' | 'ai' | 'none'
+     outcome 另外記錄是被搶走、自己答錯還是超時，結算時可以分開說明 */
+  function resolveBattle(winner, outcome, item){
+    const st=battleRef.current
+    if(st.resolved)return
+    st.resolved=true
+
+    battleAnswersRef.current.push({
+      unitKey:item.unitKey, idiomIdx:item.idiomIdx, round:item.round,
+      correct: winner==='me', outcome,
+    })
+
+    if(winner==='me'){
+      battleScoreRef.current.me++
+      setBattleScore({...battleScoreRef.current})
+      setBattleAiState('beaten')
+      setBattleMsg(`✦ 搶答成功！你得 1 分`)
+      burst(10)
+      setResult('ok')
+    }else if(winner==='ai'){
+      battleScoreRef.current.ai++
+      setBattleScore({...battleScoreRef.current})
+      setBattleAiState('correct')
+      setBattleMsg(`${AI_NAME}搶先答對了，這分被拿走`)
+      setResult('err')
+    }else{
+      setBattleMsg(outcome==='timeout'?'⏰ 時間到，沒有人得分':'兩邊都答錯，沒有人得分')
+      setResult('err')
+    }
+
+    setTimeout(()=>{
+      if(quizIdx<quizQueue.length-1){
+        setQuizIdx(i=>i+1)
+      }else{
+        const diag = diagnoseQuiz(battleAnswersRef.current)
+        const final = {...battleScoreRef.current, total:battleAnswersRef.current.length, diag}
+        setBattleFinal(final)
+        setDiagnosis(diag)
+        saveHistoryRecord('ai-battle', diag)
+        setViewingRecord(null)
+        setScreen('battle-result')
+      }
+    },1700)
+  }
+
+  function checkBattleAnswer(){
+    const item = currentQuizItem
+    const st = battleRef.current
+    if(!item||st.resolved||st.myDone)return
+    const q = UNITS[item.unitKey].idioms[item.idiomIdx]
+    const blanks=drillBlanks(q,item.round)
+    const chars=q.idiom.split('')
+    let allOk=true
+    const next={...placed}
+    blanks.forEach(pos=>{const ok=next[pos]?.ch===chars[pos];next[pos]={...next[pos],correct:ok};if(!ok)allOk=false})
+    setPlaced(next)
+
+    if(allOk){
+      resolveBattle('me','win',item)
+    }else{
+      st.myDone=true
+      setResult('err')
+      if(st.aiDone){
+        // AI 也已經出手且答錯，這題沒人拿得到分
+        resolveBattle('none','both-wrong',item)
+      }else{
+        setMsg(`✗ 答錯了，看${AI_NAME}接不接得住…`)
+      }
+    }
   }
 
   function handleClickSlot(pos){
@@ -912,7 +1033,7 @@ export default function Home(){
   }
 
   function onTilePointerDown(e,tile){
-    if(tile.used||(result!==null&&screen==='rank-drill'))return
+    if(tile.used||(result!==null&&(screen==='rank-drill'||screen==='battle-drill')))return
     e.preventDefault();dragRef.current=tile
     const g=document.createElement('div');g.className='tile-ghost';g.textContent=tile.ch
     document.body.appendChild(g);ghostRef.current=g;moveGhost(e.clientX,e.clientY)
@@ -953,6 +1074,55 @@ export default function Home(){
     return ()=>clearTimeout(t)
   },[result,practiceRound,screen])
 
+  // AI對決：每題開始時擲出 AI 的出手時間與對錯，並啟動 20 秒倒數
+  useEffect(()=>{
+    if(screen!=='battle-drill')return
+    const item = currentQuizItem
+    if(!item)return
+
+    const turn = rollAiTurn(item.round)
+    battleRef.current={start:Date.now(),aiAt:turn.at,aiCorrect:turn.correct,aiDone:false,myDone:false,resolved:false}
+    setBattleTimeLeft(BATTLE_SECONDS)
+    setBattleAiState('thinking')
+    setBattleMsg('')
+
+    const tick=setInterval(()=>{
+      const st=battleRef.current
+      if(st.resolved)return
+      const el=Date.now()-st.start
+      setBattleTimeLeft(Math.max(0,(BATTLE_SECONDS*1000-el)/1000))
+
+      // AI 出手
+      if(!st.aiDone && el>=st.aiAt){
+        st.aiDone=true
+        if(st.aiCorrect){
+          resolveBattle('ai','ai-steal',item)
+          return
+        }
+        setBattleAiState('wrong')
+        setBattleMsg(`${AI_NAME}答錯了！機會是你的`)
+        if(st.myDone){ resolveBattle('none','both-wrong',item); return }
+      }
+
+      // 時間到
+      if(el>=BATTLE_SECONDS*1000){
+        resolveBattle('none','timeout',item)
+      }
+    },100)
+
+    return ()=>clearInterval(tick)
+  },[quizIdx,quizQueue,screen])
+
+  const canCheckBattle = screen==='battle-drill' && quizIdiom && currentQuizItem && result===null &&
+    Object.keys(placed).length===drillBlanks(quizIdiom,currentQuizItem.round).length
+
+  // AI對決：填滿即判定，延遲比一般測驗短，因為是搶答
+  useEffect(()=>{
+    if(!canCheckBattle)return
+    const t=setTimeout(()=>{checkBattleAnswer()},250)
+    return ()=>clearTimeout(t)
+  },[canCheckBattle])
+
   const canCheckQuiz = quizIdiom && currentQuizItem && result===null &&
     Object.keys(placed).length===drillBlanks(quizIdiom,currentQuizItem.round).length
 
@@ -980,13 +1150,13 @@ export default function Home(){
       <div className="sidebar">
         <div className="sidebar-header">🗺️ 關卡選單</div>
 
-        {screen!=='rank-drill'&&(<>
+        {screen!=='rank-drill'&&screen!=='battle-drill'&&(<>
           <div className={`sidebar-item${['home','hub-learn-detail'].includes(screen)?' active':''}`} onClick={()=>setScreen('home')}>📖 學習與練習</div>
           <div className={`sidebar-item${['hub-rank-select','rank-mode-a-select','rank-diagnosis'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 挑戰系統</div>
         </>)}
-        {screen==='rank-drill'&&(
+        {(screen==='rank-drill'||screen==='battle-drill')&&(
           <div style={{margin:'16px 12px',fontSize:'.8rem',color:'var(--gold-dim)',textAlign:'center',lineHeight:1.6}}>
-            📝 挑戰測驗進行中<br/>完成測驗後可切換其他模式
+            {screen==='battle-drill'?<>⚔️ AI對決進行中<br/>結束後可切換其他模式</>:<>📝 挑戰測驗進行中<br/>完成測驗後可切換其他模式</>}
           </div>
         )}
       </div>
@@ -1126,8 +1296,8 @@ export default function Home(){
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
           <div className="menu-head"><h2>📝 挑戰系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
           <div className="level-grid">
-            <ModeCard modeKey="mode-a" displayName="自由選題" desc="自選一個單元，隨機抽10題（涵蓋四個階段）" onStart={()=>setScreen('rank-mode-a-select')}/>
-            <ModeCard modeKey="full-random" displayName="隨機40題" desc="橫跨全部單元，隨機抽40題，總資料庫大挑戰" onStart={startQuizModeB}/>
+            <ModeCard modeKey="mode-a" displayName="自由選題" desc="自選單元、自選階段，該單元10題一次練透" onStart={()=>{setModeAUnit(null);setScreen('rank-mode-a-select')}}/>
+            <ModeCard modeKey="ai-battle" displayName="⚔️ AI對決" desc={`跟${AI_NAME}搶答${BATTLE_TOTAL}題，全部第四階段，每題${BATTLE_SECONDS}秒`} onStart={startBattle}/>
           </div>
         </section>
 
@@ -1136,12 +1306,32 @@ export default function Home(){
           <div className="topbar">
             <button className="back-btn" onClick={()=>setScreen('hub-rank-select')}>← 選模式</button>
           </div>
-          <div className="menu-head"><h2>📝 自由選題</h2><p>選擇單元，隨機抽10題測驗</p></div>
+          <div className="menu-head"><h2>📝 自由選題</h2><p>第一步：選一個單元</p></div>
           <div className="level-grid cols-4">
-            <ModeCard modeKey="1-1" displayName="單元一" desc="隨機抽10題" onStart={()=>startQuizModeA('1-1')}/>
-            <ModeCard modeKey="2-1" displayName="單元二" desc="隨機抽10題" onStart={()=>startQuizModeA('2-1')}/>
-            <ModeCard modeKey="3-1" displayName="單元三" desc="隨機抽10題" onStart={()=>startQuizModeA('3-1')}/>
-            <ModeCard modeKey="4-1" displayName="單元四" desc="隨機抽10題" onStart={()=>startQuizModeA('4-1')}/>
+            <ModeCard modeKey="1-1" displayName="單元一" desc="10 個成語" onStart={()=>{setModeAUnit('1-1');setScreen('rank-mode-a-round')}}/>
+            <ModeCard modeKey="2-1" displayName="單元二" desc="10 個成語" onStart={()=>{setModeAUnit('2-1');setScreen('rank-mode-a-round')}}/>
+            <ModeCard modeKey="3-1" displayName="單元三" desc="10 個成語" onStart={()=>{setModeAUnit('3-1');setScreen('rank-mode-a-round')}}/>
+            <ModeCard modeKey="4-1" displayName="單元四" desc="10 個成語" onStart={()=>{setModeAUnit('4-1');setScreen('rank-mode-a-round')}}/>
+          </div>
+        </section>
+
+        {/* ════ 挑戰系統：模式A選階段 ════ */}
+        <section className={`screen${screen==='rank-mode-a-round'?' show':''}`}>
+          <div className="topbar">
+            <button className="back-btn" onClick={()=>setScreen('rank-mode-a-select')}>← 選單元</button>
+          </div>
+          <div className="menu-head">
+            <h2>📝 {modeAUnit?UNITS[modeAUnit].title.split('・')[0]:''}</h2>
+            <p>第二步：自由選擇要挑戰的階段，10 題都用這個階段出題</p>
+          </div>
+          <div className="level-grid cols-4">
+            {DRILL_ROUNDS.map(r=>(
+              <div key={r.id} className="level-card open round-pick-card" onClick={()=>modeAUnit&&startQuizModeA(modeAUnit,r.id)}>
+                <span className="lv-emoji">{['🟢','🟡','🟠','🔴'][r.id-1]}</span>
+                <h3>{r.label}</h3>
+                <div className="lv-desc">{ROUND_DESC[r.id]}</div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -1161,6 +1351,106 @@ export default function Home(){
             <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{msg}</div>
           </div>
           )}
+        </section>
+
+        {/* ════ 挑戰系統：AI對決作答 ════ */}
+        <section className={`screen${screen==='battle-drill'?' show':''}`}>
+          <div className="topbar">
+            <div className="score-pill">⚔️ 第 {quizIdx+1} / {quizQueue.length} 題</div>
+            <div className="battle-scoreboard">
+              <div className="bs-side bs-me"><span className="bs-label">你</span><span className="bs-num">{battleScore.me}</span></div>
+              <span className="bs-vs">VS</span>
+              <div className={`bs-side bs-ai${battleAiState==='thinking'?' thinking':''}`}>
+                <span className="bs-label"><BotFace size={20}/> {AI_NAME}</span><span className="bs-num">{battleScore.ai}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="battle-timer">
+            <div className="bt-bar">
+              <div className={`bt-fill${battleTimeLeft<=5?' urgent':''}`} style={{width:`${(battleTimeLeft/BATTLE_SECONDS)*100}%`}}/>
+            </div>
+            <div className={`bt-num${battleTimeLeft<=5?' urgent':''}`}>{Math.ceil(battleTimeLeft)}s</div>
+          </div>
+
+          {quizIdiom&&currentQuizItem&&(
+          <div className="card">
+            <div className="level-banner">第{quizIdx+1}題・{DRILL_ROUNDS[currentQuizItem.round-1].label}</div>
+            <Scene q={quizIdiom} qIdx={currentQuizItem.idiomIdx} blankCount={drillBlanks(quizIdiom,currentQuizItem.round).length}/>
+            <IdiomRow q={quizIdiom} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(quizIdiom,currentQuizItem.round)}/>
+            <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
+            <div className={`battle-ai-status ai-${battleAiState}`}>
+              {battleAiState==='thinking'&&<><BotFace size={24}/> {AI_NAME}思考中…</>}
+              {battleAiState==='wrong'&&<><BotFace size={24}/> {AI_NAME}答錯了！</>}
+              {battleAiState==='correct'&&<><BotFace size={24}/> {AI_NAME}答對，搶走這一分</>}
+              {battleAiState==='beaten'&&<><BotFace size={24}/> {AI_NAME}來不及了！</>}
+            </div>
+            <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{battleMsg||msg}</div>
+          </div>
+          )}
+        </section>
+
+        {/* ════ 挑戰系統：AI對決結算 ════ */}
+        <section className={`screen${screen==='battle-result'?' show':''}`}>
+          {battleFinal&&(()=>{
+            const {me,ai,total,diag}=battleFinal
+            const noScore = total-me-ai
+            const win = me>ai, draw = me===ai
+            const counts = battleAnswersRef.current.reduce((a,x)=>{a[x.outcome]=(a[x.outcome]||0)+1;return a},{})
+            return(
+            <div className="card finish-inner">
+              <div className="big">{draw?'🤝':win?'🏆':'💪'}</div>
+              <h2>{draw?'平手！':win?`你贏了${AI_NAME}！`:`${AI_NAME}這次比較快`}</h2>
+
+              <div className="battle-final">
+                <div className={`bf-side${win?' bf-winner':''}`}>
+                  <div className="bf-name">你</div>
+                  <div className="bf-score">{me}</div>
+                </div>
+                <div className="bf-vs">VS</div>
+                <div className={`bf-side${!win&&!draw?' bf-winner':''}`}>
+                  <div className="bf-name"><BotFace size={30}/> {AI_NAME}</div>
+                  <div className="bf-score">{ai}</div>
+                </div>
+              </div>
+              <p className="bf-total">滿分 {total} 分・你搶到 {me} 分・{AI_NAME} 搶到 {ai} 分{noScore>0&&`・${noScore} 題雙方都沒拿到`}</p>
+
+              <div className="diagnosis-details">
+                <div className="detail-row"><span>搶答成功：</span><span className="good">{counts['win']||0} 題</span></div>
+                <div className="detail-row"><span>被 {AI_NAME} 搶先：</span><span className="warning">{counts['ai-steal']||0} 題</span></div>
+                <div className="detail-row"><span>自己答錯：</span><span className="warning">{counts['both-wrong']||0} 題</span></div>
+                <div className="detail-row"><span>時間到沒答完：</span><span className="warning">{counts['timeout']||0} 題</span></div>
+              </div>
+
+              <p className="weak-round-tip">
+                📌 <span className="nb">挑戰模式全部採用「{DRILL_ROUNDS[BATTLE_ROUND-1].label}」，</span>
+                <span className="nb">是整句挖空加干擾字的最高難度。</span>
+              </p>
+
+              {(diag.topWrong||[]).length>0&&(<>
+                <p className="section-title">這些成語沒搶到，點一下回去複習典故</p>
+                <div className="free-idiom-grid">
+                  {diag.topWrong.map((w,i)=>{
+                    const it=w.idiom
+                    if(!it)return null
+                    return(
+                      <div className="free-idiom-card" key={i} onClick={()=>reviewWrongIdiom(w.unitKey,w.idiomIdx)}>
+                        <div className="free-idiom-emoji">{it.emoji}</div>
+                        <div className="free-idiom-name">{it.idiom}</div>
+                        <div className="free-idiom-tag">待複習</div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>)}
+
+              <div className="actions">
+                <button className="btn btn-ghost" onClick={()=>setScreen('hub-rank-select')}>← 返回挑戰系統</button>
+                <button className="btn btn-go" onClick={startBattle}>⚔️ 再戰一次</button>
+              </div>
+            </div>
+            )
+          })()}
         </section>
 
         {/* ════ 挑戰系統：診斷報告 ════ */}
