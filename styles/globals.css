@@ -425,11 +425,18 @@ body{font-family:'Noto Sans TC',sans-serif;color:var(--choc);
   .bf-score{font-size:2rem}
 }
 
-/* 小鼎頭像（robot.gif） */
-.bot-face{display:inline-block;object-fit:contain;border-radius:6px}
+/* 鼎鼎頭像（robot.gif）
+   圖本身是 512x512、有米色底與外框的方形插畫，
+   所以用圓角方形而非圓形裁切，避免切掉四個角的裝飾 */
+.bot-face{display:inline-block;object-fit:cover;border-radius:14px;box-shadow:0 3px 8px rgba(90,61,43,.18)}
 .bs-ai.thinking .bot-face{animation:aiBlink 1s ease-in-out infinite}
 
-/* 導覽頭像改放 robot.gif 後的尺寸修正 */
-.guide-face{display:flex;align-items:center;justify-content:center;line-height:1}
-.guide-face .bot-face{width:40px;height:40px;border-radius:50%}
-@media (max-width:600px){.guide-face .bot-face{width:32px;height:32px}}
+/* 導覽頭像：原本是圓形漸層底 + emoji，改放插畫後取消漸層底 */
+.guide-avatar{width:72px;height:72px;border-radius:20px;background:transparent;border:3px solid #fff;padding:0;overflow:hidden}
+.guide-face{display:flex;align-items:center;justify-content:center;line-height:1;width:100%;height:100%}
+.guide-face .bot-face{width:100%;height:100%;border-radius:0;box-shadow:none}
+@media (max-width:600px){.guide-avatar{width:56px;height:56px;border-radius:16px}}
+
+/* 對戰狀態列與結算比分卡：頭像放大後要重新排版 */
+.battle-ai-status{display:flex;align-items:center;justify-content:center;gap:10px;min-height:58px}
+.bf-name{display:flex;flex-direction:column;align-items:center;gap:6px}

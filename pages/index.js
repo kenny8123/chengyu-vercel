@@ -726,7 +726,7 @@ function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
 /* 鼎鼎頭像：public/images/robot.gif，檔案不存在時自動退回 🤖 */
 function BotFace({size=22}){
   return <ImgWithFallback src={IMG_BASE+'robot.gif'} fallback="🤖" alt="鼎鼎"
-    className="bot-face" style={{width:size,height:size,verticalAlign:'-0.18em'}}/>
+    className="bot-face" style={{width:size,height:size,verticalAlign:'middle'}}/>
 }
 
 function Guide({tip,open,onToggle}){
@@ -739,7 +739,7 @@ function Guide({tip,open,onToggle}){
         </div>
       )}
       <button className="guide-avatar" onClick={onToggle} aria-label="打開嚮導">
-        <span className="guide-face"><BotFace size={40}/></span>
+        <span className="guide-face"><BotFace size={64}/></span>
       </button>
     </div>
   )
@@ -1361,7 +1361,7 @@ export default function Home(){
               <div className="bs-side bs-me"><span className="bs-label">你</span><span className="bs-num">{battleScore.me}</span></div>
               <span className="bs-vs">VS</span>
               <div className={`bs-side bs-ai${battleAiState==='thinking'?' thinking':''}`}>
-                <span className="bs-label"><BotFace size={20}/> {AI_NAME}</span><span className="bs-num">{battleScore.ai}</span>
+                <span className="bs-label"><BotFace size={40}/> {AI_NAME}</span><span className="bs-num">{battleScore.ai}</span>
               </div>
             </div>
           </div>
@@ -1380,10 +1380,10 @@ export default function Home(){
             <IdiomRow q={quizIdiom} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(quizIdiom,currentQuizItem.round)}/>
             <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
             <div className={`battle-ai-status ai-${battleAiState}`}>
-              {battleAiState==='thinking'&&<><BotFace size={24}/> {AI_NAME}思考中…</>}
-              {battleAiState==='wrong'&&<><BotFace size={24}/> {AI_NAME}答錯了！</>}
-              {battleAiState==='correct'&&<><BotFace size={24}/> {AI_NAME}答對，搶走這一分</>}
-              {battleAiState==='beaten'&&<><BotFace size={24}/> {AI_NAME}來不及了！</>}
+              {battleAiState==='thinking'&&<><BotFace size={54}/> {AI_NAME}思考中…</>}
+              {battleAiState==='wrong'&&<><BotFace size={54}/> {AI_NAME}答錯了！</>}
+              {battleAiState==='correct'&&<><BotFace size={54}/> {AI_NAME}答對，搶走這一分</>}
+              {battleAiState==='beaten'&&<><BotFace size={54}/> {AI_NAME}來不及了！</>}
             </div>
             <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{battleMsg||msg}</div>
           </div>
@@ -1409,7 +1409,7 @@ export default function Home(){
                 </div>
                 <div className="bf-vs">VS</div>
                 <div className={`bf-side${!win&&!draw?' bf-winner':''}`}>
-                  <div className="bf-name"><BotFace size={30}/> {AI_NAME}</div>
+                  <div className="bf-name"><BotFace size={96}/><br/>{AI_NAME}</div>
                   <div className="bf-score">{ai}</div>
                 </div>
               </div>
