@@ -1,3 +1,4 @@
+import {Guide, TextScaleControl} from '../components/GameControls'
 import Head from 'next/head'
 import { useState, useEffect, useRef, useCallback } from 'react'
 
@@ -469,15 +470,9 @@ const ROUND_WEIGHT={1:5,2:8,3:10,4:12}
    模式B「AI對決」：橫跨全部單元，40題，每題隨機單元+隨機階段，與AI搶答
    佇列項目格式：{unitKey, idiomIdx, round}
    ═══════════════════════════════════════════ */
-const FREE_TOTAL = 10   // 自由選題的題數
-
-function buildFreeQuizQueue(round){
-  // 不分單元，從全部 40 個成語裡隨機抽 10 題，階段由玩家指定
-  const pool=[]
-  Object.keys(UNITS).forEach(unitKey=>{
-    UNITS[unitKey].idioms.forEach((_,idx)=>{ pool.push({unitKey, idiomIdx:idx}) })
-  })
-  return shuffle(pool).slice(0,FREE_TOTAL).map(item=>({...item, round}))
+function buildFreeQuizQueue(unitKey, round){
+  const idioms = UNITS[unitKey].idioms
+  return shuffle(idioms.map((_,idx)=>({unitKey, idiomIdx:idx, round})))
 }
 
 /* AI對決設定 */
@@ -716,8 +711,6 @@ function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
       return `第 ${practiceRound} 階段：把字拖進空格吧！`
     case 'hub-rank-select':
       return '選一個模式吧！選 AI 對決的話，對手就是我喔 ⚔️'
-    case 'rank-mode-a-round':
-      return '選一個階段吧！同一個階段連練 10 題最有感'
     case 'rank-drill':
       return `每題只有一次機會，看清楚再把字拖進空格！`
     case 'rank-diagnosis':
@@ -737,53 +730,11 @@ function BotFace({size=22}){
     className="bot-face" style={{width:size,height:size,verticalAlign:'middle'}}/>
 }
 
-/* 自由選題的階段卡：各階段分開記最佳成績 */
-function RoundCard({round,onStart}){
-  const[best,setBest]=useState(null)
-  useEffect(()=>{ setBest(getBestScore(`free-r${round.id}`)) },[round.id])
-  return(
-    <div className="level-card open round-pick-card" onClick={onStart}>
-      <span className="lv-emoji">{['🟢','🟡','🟠','🔴'][round.id-1]}</span>
-      <h3>{round.label}</h3>
-      <div className="lv-desc">{ROUND_DESC[round.id]}</div>
-      {best
-        ? <div className="lv-last-score">🏆 最佳成績：{best.totalScore} 分</div>
-        : <div className="lv-desc">尚未挑戰過</div>}
-    </div>
-  )
-}
-
-function Guide({tip,open,onToggle}){
-  return(
-    <div className="guide-wrap">
-      {open&&(
-        <div className="guide-bubble">
-          <button className="guide-close" onClick={onToggle} aria-label="收起嚮導">×</button>
-          <p>{tip}</p>
-        </div>
-      )}
-      <button className="guide-avatar" onClick={onToggle} aria-label="打開嚮導">
-        <span className="guide-face"><BotFace size={64}/></span>
-      </button>
-    </div>
-  )
-}
-
-function TextScaleControl({scale,onChange}){
-  return(
-    <div className="text-scale-ctrl">
-      <span className="ts-label">Aa</span>
-      <button className={scale==='sm'?'active':''} onClick={()=>onChange('sm')}>小</button>
-      <button className={scale==='md'?'active':''} onClick={()=>onChange('md')}>中</button>
-      <button className={scale==='lg'?'active':''} onClick={()=>onChange('lg')}>大</button>
-    </div>
-  )
-}
-
 export default function Home(){
   // screen: home / hub-learn-detail /
-  //         hub-rank-select / rank-mode-a-round / rank-drill / rank-diagnosis / battle-drill / battle-result
+  //         hub-rank-select / rank-mode-a-select / rank-drill / rank-diagnosis
   const[screen,setScreen]=useState('home')
+  useEffect(()=>{if(new URLSearchParams(window.location.search).get('view')==='challenge')setScreen('hub-rank-select')},[])
   const[unit,setUnit]=useState('1-1')
   const[selectedIdiomIdx,setSelectedIdiomIdx]=useState(null) // 學習模式：選中的成語
   const[practiceRound,setPracticeRound]=useState(null)       // 學習模式：選中的練習階段(1-4)
@@ -795,6 +746,7 @@ export default function Home(){
   const[quizIdx,setQuizIdx]=useState(0)
   const[quizScore,setQuizScore]=useState(0)
   const[diagnosis,setDiagnosis]=useState(null) // 最新一次挑戰結果
+  const[modeAUnit,setModeAUnit]=useState(null)         // 模式A：選好的單元，等待選階段
   const[battleScore,setBattleScore]=useState({me:0,ai:0})
   const[battleTimeLeft,setBattleTimeLeft]=useState(BATTLE_SECONDS)
   const[battleMsg,setBattleMsg]=useState('')
@@ -910,8 +862,8 @@ export default function Home(){
   }
 
   /* ── 挑戰系統 ── */
-  function startQuizModeA(round){
-    const queue = buildFreeQuizQueue(round)
+  function startQuizModeA(unitKey, round){
+    const queue = buildFreeQuizQueue(unitKey, round)
     setQuizMode('a')
     setQuizQueue(queue)
     setQuizIdx(0)
@@ -1045,7 +997,7 @@ export default function Home(){
       if(quizIdx<quizQueue.length-1){
         setQuizIdx(i=>i+1)
       }else{
-        const key = quizMode==='a' ? `free-r${item.round}` : 'full-random'
+        const key = quizMode==='a' ? item.unitKey : 'full-random'
         const res = diagnoseQuiz(quizAnswersRef.current)
         setDiagnosis(res)
         saveHistoryRecord(key, res)
@@ -1175,7 +1127,7 @@ export default function Home(){
 
         {screen!=='rank-drill'&&screen!=='battle-drill'&&(<>
           <div className={`sidebar-item${['home','hub-learn-detail'].includes(screen)?' active':''}`} onClick={()=>setScreen('home')}>📖 學習與練習</div>
-          <div className={`sidebar-item${['hub-rank-select','rank-mode-a-round','rank-diagnosis','battle-result'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 挑戰系統</div>
+          <div className={`sidebar-item${['hub-rank-select','rank-mode-a-select','rank-diagnosis'].includes(screen)?' active':''}`} onClick={()=>setScreen('hub-rank-select')}>📝 挑戰系統</div>
         </>)}
         {(screen==='rank-drill'||screen==='battle-drill')&&(
           <div style={{margin:'16px 12px',fontSize:'.8rem',color:'var(--gold-dim)',textAlign:'center',lineHeight:1.6}}>
@@ -1319,23 +1271,42 @@ export default function Home(){
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
           <div className="menu-head"><h2>📝 挑戰系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
           <div className="level-grid">
-            <ModeCard modeKey="mode-a" displayName="自由選題" desc={`自選階段，從全部成語隨機抽 ${FREE_TOTAL} 題`} onStart={()=>setScreen('rank-mode-a-round')}/>
+            <ModeCard modeKey="video" displayName="🎬 影片答題" desc="40 抽 10，不重複。每題先看約 30 秒影片，再比較成語作答；完成後查看知識點與錯誤解析。" onStart={()=>{window.location.href="/video-challenge"}}/>
+            <ModeCard modeKey="mode-a" displayName="自由選題" desc="自選單元、自選階段，該單元10題一次練透" onStart={()=>{setModeAUnit(null);setScreen('rank-mode-a-select')}}/>
             <ModeCard modeKey="ai-battle" displayName="⚔️ AI對決" desc={`跟${AI_NAME}搶答${BATTLE_TOTAL}題，全部第四階段，每題${BATTLE_SECONDS}秒`} onStart={startBattle}/>
+          </div>
+        </section>
+
+        {/* ════ 挑戰系統：模式A選單元 ════ */}
+        <section className={`screen${screen==='rank-mode-a-select'?' show':''}`}>
+          <div className="topbar">
+            <button className="back-btn" onClick={()=>setScreen('hub-rank-select')}>← 選模式</button>
+          </div>
+          <div className="menu-head"><h2>📝 自由選題</h2><p>第一步：選一個單元</p></div>
+          <div className="level-grid cols-4">
+            <ModeCard modeKey="1-1" displayName="單元一" desc="10 個成語" onStart={()=>{setModeAUnit('1-1');setScreen('rank-mode-a-round')}}/>
+            <ModeCard modeKey="2-1" displayName="單元二" desc="10 個成語" onStart={()=>{setModeAUnit('2-1');setScreen('rank-mode-a-round')}}/>
+            <ModeCard modeKey="3-1" displayName="單元三" desc="10 個成語" onStart={()=>{setModeAUnit('3-1');setScreen('rank-mode-a-round')}}/>
+            <ModeCard modeKey="4-1" displayName="單元四" desc="10 個成語" onStart={()=>{setModeAUnit('4-1');setScreen('rank-mode-a-round')}}/>
           </div>
         </section>
 
         {/* ════ 挑戰系統：模式A選階段 ════ */}
         <section className={`screen${screen==='rank-mode-a-round'?' show':''}`}>
           <div className="topbar">
-            <button className="back-btn" onClick={()=>setScreen('hub-rank-select')}>← 選模式</button>
+            <button className="back-btn" onClick={()=>setScreen('rank-mode-a-select')}>← 選單元</button>
           </div>
           <div className="menu-head">
-            <h2>📝 自由選題</h2>
-            <p>選一個階段，從全部成語裡隨機抽 {FREE_TOTAL} 題</p>
+            <h2>📝 {modeAUnit?UNITS[modeAUnit].title.split('・')[0]:''}</h2>
+            <p>第二步：自由選擇要挑戰的階段，10 題都用這個階段出題</p>
           </div>
           <div className="level-grid cols-4">
             {DRILL_ROUNDS.map(r=>(
-              <RoundCard key={r.id} round={r} onStart={()=>startQuizModeA(r.id)}/>
+              <div key={r.id} className="level-card open round-pick-card" onClick={()=>modeAUnit&&startQuizModeA(modeAUnit,r.id)}>
+                <span className="lv-emoji">{['🟢','🟡','🟠','🔴'][r.id-1]}</span>
+                <h3>{r.label}</h3>
+                <div className="lv-desc">{ROUND_DESC[r.id]}</div>
+              </div>
             ))}
           </div>
         </section>
