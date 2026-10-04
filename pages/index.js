@@ -498,10 +498,8 @@ const AI_PROFILE = {
 }
 function rollAiTurn(round){
   const p = AI_PROFILE[round] || AI_PROFILE[1]
-  return {
-    at: p.min + Math.random()*(p.max-p.min),   // 第幾毫秒出手
-    correct: Math.random() < p.acc,            // 這題會不會答對
-  }
+  const seconds = 11 + Math.floor(Math.random()*8)
+  return {seconds,at:seconds*1000,correct:Math.random()<p.acc}
 }
 
 function buildFullRandomQueue(){
@@ -759,6 +757,7 @@ export default function Home(){
   const[diagnosis,setDiagnosis]=useState(null) // 最新一次挑戰結果
   const[battleScore,setBattleScore]=useState({me:0,ai:0})
   const[battleTimeLeft,setBattleTimeLeft]=useState(BATTLE_SECONDS)
+  const[battleAiSeconds,setBattleAiSeconds]=useState(0)
   const[battleMsg,setBattleMsg]=useState('')
   const[battleAiState,setBattleAiState]=useState('thinking') // thinking | correct | wrong | beaten
   const[battleFinal,setBattleFinal]=useState(null)           // 對決結算 {me,ai,total,diag}
@@ -940,7 +939,7 @@ export default function Home(){
         setViewingRecord(null)
         setScreen('battle-result')
       }
-    },1700)
+    },winner==='none'?0:1700)
   }
 
   function checkBattleAnswer(){
@@ -1067,6 +1066,7 @@ export default function Home(){
     if(!item)return
 
     const turn = rollAiTurn(item.round)
+    setBattleAiSeconds(turn.seconds)
     battleRef.current={start:Date.now(),aiAt:turn.at,aiCorrect:turn.correct,aiDone:false,myDone:false,resolved:false}
     setBattleTimeLeft(BATTLE_SECONDS)
     setBattleAiState('thinking')
@@ -1092,7 +1092,7 @@ export default function Home(){
 
       // 時間到
       if(el>=BATTLE_SECONDS*1000){
-        resolveBattle('none','timeout',item)
+        resolveBattle('none',st.myDone&&st.aiDone?'both-wrong':'timeout',item)
       }
     },100)
 
@@ -1284,7 +1284,7 @@ export default function Home(){
           <div className="level-grid">
             <ModeCard modeKey="video" displayName="🎬 影片答題" desc="40 抽 10，不重複。每題先看約 30 秒影片，再比較成語作答；完成後查看知識點與錯誤解析。" onStart={()=>{window.location.href="/video-challenge"}}/>
             <ModeCard modeKey="mode-a" displayName="自由選題" desc="只選階段，從全部 40 個成語隨機抽 10 題" onStart={()=>setScreen('rank-mode-a-round')}/>
-            <ModeCard modeKey="ai-battle" displayName="⚔️ AI對決" desc={`跟${AI_NAME}搶答${BATTLE_TOTAL}題，全部第四階段，每題${BATTLE_SECONDS}秒`} onStart={startBattle}/>
+            <ModeCard modeKey="ai-battle" displayName="⚔️ AI對決" desc={`跟${AI_NAME}搶答${BATTLE_TOTAL}題，全部第四階段，每題${BATTLE_SECONDS}秒，AI 隨機在 11–18 秒作答`} onStart={startBattle}/>
           </div>
         </section>
 
@@ -1323,23 +1323,16 @@ export default function Home(){
         </section>
 
         {/* ════ 挑戰系統：AI對決作答 ════ */}
-        <section className={`screen${screen==='battle-drill'?' show':''}`}>
-          <div className="topbar">
-            <div className="score-pill">⚔️ 第 {quizIdx+1} / {quizQueue.length} 題</div>
-            <div className="battle-scoreboard">
-              <div className="bs-side bs-me"><span className="bs-label">你</span><span className="bs-num">{battleScore.me}</span></div>
-              <span className="bs-vs">VS</span>
-              <div className={`bs-side bs-ai${battleAiState==='thinking'?' thinking':''}`}>
-                <span className="bs-label"><BotFace size={40}/> {AI_NAME}</span><span className="bs-num">{battleScore.ai}</span>
-              </div>
+        <section className={`screen battle-arena${screen==='battle-drill'?' show':''}`}>
+          <div className="battle-hud">
+            <div className="battle-clock-row">
+              <div className="battle-ai-clock"><strong>AI 回答進度 <span className="ai-progress-seconds">{Math.min(battleAiSeconds,Math.floor(BATTLE_SECONDS-battleTimeLeft))} / {battleAiSeconds} 秒</span></strong><div className="ai-answer-track" role="progressbar" aria-label="AI 回答進度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1,(BATTLE_SECONDS-battleTimeLeft)/Math.max(1,battleAiSeconds))*100)}><div className="ai-answer-fill" style={{width:`${Math.min(100,(BATTLE_SECONDS-battleTimeLeft)/Math.max(1,battleAiSeconds)*100)}%`}}/></div><small>{battleAiState==='thinking'?'思考中，讀條完成後作答':battleAiState==='wrong'?'AI 已作答，答案錯誤':battleAiState==='correct'?'AI 已作答，答案正確':'你已搶先答對'}</small></div>
             </div>
-          </div>
-
-          <div className="battle-timer">
-            <div className="bt-bar">
-              <div className={`bt-fill${battleTimeLeft<=5?' urgent':''}`} style={{width:`${(battleTimeLeft/BATTLE_SECONDS)*100}%`}}/>
+            <div className="battle-players">
+              <div className="battle-player"><strong className="battle-points">{battleScore.me}<small> 分</small></strong><span className="player-avatar" aria-hidden="true">🧑‍🚀</span><b>你</b><span>{result==='ok'?'搶答成功':battleRef.current.myDone?'本題已作答':'準備搶答'}</span></div>
+              <div className="battle-player"><strong className="battle-points">{battleScore.ai}<small> 分</small></strong><BotFace size={68}/><b>AI {AI_NAME}</b><span>{battleAiState==='thinking'?'思考中…':battleAiState==='wrong'?'答錯了':battleAiState==='correct'?'答對了':'你搶先答對'}</span></div>
             </div>
-            <div className={`bt-num${battleTimeLeft<=5?' urgent':''}`}>{Math.ceil(battleTimeLeft)}s</div>
+            <div className="battle-round-caption">⚔️ 第 {quizIdx+1} / {quizQueue.length} 題</div>
           </div>
 
           {quizIdiom&&currentQuizItem&&(
@@ -1348,12 +1341,6 @@ export default function Home(){
             <Scene q={quizIdiom} qIdx={currentQuizItem.idiomIdx} blankCount={drillBlanks(quizIdiom,currentQuizItem.round).length}/>
             <IdiomRow q={quizIdiom} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(quizIdiom,currentQuizItem.round)}/>
             <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
-            <div className={`battle-ai-status ai-${battleAiState}`}>
-              {battleAiState==='thinking'&&<><BotFace size={54}/> {AI_NAME}思考中…</>}
-              {battleAiState==='wrong'&&<><BotFace size={54}/> {AI_NAME}答錯了！</>}
-              {battleAiState==='correct'&&<><BotFace size={54}/> {AI_NAME}答對，搶走這一分</>}
-              {battleAiState==='beaten'&&<><BotFace size={54}/> {AI_NAME}來不及了！</>}
-            </div>
             <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{battleMsg||msg}</div>
           </div>
           )}
