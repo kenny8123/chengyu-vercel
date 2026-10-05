@@ -1,4 +1,4 @@
-import {Guide, TextScaleControl} from '../components/GameControls'
+import {Guide, TextScaleControl, BotFace} from '../components/GameControls'
 import Head from 'next/head'
 import { useState, useEffect, useRef, useCallback } from 'react'
 
@@ -733,12 +733,6 @@ function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
   }
 }
 
-/* 鼎鼎頭像：public/images/robot.gif，檔案不存在時自動退回 🤖 */
-function BotFace({size=22}){
-  return <ImgWithFallback src={IMG_BASE+'robot.gif'} fallback="🤖" alt="鼎鼎"
-    className="bot-face" style={{width:size,height:size,verticalAlign:'middle'}}/>
-}
-
 export default function Home(){
   // screen: home / hub-learn-detail /
   //         hub-rank-select / rank-mode-a-select / rank-drill / rank-diagnosis
@@ -1152,7 +1146,7 @@ export default function Home(){
       {portalFlash&&<div className="portal-flash"/>}
 
       <TextScaleControl scale={textScale} onChange={setTextScale}/>
-      <Guide tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(o=>!o)}/>
+      <Guide mood={screen==='battle-result'?'celebrate':screen==='battle-drill'?({thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]||'idle'):screen==='rank-diagnosis'||practiceCycleDone?'celebrate':result==='ok'?'happy':result==='err'?'sad':screen==='rank-drill'||(screen==='hub-learn-detail'&&practiceRound)?'thinking':'idle'} tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(o=>!o)}/>
 
       <div className={`wrap text-scale-${textScale}`}>
 
@@ -1330,7 +1324,7 @@ export default function Home(){
             </div>
             <div className="battle-players">
               <div className="battle-player"><strong className="battle-points">{battleScore.me}<small> 分</small></strong><span className="player-avatar" aria-hidden="true">🧑‍🚀</span><b>你</b><span>{result==='ok'?'搶答成功':battleRef.current.myDone?'本題已作答':'準備搶答'}</span></div>
-              <div className="battle-player"><strong className="battle-points">{battleScore.ai}<small> 分</small></strong><BotFace size={68}/><b>AI {AI_NAME}</b><span>{battleAiState==='thinking'?'思考中…':battleAiState==='wrong'?'答錯了':battleAiState==='correct'?'答對了':'你搶先答對'}</span></div>
+              <div className="battle-player"><strong className="battle-points">{battleScore.ai}<small> 分</small></strong><BotFace size={68} mood={{thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]}/><b>AI {AI_NAME}</b><span>{battleAiState==='thinking'?'思考中…':battleAiState==='wrong'?'答錯了':battleAiState==='correct'?'答對了':'你搶先答對'}</span></div>
             </div>
             <div className="battle-round-caption">⚔️ 第 {quizIdx+1} / {quizQueue.length} 題</div>
           </div>
@@ -1365,7 +1359,7 @@ export default function Home(){
                 </div>
                 <div className="bf-vs">VS</div>
                 <div className={`bf-side${!win&&!draw?' bf-winner':''}`}>
-                  <div className="bf-name"><BotFace size={96}/><br/>{AI_NAME}</div>
+                  <div className="bf-name"><BotFace size={96} mood={win?'sad':draw?'happy':'celebrate'}/><br/>{AI_NAME}</div>
                   <div className="bf-score">{ai}</div>
                 </div>
               </div>

@@ -1,9 +1,11 @@
 import {useState} from 'react'
-function BotFace({size=64}){
+export function BotFace({size=64,mood='idle'}){
  const [failed,setFailed]=useState(false)
- return failed ? <span aria-label="鼎鼎">🤖</span> : <img src="/images/robot.gif" alt="鼎鼎" className="bot-face" style={{width:size,height:size,verticalAlign:'middle'}} onError={()=>setFailed(true)}/>
+ const safeMood=['idle','thinking','happy','sad','celebrate'].includes(mood)?mood:'idle'
+ const labels={idle:'待機',thinking:'思考',happy:'開心',sad:'再接再厲',celebrate:'慶祝'}
+ return failed ? <span aria-label="鼎鼎">🤖</span> : <picture className="dingding-picture"><source media="(prefers-reduced-motion: reduce)" srcSet={`/images/dingding-pixel/${safeMood}.png`}/><img src={`/images/dingding-pixel/${safeMood}.gif`} alt={`鼎鼎・${labels[safeMood]}`} className="bot-face pixel-dingding" data-mood={safeMood} style={{width:size,height:size,verticalAlign:'middle',imageRendering:'pixelated',objectFit:'contain'}} onError={()=>setFailed(true)}/></picture>
 }
-export function Guide({tip,open,onToggle}){
+export function Guide({tip,open,onToggle,mood='idle'}){
   return(
     <div className="guide-wrap">
       {open&&(
@@ -13,7 +15,7 @@ export function Guide({tip,open,onToggle}){
         </div>
       )}
       <button className="guide-avatar" onClick={onToggle} aria-label="打開嚮導">
-        <span className="guide-face"><BotFace size={64}/></span>
+        <span className="guide-face"><BotFace size={80} mood={mood}/></span>
       </button>
     </div>
   )

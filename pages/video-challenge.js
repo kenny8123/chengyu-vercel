@@ -38,7 +38,7 @@ export default function VideoChallenge(){
   </aside>
   <div className="cloud c1"/><div className="cloud c2"/><div className="cloud c3"/>
   <TextScaleControl scale={textScale} onChange={setTextScale}/>
-  <Guide tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(v=>!v)}/>
+  <Guide mood={finished?(score>=6?'celebrate':'sad'):playing?'thinking':'idle'} tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(v=>!v)}/>
   <main className={`wrap video-wrap text-scale-${textScale}`}>
    <section className="screen show">
     {!playing&&<div className="topbar"><a className="back-btn" href="/?view=challenge">← 選模式</a></div>}
