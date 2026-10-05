@@ -1,4 +1,4 @@
-import {Guide, TextScaleControl, BotFace} from '../components/GameControls'
+import {Guide, TextScaleControl, BotFace, PlayerFace} from '../components/GameControls'
 import Head from 'next/head'
 import { useState, useEffect, useRef, useCallback } from 'react'
 
@@ -1323,7 +1323,7 @@ export default function Home(){
               <div className="battle-ai-clock"><strong>AI 回答進度 <span className="ai-progress-seconds">{Math.min(battleAiSeconds,Math.floor(BATTLE_SECONDS-battleTimeLeft))} / {battleAiSeconds} 秒</span></strong><div className="ai-answer-track" role="progressbar" aria-label="AI 回答進度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1,(BATTLE_SECONDS-battleTimeLeft)/Math.max(1,battleAiSeconds))*100)}><div className="ai-answer-fill" style={{width:`${Math.min(100,(BATTLE_SECONDS-battleTimeLeft)/Math.max(1,battleAiSeconds)*100)}%`}}/></div><small>{battleAiState==='thinking'?'思考中，讀條完成後作答':battleAiState==='wrong'?'AI 已作答，答案錯誤':battleAiState==='correct'?'AI 已作答，答案正確':'你已搶先答對'}</small></div>
             </div>
             <div className="battle-players">
-              <div className="battle-player"><strong className="battle-points">{battleScore.me}<small> 分</small></strong><span className="player-avatar" aria-hidden="true">🧑‍🚀</span><b>你</b><span>{result==='ok'?'搶答成功':battleRef.current.myDone?'本題已作答':'準備搶答'}</span></div>
+              <div className="battle-player"><strong className="battle-points">{battleScore.me}<small> 分</small></strong><PlayerFace size={68} mood={result==='ok'?'happy':battleRef.current.myDone?'sad':battleAiState==='thinking'?'thinking':'idle'}/><b>你</b><span>{result==='ok'?'搶答成功':battleRef.current.myDone?'本題已作答':'準備搶答'}</span></div>
               <div className="battle-player"><strong className="battle-points">{battleScore.ai}<small> 分</small></strong><BotFace size={68} mood={{thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]}/><b>AI {AI_NAME}</b><span>{battleAiState==='thinking'?'思考中…':battleAiState==='wrong'?'答錯了':battleAiState==='correct'?'答對了':'你搶先答對'}</span></div>
             </div>
             <div className="battle-round-caption">⚔️ 第 {quizIdx+1} / {quizQueue.length} 題</div>
@@ -1354,7 +1354,7 @@ export default function Home(){
 
               <div className="battle-final">
                 <div className={`bf-side${win?' bf-winner':''}`}>
-                  <div className="bf-name">你</div>
+                  <div className="bf-name"><PlayerFace size={96} mood={win?'celebrate':draw?'happy':'sad'}/><br/>你</div>
                   <div className="bf-score">{me}</div>
                 </div>
                 <div className="bf-vs">VS</div>
