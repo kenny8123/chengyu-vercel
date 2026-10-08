@@ -21,14 +21,26 @@ export function applyLearning(profile,event,now=Date.now()){
   if(correct&&stage)l.stages[stage]=true
   if(correct&&!stage)l.challengeCorrect++
  }
- const day=new Date(now).toLocaleDateString('en-CA'),key=`${day}:${idiom}:${kind}:${stage||0}:${correct===true}`
- if(!p.rewards[key]){p.xp+=kind==='read'?5:correct?10:2;p.food=(p.food||0)+(correct?2:1);p.rewards[key]=true}
  p.history=[{...event,at:now},...p.history].slice(0,200)
- p.rewards=Object.fromEntries(Object.entries(p.rewards).filter(([k])=>k.startsWith(day+':')))
  if(!p.outfit&&unlocked(l))p.outfit=idiom
  return p
 }
 export function recordLearning(event){const x=readPet();x.profiles[x.active]=applyLearning(x.profiles[x.active],event);return savePet(x)}
+export function startRewardRun(mode){return {id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,mode,profileId:readPet().active}}
+export function applyCompletion(profile,run,answers){
+ const total={practice:4,free:10,video:10,battle:40}[run?.mode]
+ if(!run?.id||!total||answers.length!==total||answers.some(a=>typeof a.correct!=='boolean')||profile.completedRuns?.[run.id])return null
+ const xp=answers.reduce((n,a)=>n+(a.correct?10:2),0),food=answers.reduce((n,a)=>n+(a.correct?2:1),0)
+ return {profile:{...profile,xp:(profile.xp||0)+xp,food:(profile.food||0)+food,completedRuns:{...profile.completedRuns,[run.id]:true}},xp,food}
+}
+export function completeRewardRun(run,answers){
+ const x=readPet()
+ if(!run||x.active!==run.profileId)return null
+ const result=applyCompletion(x.profiles[x.active],run,answers)
+ if(!result)return null
+ x.profiles[x.active]=result.profile
+ return savePet(x)?{xp:result.xp,food:result.food}:null
+}
 export function makeProfile(name){const x=readPet(),id=`student-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;x.profiles[id]={name:name.trim().slice(0,24),...fresh()};x.active=id;return savePet(x)}
 export function switchProfile(id){const x=readPet();if(x.profiles[id]){x.active=id;return savePet(x)}}
 export function wearOutfit(id){const x=readPet(),p=x.profiles[x.active];if(id===null||unlocked(p.lessons[id])){p.outfit=id;return savePet(x)}return false}

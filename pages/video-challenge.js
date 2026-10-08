@@ -1,4 +1,5 @@
-import {recordLearning} from '../components/petMemory'
+import CompletionReward from '../components/CompletionReward'
+import {recordLearning,startRewardRun,completeRewardRun} from '../components/petMemory'
 import Head from 'next/head'
 import {useEffect,useRef,useState} from 'react'
 import {Guide,TextScaleControl} from '../components/GameControls'
@@ -11,7 +12,8 @@ export default function VideoChallenge(){
  const [round,setRound]=useState(null),[index,setIndex]=useState(0),[answers,setAnswers]=useState([])
  const [choice,setChoice]=useState(null),[watched,setWatched]=useState(false),[finished,setFinished]=useState(false)
  const [videoError,setVideoError]=useState(false),[guideOpen,setGuideOpen]=useState(false),[textScale,setTextScale]=useState('md')
- const video=useRef(null),furthest=useRef(0)
+ const video=useRef(null),furthest=useRef(0),rewardRun=useRef(null),submitted=useRef(-1)
+ const [completionReward,setCompletionReward]=useState(null)
  useEffect(()=>{fetch('/video-lessons.json').then(r=>{if(!r.ok)throw Error();return r.json()}).then(setLessons).catch(()=>setError('教材載入失敗，請重新整理頁面。'))},[])
  useEffect(()=>{if(lessons.length===40)start()},[lessons])
  const current=round?.[index],playing=!!round&&!finished
@@ -19,15 +21,17 @@ export default function VideoChallenge(){
  const guideTip=finished?'比較每個選項的意思，找出適合的情境，再試著用成語造句。':playing?'先看完影片，再比較四個選項。留意成語的意思與用法，不用背人名或年代！':'從 40 個成語隨機抽出 10 題。看故事、找線索，再挑戰你的成語判斷力！'
  function start(){
   if(lessons.length!==40)return
+  rewardRun.current=startRewardRun('video');setCompletionReward(null);submitted.current=-1
   setRound(shuffle(lessons).slice(0,10).map(item=>({item,options:shuffle([item,...COMPARISONS[item.id-1].map(id=>lessons.find(x=>x.id===id))])})))
   setIndex(0);setAnswers([]);setChoice(null);setWatched(false);setFinished(false);setVideoError(false);setGuideOpen(false);furthest.current=0
  }
  function submit(){
-  if(!watched||choice===null)return
+  if(!watched||choice===null||finished||submitted.current===index)return
+  submitted.current=index
   recordLearning({idiom:current.item.idiom,kind:'read'})
   recordLearning({idiom:current.item.idiom,kind:'answer',correct:choice===current.item.id})
   setAnswers([...answers,{...current,choice}])
-  if(index===9){setFinished(true);setGuideOpen(true)}
+  if(index===9){setCompletionReward(completeRewardRun(rewardRun.current,[...answers,{...current,choice}].map(a=>({correct:a.choice===a.item.id}))));setFinished(true);setGuideOpen(true)}
   else{setIndex(index+1);setChoice(null);setWatched(false);setVideoError(false);furthest.current=0}
  }
  return <>
@@ -72,6 +76,7 @@ export default function VideoChallenge(){
      </div>
     </>}
     {finished&&<>
+     <CompletionReward reward={completionReward}/>
      <div className="menu-head"><h2>🎉 挑戰完成！</h2><p>看看哪些成語學會了，哪些還可以再練習</p></div>
      <div className="card results-card"><div className="level-banner">影片答題・學習回饋</div><h3 className="result-score">{score*10}<span> 分</span></h3><p>答對 {score} / 10 題</p><p>{score===10?'全部答對！試著選一個成語造句，活用在生活裡。':`有 ${10-score} 個成語值得再練習。比較選項的意思，找出判斷關鍵。`}</p><div className="actions"><button className="btn btn-go" onClick={start}>再隨機挑戰 10 題</button><a className="btn btn-ghost" href="/?view=challenge">返回挑戰系統</a></div></div>
      {answers.map((a,n)=>{const correct=a.choice===a.item.id,selected=lessons.find(x=>x.id===a.choice);return <article key={a.item.id} className={`card review ${correct?'correct':'incorrect'}`}>

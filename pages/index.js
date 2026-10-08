@@ -1,4 +1,5 @@
-import {recordLearning} from '../components/petMemory'
+import CompletionReward from '../components/CompletionReward'
+import {recordLearning,startRewardRun,completeRewardRun} from '../components/petMemory'
 import {Guide, TextScaleControl, BotFace, PlayerFace} from '../components/GameControls'
 import Head from 'next/head'
 import { useState, useEffect, useRef, useCallback } from 'react'
@@ -738,6 +739,7 @@ export default function Home(){
   // screen: home / hub-learn-detail /
   //         hub-rank-select / rank-mode-a-select / rank-drill / rank-diagnosis
   const[screen,setScreen]=useState('home')
+  const rewardRun=useRef(null),[completionReward,setCompletionReward]=useState(null)
   useEffect(()=>{if(new URLSearchParams(window.location.search).get('view')==='challenge')setScreen('hub-rank-select')},[])
   const[unit,setUnit]=useState('1-1')
   const[selectedIdiomIdx,setSelectedIdiomIdx]=useState(null) // 學習模式：選中的成語
@@ -818,6 +820,7 @@ export default function Home(){
   /* ── 學習與練習模式 ── */
   function openIdiom(unitKey,idx){ setUnit(unitKey); setSelectedIdiomIdx(idx); setPracticeRound(null); setPracticeCycleDone(false); setPracticeMistakes({1:0,2:0,3:0,4:0}); setScreen('hub-learn-detail') }
   function startPracticeCycle(){
+    rewardRun.current=startRewardRun('practice');setCompletionReward(null)
     setPracticeRound(1)
     setPracticeCycleDone(false)
     setPracticeMistakes({1:0,2:0,3:0,4:0})
@@ -856,6 +859,7 @@ export default function Home(){
       setTiles(drillTiles(IDIOMS[selectedIdiomIdx],nr))
     }else{
       // 四個階段都完成，留在原地顯示完成訊息，不自動跳轉
+      setCompletionReward(completeRewardRun(rewardRun.current,[1,2,3,4].map(()=>({correct:true}))))
       setPracticeCycleDone(true)
     }
   }
@@ -876,6 +880,7 @@ export default function Home(){
 
   /* ── 挑戰系統 ── */
   function startQuizModeA(round){
+    rewardRun.current=startRewardRun('free');setCompletionReward(null)
     const queue = buildFreeQuizQueue(round)
     setQuizMode('a')
     setQuizQueue(queue)
@@ -888,6 +893,7 @@ export default function Home(){
 
   /* ── AI對決 ── */
   function startBattle(){
+    rewardRun.current=startRewardRun('battle');setCompletionReward(null)
     const queue = buildFullRandomQueue()
     setQuizMode('battle')
     setQuizQueue(queue)
@@ -942,6 +948,7 @@ export default function Home(){
         setDiagnosis(diag)
         saveHistoryRecord('ai-battle', diag)
         setViewingRecord(null)
+        setCompletionReward(completeRewardRun(rewardRun.current,battleAnswersRef.current))
         setScreen('battle-result')
       }
     },winner==='none'?0:1700)
@@ -1019,6 +1026,7 @@ export default function Home(){
         saveHistoryRecord(key, res)
         if(quizMode==='a')saveHistoryRecord(`mode-a-round-${item.round}`,res)
         setViewingRecord(null)
+        setCompletionReward(completeRewardRun(rewardRun.current,quizAnswersRef.current))
         setScreen('rank-diagnosis')
       }
     },1400)
@@ -1162,6 +1170,7 @@ export default function Home(){
       <Guide quiet={screen==='rank-drill'||screen==='battle-drill'} feedback={screen==='rank-diagnosis'||screen==='battle-result'||practiceCycleDone} mood={screen==='battle-result'?'celebrate':screen==='battle-drill'?({thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]||'idle'):screen==='rank-diagnosis'||practiceCycleDone?'celebrate':result==='ok'?'happy':result==='err'?'sad':screen==='rank-drill'||(screen==='hub-learn-detail'&&practiceRound)?'thinking':'idle'} tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(o=>!o)}/>
 
       <div className={`wrap text-scale-${textScale}`}>
+        {((screen==='hub-learn-detail'&&practiceCycleDone)||screen==='battle-result'||(screen==='rank-diagnosis'&&!viewingRecord))&&<CompletionReward reward={completionReward}/>}
 
         {/* ════ 序章 ════ */}
         <section className={`screen${screen==='home'?' show':''}`}>
