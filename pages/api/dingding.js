@@ -22,5 +22,9 @@ export default async function handler(req,res){
   const data=await response.json(),text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n')
   if(!text)return res.status(502).json({error:'這次沒有收到文字回覆，請再試一次。'})
   return res.status(200).json({text})
- }catch{return res.status(504).json({error:'鼎鼎連線逾時，請稍後再試。'})}
+ }catch(e){
+  const code=e.cause?.code||e.code
+  if(['SELF_SIGNED_CERT_IN_CHAIN','DEPTH_ZERO_SELF_SIGNED_CERT','UNABLE_TO_VERIFY_LEAF_SIGNATURE'].includes(code))return res.status(502).json({error:'伺服器的 HTTPS 憑證未受信任。請使用新版啟動指令 npm run start，再重新連線。',code:'TLS_TRUST'})
+  return res.status(504).json({error:e.name==='TimeoutError'?'Claude 回覆逾時，請稍後再試。':'無法連線至 Claude，請檢查伺服器網路。',code:'CONNECTION_FAILED'})
+ }
 }
