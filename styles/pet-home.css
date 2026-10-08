@@ -62,3 +62,19 @@
 .dd-send{width:66px;font-size:16px;font-weight:700;background:#d95380}
 .dd-chat-reward{font-size:14px;padding:7px 12px}
 @media(max-width:700px){.dd-home{grid-template-rows:88px minmax(150px,1fr) clamp(330px,43dvh,420px);gap:12px;min-height:630px;padding:8px 10px 14px}.dd-title h1{font-size:19px}.dd-console{grid-template-rows:78px minmax(0,1fr);gap:12px}.dd-actions{gap:6px}.dd-actions .dd-key{min-height:34px;font-size:12px}.dd-conversation{padding:14px 16px;grid-template-rows:minmax(0,1fr) 48px;gap:10px;border-radius:26px}.dd-speech p{font-size:16px;line-height:1.75}.dd-speech strong{font-size:15px}.dd-conversation form{height:48px}.dd-conversation input{font-size:16px;padding:10px}.dd-send{width:54px}.dd-resident{width:clamp(95px,20vh,150px);max-height:75%}.dd-room-label{padding:5px 9px}.dd-room{border-radius:26px}}
+/* Readable type throughout the pet home, including secondary labels. */
+.dd-home{grid-template-rows:100px minmax(160px,1fr) clamp(360px,43dvh,480px);min-height:720px}
+.dd-header{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:48px 44px;gap:8px 16px}.dd-title{justify-content:center}.dd-title h1{font-size:32px}.dd-header>.dd-key{font-size:20px;min-height:44px}.dd-help-trigger{margin:0}
+.dd-stats{grid-column:1/-1;justify-content:center;gap:26px;margin:0;font-size:20px}.dd-stats>span:first-child{max-width:none;gap:10px}.dd-growth-title,.dd-next-level{font-size:16px}.dd-stats progress{width:80px;height:10px}
+.dd-key,.dd-actions .dd-key{font-size:20px;min-height:50px}.dd-actions .dd-key{max-width:none;gap:8px}.dd-actions .dd-key small{font-size:16px}.dd-key>span{font-size:24px}.dd-console{grid-template-rows:56px minmax(0,1fr)}
+.dd-room-label{font-size:16px}.dd-floor-label{font-size:16px}.dd-speech strong{font-size:22px}.dd-speech strong span{font-size:17px}.dd-speech p{font-size:24px;line-height:1.7}.dd-conversation input{font-size:21px}.dd-send{font-size:20px;width:80px}.dd-chat-reward{font-size:18px}.dd-speech [role=alert] small{font-size:18px}
+.dd-closet h2{font-size:28px}.dd-closet h3{font-size:23px}.dd-closet p,.dd-help p,.dd-help dl{font-size:18px;line-height:1.8}.dd-outfit strong{font-size:19px}.dd-outfit small{font-size:15px}.dd-help dl{grid-template-columns:160px 1fr}
+@media(max-width:1100px) and (min-width:701px){.dd-actions .dd-key{flex-wrap:wrap;column-gap:6px;row-gap:0;padding:5px 8px}.dd-actions .dd-key small{flex-basis:100%}.dd-console{grid-template-rows:74px minmax(0,1fr)}.dd-stats{gap:16px;font-size:18px}}
+@media(max-width:700px){
+ .dd-home{grid-template-rows:140px minmax(130px,1fr) clamp(390px,47dvh,470px);min-height:710px;gap:10px}
+ .dd-header{grid-template-rows:44px 86px;gap:8px}.dd-title h1{font-size:24px}.dd-header>.dd-key{font-size:16px;padding:6px 10px}.dd-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;font-size:17px;text-align:center}.dd-stats>span:first-child{grid-column:1/-1;justify-content:center;flex-wrap:wrap;gap:5px 8px}.dd-growth-title,.dd-next-level{font-size:14px}.dd-stats progress{width:60px}.dd-next-level{flex-basis:100%}.dd-console{grid-template-rows:110px minmax(0,1fr);gap:12px}
+ .dd-actions .dd-key{font-size:17px;min-height:52px;gap:2px 5px;padding:5px 7px}.dd-actions .dd-key>span{font-size:20px}.dd-actions .dd-key small{font-size:14px;flex-basis:100%}.dd-room-label,.dd-floor-label{font-size:14px}.dd-room-label{max-width:calc(100% - 20px)}.dd-floor-label{left:8px;bottom:8px}
+ .dd-speech strong{font-size:20px}.dd-speech strong span{font-size:15px}.dd-speech p{font-size:20px;line-height:1.65}.dd-conversation input{font-size:18px}.dd-send{font-size:18px;width:62px}.dd-chat-reward,.dd-speech [role=alert] small{font-size:16px}.dd-help dl{grid-template-columns:1fr}.dd-closet h2{font-size:24px}.dd-outfit strong{font-size:18px}
+}
+
+.dd-actions .dd-key{line-height:1.2}.dd-actions .dd-key small{line-height:1.2}@media(max-width:700px){.dd-console{grid-template-rows:122px minmax(0,1fr)}.dd-actions{row-gap:8px}}
