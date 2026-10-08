@@ -1,3 +1,4 @@
+import {recordLearning} from '../components/petMemory'
 import {Guide, TextScaleControl, BotFace, PlayerFace} from '../components/GameControls'
 import Head from 'next/head'
 import { useState, useEffect, useRef, useCallback } from 'react'
@@ -806,6 +807,14 @@ export default function Home(){
   },[quizIdx,quizQueue,screen])
 
 
+  useEffect(()=>{
+    if(screen!=='hub-learn-detail'||practiceRound||selectedIdiomIdx===null)return
+    let timer
+    const schedule=()=>{clearTimeout(timer);if(!document.hidden)timer=setTimeout(()=>recordLearning({idiom:IDIOMS[selectedIdiomIdx].idiom,kind:'read'}),20000)}
+    schedule();document.addEventListener('visibilitychange',schedule)
+    return()=>{clearTimeout(timer);document.removeEventListener('visibilitychange',schedule)}
+  },[screen,practiceRound,selectedIdiomIdx,unit])
+
   /* ── 學習與練習模式 ── */
   function openIdiom(unitKey,idx){ setUnit(unitKey); setSelectedIdiomIdx(idx); setPracticeRound(null); setPracticeCycleDone(false); setPracticeMistakes({1:0,2:0,3:0,4:0}); setScreen('hub-learn-detail') }
   function startPracticeCycle(){
@@ -823,6 +832,7 @@ export default function Home(){
     const next={...placed}
     blanks.forEach(pos=>{const ok=next[pos]?.ch===chars[pos];next[pos]={...next[pos],correct:ok};if(!ok)allOk=false})
     setPlaced(next)
+    recordLearning({idiom:q.idiom,kind:'answer',correct:allOk,stage:practiceRound})
     if(allOk){
       setResult('ok');setMsg(`✦ 答對了！「${q.idiom}」`);burst(10)
     }else{
@@ -898,6 +908,7 @@ export default function Home(){
     if(st.resolved)return
     st.resolved=true
 
+    if(winner==='me')recordLearning({idiom:UNITS[item.unitKey].idioms[item.idiomIdx].idiom,kind:'answer',correct:true})
     battleAnswersRef.current.push({
       unitKey:item.unitKey, idiomIdx:item.idiomIdx, round:item.round,
       correct: winner==='me', outcome,
@@ -951,6 +962,7 @@ export default function Home(){
     if(allOk){
       resolveBattle('me','win',item)
     }else{
+      recordLearning({idiom:q.idiom,kind:'answer',correct:false})
       st.myDone=true
       setResult('err')
       if(st.aiDone){
@@ -989,6 +1001,7 @@ export default function Home(){
     const next={...placed}
     blanks.forEach(pos=>{const ok=next[pos]?.ch===chars[pos];next[pos]={...next[pos],correct:ok};if(!ok)allOk=false})
     setPlaced(next)
+    recordLearning({idiom:q.idiom,kind:'answer',correct:allOk})
     quizAnswersRef.current.push({unitKey:item.unitKey,idiomIdx:item.idiomIdx,round:item.round,correct:allOk})
     if(allOk){
       setQuizScore(s=>s+1)
@@ -1146,7 +1159,7 @@ export default function Home(){
       {portalFlash&&<div className="portal-flash"/>}
 
       <TextScaleControl scale={textScale} onChange={setTextScale}/>
-      <Guide mood={screen==='battle-result'?'celebrate':screen==='battle-drill'?({thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]||'idle'):screen==='rank-diagnosis'||practiceCycleDone?'celebrate':result==='ok'?'happy':result==='err'?'sad':screen==='rank-drill'||(screen==='hub-learn-detail'&&practiceRound)?'thinking':'idle'} tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(o=>!o)}/>
+      <Guide quiet={screen==='rank-drill'||screen==='battle-drill'} feedback={screen==='rank-diagnosis'||screen==='battle-result'||practiceCycleDone} mood={screen==='battle-result'?'celebrate':screen==='battle-drill'?({thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]||'idle'):screen==='rank-diagnosis'||practiceCycleDone?'celebrate':result==='ok'?'happy':result==='err'?'sad':screen==='rank-drill'||(screen==='hub-learn-detail'&&practiceRound)?'thinking':'idle'} tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(o=>!o)}/>
 
       <div className={`wrap text-scale-${textScale}`}>
 
@@ -1276,6 +1289,7 @@ export default function Home(){
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
           <div className="menu-head"><h2>📝 挑戰系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
           <div className="level-grid">
+            <ModeCard modeKey="pet" displayName="🌱 鼎鼎的家" desc="學習就是養分，累積經驗、回顧記憶，解鎖 40 套典故造型" onStart={()=>{window.location.href="/pet"}}/>
             <ModeCard modeKey="video" displayName="🎬 影片答題" desc="40 抽 10，不重複。每題先看約 30 秒影片，再比較成語作答；完成後查看知識點與錯誤解析。" onStart={()=>{window.location.href="/video-challenge"}}/>
             <ModeCard modeKey="mode-a" displayName="自由選題" desc="只選階段，從全部 40 個成語隨機抽 10 題" onStart={()=>setScreen('rank-mode-a-round')}/>
             <ModeCard modeKey="ai-battle" displayName="⚔️ AI對決" desc={`跟${AI_NAME}搶答${BATTLE_TOTAL}題，全部第四階段，每題${BATTLE_SECONDS}秒，AI 隨機在 11–18 秒作答`} onStart={startBattle}/>
