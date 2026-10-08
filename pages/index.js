@@ -676,11 +676,11 @@ function ModeCard({modeKey,displayName,desc,onStart}){
     <div className="level-card open" onClick={onStart}>
       <span className="lv-emoji">📝</span><h3>{displayName}</h3>
       <div className="lv-desc">{desc}</div>
-      {best?(
+      {modeKey!=='pet'&&(best?(
         <div className="lv-last-score">🏆 最佳成績：{best.totalScore} 分</div>
       ):(
         <div className="lv-desc">尚未測驗過</div>
-      )}
+      ))}
       <span className="lv-tag ready">▶ 開始</span>
     </div>
   )
