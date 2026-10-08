@@ -1167,7 +1167,7 @@ export default function Home(){
       {portalFlash&&<div className="portal-flash"/>}
 
       <TextScaleControl scale={textScale} onChange={setTextScale}/>
-      <Guide quiet={screen==='rank-drill'||screen==='battle-drill'} feedback={screen==='rank-diagnosis'||screen==='battle-result'||practiceCycleDone} mood={screen==='battle-result'?'celebrate':screen==='battle-drill'?({thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]||'idle'):screen==='rank-diagnosis'||practiceCycleDone?'celebrate':result==='ok'?'happy':result==='err'?'sad':screen==='rank-drill'||(screen==='hub-learn-detail'&&practiceRound)?'thinking':'idle'} tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(o=>!o)}/>
+      {['home','hub-rank-select','rank-mode-a-round'].includes(screen)&&<Guide quiet={screen==='rank-drill'||screen==='battle-drill'} feedback={screen==='rank-diagnosis'||screen==='battle-result'||practiceCycleDone} mood={screen==='battle-result'?'celebrate':screen==='battle-drill'?({thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]||'idle'):screen==='rank-diagnosis'||practiceCycleDone?'celebrate':result==='ok'?'happy':result==='err'?'sad':screen==='rank-drill'||(screen==='hub-learn-detail'&&practiceRound)?'thinking':'idle'} tip={guideTip} open={guideOpen} onToggle={()=>setGuideOpen(o=>!o)}/>}
 
       <div className={`wrap text-scale-${textScale}`}>
         {((screen==='hub-learn-detail'&&practiceCycleDone)||screen==='battle-result'||(screen==='rank-diagnosis'&&!viewingRecord))&&<CompletionReward reward={completionReward}/>}
@@ -1343,11 +1343,12 @@ export default function Home(){
         <section className={`screen battle-arena${screen==='battle-drill'?' show':''}`}>
           <div className="battle-hud">
             <div className="battle-clock-row">
-              <div className="battle-ai-clock"><strong>AI 回答進度 <span className="ai-progress-seconds">{Math.min(battleAiSeconds,Math.floor(BATTLE_SECONDS-battleTimeLeft))} / {battleAiSeconds} 秒</span></strong><div className="ai-answer-track" role="progressbar" aria-label="AI 回答進度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1,(BATTLE_SECONDS-battleTimeLeft)/Math.max(1,battleAiSeconds))*100)}><div className="ai-answer-fill" style={{width:`${Math.min(100,(BATTLE_SECONDS-battleTimeLeft)/Math.max(1,battleAiSeconds)*100)}%`}}/></div><small>{battleAiState==='thinking'?'思考中，讀條完成後作答':battleAiState==='wrong'?'AI 已作答，答案錯誤':battleAiState==='correct'?'AI 已作答，答案正確':'你已搶先答對'}</small></div>
+              <div className="battle-ai-clock"><strong>AI 回答進度 <span className="ai-progress-seconds">{Math.min(battleAiSeconds,Math.floor(BATTLE_SECONDS-battleTimeLeft))} / {battleAiSeconds} 秒</span></strong><div className="ai-answer-track" role="progressbar" aria-label="AI 回答進度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1,(BATTLE_SECONDS-battleTimeLeft)/Math.max(1,battleAiSeconds))*100)}><div className="ai-answer-fill" style={{width:`${Math.min(100,(BATTLE_SECONDS-battleTimeLeft)/Math.max(1,battleAiSeconds)*100)}%`}}/></div></div>
             </div>
             <div className="battle-players">
               <div className="battle-player"><strong className="battle-points">{battleScore.me}<small> 分</small></strong><PlayerFace size={68} mood={result==='ok'?'happy':battleRef.current.myDone?'sad':battleAiState==='thinking'?'thinking':'idle'}/><b>你</b><span>{result==='ok'?'搶答成功':battleRef.current.myDone?'本題已作答':'準備搶答'}</span></div>
-              <div className="battle-player"><strong className="battle-points">{battleScore.ai}<small> 分</small></strong><BotFace size={68} mood={{thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]}/><b>AI {AI_NAME}</b><span>{battleAiState==='thinking'?'思考中…':battleAiState==='wrong'?'答錯了':battleAiState==='correct'?'答對了':'你搶先答對'}</span></div>
+              <div className="battle-verdict" role="status" aria-live="polite">{battleMsg||msg||(battleAiState==='thinking'?'鼎鼎思考中…':battleAiState==='wrong'?'鼎鼎答錯了，換你試試！':battleAiState==='correct'?'鼎鼎答對了！':'你搶先答對！')}</div>
+              <div className="battle-player"><strong className="battle-points">{battleScore.ai}<small> 分</small></strong><BotFace size={68} mood={{thinking:'thinking',wrong:'sad',correct:'happy',beaten:'sad'}[battleAiState]}/><b>AI {AI_NAME}</b></div>
             </div>
             <div className="battle-round-caption">⚔️ 第 {quizIdx+1} / {quizQueue.length} 題</div>
           </div>
@@ -1358,7 +1359,7 @@ export default function Home(){
             <Scene q={quizIdiom} qIdx={currentQuizItem.idiomIdx} blankCount={drillBlanks(quizIdiom,currentQuizItem.round).length}/>
             <IdiomRow q={quizIdiom} placed={placed} onClickSlot={handleClickSlot} blanksOverride={drillBlanks(quizIdiom,currentQuizItem.round)}/>
             <div className="bank">{tiles.map(tile=>(<div key={tile.tid} className={`tile${tile.used?' used':''}`} onPointerDown={e=>onTilePointerDown(e,tile)}>{tile.ch}</div>))}</div>
-            <div className={`result${result==='ok'?' result-success':result==='err'?' result-error':''}`}>{battleMsg||msg}</div>
+            
           </div>
           )}
         </section>
