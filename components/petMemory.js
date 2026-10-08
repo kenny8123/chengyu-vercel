@@ -48,7 +48,7 @@ export function careForPet(action){
  const x=readPet(),p=x.profiles[x.active],day=new Date().toLocaleDateString('en-CA')
  if(!['feed','pat','rest'].includes(action))return '請選擇一個陪伴方式。'
  if(action==='feed'){
-  if(!(p.food>0))return '點心吃完了，我們一起學個典故，再帶點心回家吧。'
+  if(!(p.food>0))return '典故點心吃完了，完成一輪練習或挑戰，或答對典故切磋，就能帶點心回家。'
   p.food--;p.bond=(p.bond||0)+5
  }else{
   if(p.care?.day!==day)p.care={day,pat:0,rest:0}
@@ -57,6 +57,14 @@ export function careForPet(action){
  }
  if(!savePet(x))return '這次未能儲存，請確認瀏覽器允許儲存資料。'
  return action==='feed'?'好好吃！你的學習變成我的養分了。親密度 +5。':action==='pat'?'收到你的摸摸了！一起學習很開心。親密度 +2。':'一起歇一會兒吧，休息後再出發。親密度 +2。'
+}
+export function rewardStoryAnswer(idiom,profileId){
+ const x=readPet();if(x.active!==profileId)return null
+ const p=x.profiles[x.active],day=new Date().toLocaleDateString('en-CA'),key=day+':'+idiom
+ if(p.storyRewards?.[key])return {bond:0,food:0}
+ p.storyRewards=Object.fromEntries(Object.entries(p.storyRewards||{}).filter(([k])=>k.startsWith(day+':')))
+ p.storyRewards[key]=true;p.bond=(p.bond||0)+3;p.food=(p.food||0)+1
+ return savePet(x)?{bond:3,food:1}:null
 }
 const shuffled=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
 export function nextReminder(profile,catalog,focusRecent=false){

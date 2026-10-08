@@ -19,8 +19,10 @@ export async function readClaudeStream(body,onText){
    buffer+=decoder.decode(value,{stream:!done})
    let match
    while((match=/\r?\n\r?\n/.exec(buffer))){consume(buffer.slice(0,match.index).replace(/\r\n/g,'\n'));buffer=buffer.slice(match.index+match[0].length)}
+   if(complete)break
    if(done)break
   }
+  if(buffer.trim()&&!complete)consume(buffer.replace(/\r\n/g,'\n'))
   if(!complete||!text)throw Error('回覆尚未完成，請再試一次。')
   return text
  }finally{await reader.cancel().catch(()=>{});reader.releaseLock()}
