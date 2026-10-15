@@ -134,3 +134,22 @@
  .dd-actions .dd-key{min-height:48px;font-size:19px}.dd-conversation{grid-template-rows:minmax(125px,1fr) 52px;padding:16px 22px;gap:10px}.dd-conversation form{height:52px}
 }
 @media(min-width:701px) and (max-width:900px){.dd-console{grid-template-rows:68px minmax(220px,1fr)}}
+
+/* Quiet scenery, expressive companion, concise learning guide. */
+.dd-room-art{opacity:.65;object-position:center!important}
+.dd-action-bubble{position:absolute;z-index:4;top:8%;left:50%;transform:translateX(-50%);max-width:calc(100% - 32px);width:max-content;background:#fffdf6;border:2px solid #d9c8a7;border-radius:22px;padding:12px 22px;font-size:clamp(16px,1.5vw,22px);font-weight:700;color:#654c38;text-align:center;box-shadow:0 5px 0 #dacdaf55}
+.dd-action-bubble:after{content:'';position:absolute;bottom:-10px;left:calc(50% - 8px);width:16px;height:16px;background:#fffdf6;border-right:2px solid #d9c8a7;border-bottom:2px solid #d9c8a7;transform:rotate(45deg)}
+.dd-home .dd-resident,.dd-home .dd-resident.dd-sleep{left:50%;bottom:3%;width:40%;height:68%;max-height:340px;transform:translateX(-50%);animation:dd-breathe 3s ease-in-out infinite}
+.dd-home .dd-resident>img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 8px #586b5226)}
+.dd-home .dd-room-hotspot,.dd-home .dd-room:has(.dd-sleep) .dd-room-hotspot{left:35%;bottom:3%;width:30%;height:65%}
+.dd-action-symbol{position:absolute;bottom:30%;left:55%;font-size:clamp(24px,4vw,48px);filter:drop-shadow(0 2px 2px #fff)}
+.dd-shy .dd-action-symbol{color:#ed729a}.dd-sleep .dd-action-symbol{bottom:65%;font-size:28px;color:#8269b0}
+.dd-help-table{overflow-x:auto}.dd-help table{width:100%;border-collapse:collapse;font-size:17px;line-height:1.6}.dd-help th,.dd-help td{padding:12px 10px;text-align:left;border-bottom:1px solid #dfd2b8}.dd-help th{background:#e8f2df;color:#4e6647}.dd-help li{margin:9px 0;line-height:1.65}.dd-help ul,.dd-help ol{padding-left:26px}.dd-help section{margin:22px 0}
+@keyframes dd-breathe{0%,100%{translate:0 0}50%{translate:0 -5px}}
+@media(max-width:700px){.dd-action-bubble{top:4%;font-size:15px;padding:7px 12px}.dd-home .dd-resident,.dd-home .dd-resident.dd-sleep{height:62%;width:48%}.dd-help table{font-size:15px}.dd-help th,.dd-help td{padding:9px 7px}}
+@media(prefers-reduced-motion:reduce){.dd-home .dd-resident{animation:none}}
+
+.dd-home .dd-resident,.dd-home .dd-resident.dd-sleep{width:55%;height:76%;max-height:390px;bottom:1%}
+.dd-home .dd-room-hotspot,.dd-home .dd-room:has(.dd-sleep) .dd-room-hotspot{left:30%;width:40%;height:74%;bottom:1%}
+.dd-action-bubble{top:3%;padding:8px 20px}
+@media(max-width:700px){.dd-home .dd-resident,.dd-home .dd-resident.dd-sleep{width:62%;height:70%;bottom:0}.dd-action-bubble{font-size:14px}}

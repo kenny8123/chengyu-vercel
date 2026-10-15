@@ -1,4 +1,3 @@
-import usePetRoam from './usePetRoam'
 import {useState,useEffect} from 'react'
 import usePet from './usePet'
 import CATALOG from './petCatalog.json'
@@ -21,9 +20,8 @@ export function PetLook({size=80,mood='idle',outfit=null}){
 }
 export function Guide({tip,open,onToggle,mood='idle',quiet=false}){
  const store=usePet(),p=store?.profiles[store.active],[paused,setPaused]=useState(false),[hover,setHover]=useState(false)
- const position=usePetRoam(quiet,paused||hover)
- return <aside className={`guide-wrap pet-roaming ${quiet?'pet-quiet':''} ${paused?'pet-paused':''}`} aria-label="鼎鼎陪伴區" style={{visibility:position?.hidden||!position?'hidden':'visible',transition:position?.jump?'none':undefined,left:position?.x??'auto',top:position?.y??110,right:position? 'auto':8,bottom:'auto'}} onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)} onFocus={()=>setHover(true)} onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget))setHover(false)}}>
- <a className="guide-avatar" href={quiet?undefined:'/pet'} aria-label={quiet?'鼎鼎安靜陪考':'回鼎鼎的家'} tabIndex={quiet?-1:0}><span className="guide-face"><PetLook size={64} mood={quiet?'idle':mood} outfit={quiet?null:p?.outfit}/></span></a>
+ return <aside className={`guide-wrap pet-roaming ${quiet?'pet-quiet':''} ${paused?'pet-paused':''}`} aria-label="鼎鼎陪伴區" style={{position:'fixed',left:'auto',top:'auto',right:'max(16px, env(safe-area-inset-right))',bottom:'max(16px, env(safe-area-inset-bottom))',visibility:'visible',transition:'none'}} onMouseEnter={()=>setHover(true)} onMouseLeave={()=>setHover(false)} onFocus={()=>setHover(true)} onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget))setHover(false)}}>
+ <a className="guide-avatar" href={quiet?undefined:'/pet'} aria-label={quiet?'鼎鼎安靜陪考':'回寵物的家'} tabIndex={quiet?-1:0}><span className="guide-face"><PetLook size={64} mood={quiet?'idle':mood} outfit={quiet?null:p?.outfit}/></span></a>
  <span className="pet-level">{quiet?'安靜陪考':`Lv. ${Math.floor((p?.xp||0)/100)+1} · 鼎鼎`}</span>
  {!quiet&&<button className="pet-pause" onClick={()=>setPaused(v=>!v)} aria-pressed={paused}>{paused?'繼續散步':'原地陪伴'}</button>}
  </aside>

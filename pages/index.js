@@ -1298,7 +1298,7 @@ export default function Home(){
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
           <div className="menu-head"><h2>📝 挑戰系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
           <div className="level-grid">
-            <ModeCard modeKey="pet" displayName="🌱 鼎鼎的家" desc="學習就是養分，累積經驗、回顧記憶，解鎖 40 套典故造型" onStart={()=>{window.location.href="/pet"}}/>
+            <ModeCard modeKey="pet" displayName="🌱 寵物的家" desc="學習就是養分，累積經驗、回顧記憶，解鎖 40 套典故造型" onStart={()=>{window.location.href="/pet"}}/>
             <ModeCard modeKey="video" displayName="🎬 影片答題" desc="40 抽 10，不重複。每題先看約 30 秒影片，再比較成語作答；完成後查看知識點與錯誤解析。" onStart={()=>{window.location.href="/video-challenge"}}/>
             <ModeCard modeKey="mode-a" displayName="隨機選題" desc="只選階段，從全部 40 個成語隨機抽 10 題" onStart={()=>setScreen('rank-mode-a-round')}/>
             <ModeCard modeKey="ai-battle" displayName="⚔️ AI對決" desc={`跟${AI_NAME}搶答${BATTLE_TOTAL}題，全部第四階段，每題${BATTLE_SECONDS}秒，AI 隨機在 11–18 秒作答`} onStart={startBattle}/>
