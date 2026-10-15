@@ -468,7 +468,7 @@ const ROUND_WEIGHT={1:5,2:8,3:10,4:12}
 
 /* ═══════════════════════════════════════════
    挑戰系統：抽題邏輯
-   模式A「自由選題」：自選階段，全部40個成語隨機抽10題，同一階段出題
+   模式A「隨機選題」：自選階段，全部40個成語隨機抽10題，同一階段出題
    模式B「AI對決」：橫跨全部單元，40題，每題隨機單元+隨機階段，與AI搶答
    佇列項目格式：{unitKey, idiomIdx, round}
    ═══════════════════════════════════════════ */
@@ -747,7 +747,7 @@ export default function Home(){
   const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四階段是否已跑完
   const[practiceMistakes,setPracticeMistakes]=useState({1:0,2:0,3:0,4:0}) // 本輪練習各階段答錯次數
 
-  const[quizMode,setQuizMode]=useState(null)   // 挑戰系統：'a'（自由選題）或 'b'（隨機40題）
+  const[quizMode,setQuizMode]=useState(null)   // 挑戰系統：'a'（隨機選題）或 'b'（隨機40題）
   const[quizQueue,setQuizQueue]=useState([])   // [{unitKey,idiomIdx,round}]
   const[quizIdx,setQuizIdx]=useState(0)
   const[quizScore,setQuizScore]=useState(0)
@@ -1300,7 +1300,7 @@ export default function Home(){
           <div className="level-grid">
             <ModeCard modeKey="pet" displayName="🌱 鼎鼎的家" desc="學習就是養分，累積經驗、回顧記憶，解鎖 40 套典故造型" onStart={()=>{window.location.href="/pet"}}/>
             <ModeCard modeKey="video" displayName="🎬 影片答題" desc="40 抽 10，不重複。每題先看約 30 秒影片，再比較成語作答；完成後查看知識點與錯誤解析。" onStart={()=>{window.location.href="/video-challenge"}}/>
-            <ModeCard modeKey="mode-a" displayName="自由選題" desc="只選階段，從全部 40 個成語隨機抽 10 題" onStart={()=>setScreen('rank-mode-a-round')}/>
+            <ModeCard modeKey="mode-a" displayName="隨機選題" desc="只選階段，從全部 40 個成語隨機抽 10 題" onStart={()=>setScreen('rank-mode-a-round')}/>
             <ModeCard modeKey="ai-battle" displayName="⚔️ AI對決" desc={`跟${AI_NAME}搶答${BATTLE_TOTAL}題，全部第四階段，每題${BATTLE_SECONDS}秒，AI 隨機在 11–18 秒作答`} onStart={startBattle}/>
           </div>
         </section>
@@ -1311,7 +1311,7 @@ export default function Home(){
             <button className="back-btn" onClick={()=>setScreen('hub-rank-select')}>← 選模式</button>
           </div>
           <div className="menu-head">
-            <h2>📝 自由選題</h2>
+            <h2>📝 隨機選題</h2>
             <p>選一個階段，從全部成語裡隨機抽 10 題</p>
           </div>
           <div className="level-grid cols-4">
