@@ -27,13 +27,15 @@ export function applyLearning(profile,event,now=Date.now()){
 }
 export function recordLearning(event){const x=readPet();x.profiles[x.active]=applyLearning(x.profiles[x.active],event);return savePet(x)}
 export function startRewardRun(mode){return {id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,mode,profileId:readPet().active}}
-export const bondExperienceBonus=bond=>bond>=100?10:bond>=30?5:0
+export const BOND_DECORATIONS=[{id:'hearts',bond:30,name:'愛心掛飾',icon:'♡'},{id:'stars',bond:100,name:'星光燈串',icon:'☆'},{id:'garden',bond:200,name:'花朵盆栽',icon:'❀'}]
+export const canWearDecoration=(profile,id)=>id===null||BOND_DECORATIONS.some(d=>d.id===id&&(profile?.bond||0)>=d.bond)
+export function wearDecoration(id){const x=readPet(),p=x.profiles[x.active];if(!canWearDecoration(p,id))return false;p.decoration=id;return savePet(x)}
 export function applyCompletion(profile,run,answers){
  const total={practice:4,free:10,video:10,battle:40}[run?.mode]
  if(!run?.id||!total||answers.length!==total||answers.some(a=>typeof a.correct!=='boolean')||profile.completedRuns?.[run.id])return null
  const baseXp=answers.reduce((n,a)=>n+(a.correct?10:2),0),food=answers.reduce((n,a)=>n+(a.correct?2:1),0)
- const bondBonus=bondExperienceBonus(profile.bond||0),xp=baseXp+bondBonus
- return {profile:{...profile,xp:(profile.xp||0)+xp,food:(profile.food||0)+food,completedRuns:{...profile.completedRuns,[run.id]:true}},xp,food,baseXp,bondBonus}
+ const xp=baseXp
+ return {profile:{...profile,xp:(profile.xp||0)+xp,food:(profile.food||0)+food,completedRuns:{...profile.completedRuns,[run.id]:true}},xp,food,baseXp}
 }
 export function completeRewardRun(run,answers){
  const x=readPet()
@@ -41,7 +43,7 @@ export function completeRewardRun(run,answers){
  const result=applyCompletion(x.profiles[x.active],run,answers)
  if(!result)return null
  x.profiles[x.active]=result.profile
- return savePet(x)?{xp:result.xp,food:result.food,baseXp:result.baseXp,bondBonus:result.bondBonus}:null
+ return savePet(x)?{xp:result.xp,food:result.food,baseXp:result.baseXp}:null
 }
 export function makeProfile(name){const x=readPet(),id=`student-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;x.profiles[id]={name:name.trim().slice(0,24),...fresh()};x.active=id;return savePet(x)}
 export function switchProfile(id){const x=readPet();if(x.profiles[id]){x.active=id;return savePet(x)}}

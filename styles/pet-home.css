@@ -165,3 +165,11 @@
 .completion-reward{padding:12px 18px;margin:16px 0;border-radius:14px;background:#e4f4dc;color:#365e3a;font-weight:700}
 .dd-stats{flex-wrap:wrap}.dd-stats>span{white-space:normal}
 @media(max-width:700px){.dd-quick-guide{padding:14px 12px}.dd-quick-guide summary{font-size:17px}.dd-quick-guide table{min-width:320px}.dd-header{min-height:150px}.dd-stats{gap:8px}.dd-stats>span{font-size:15px}}
+
+.dd-animation{position:relative;width:100%;height:100%}
+.dd-home .dd-animation .dd-animation-layer,.dd-home .dd-animation-fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;transition:none}
+.dd-bond-decor{position:absolute;inset:20% 6% auto;display:flex;justify-content:space-between;pointer-events:none;z-index:1;font-size:clamp(20px,3vw,40px)}
+.dd-bond-decor span{border-top:2px solid #c7ad8b;padding-top:6px;letter-spacing:7px;text-shadow:0 2px 4px #fff8}
+.dd-decor-hearts{color:#d17791}.dd-decor-stars{color:#d8ab43;text-shadow:0 0 14px #ffedb0}.dd-decor-garden{inset:auto 5% 12%}.dd-decor-garden span{border:0;letter-spacing:0}
+.dd-decoration-options{display:flex;gap:12px;flex-wrap:wrap}.dd-decoration-options .dd-key{display:flex;flex-direction:column;gap:7px;min-width:150px;flex:1}.dd-decoration-options .dd-key small{font-size:14px}.dd-decoration-options [aria-pressed=true]{outline:3px solid #7bc78b}.dd-decoration-options button:disabled{opacity:.65;cursor:default}
+@media(max-width:700px){.dd-bond-decor{font-size:20px}.dd-bond-decor span{letter-spacing:1px}.dd-decoration-options .dd-key{min-width:130px}}

@@ -35,7 +35,7 @@ export default function PetChat({notice='',action='study',onBusy,onCelebrate}){
     if(data.correct===true){
      const reward=rewardStoryAnswer(activeQuestion.idiom,profileId)
      s.onCelebrate?.()
-     setRewardNote(reward?.food?'親密度 +3|典故點心 +1|經驗值不直接增加；親密度可提升完成一輪後的經驗加成':reward?'這個成語今天已領過獎勵，你仍然答得很好！':'獎勵未能儲存，請檢查瀏覽器儲存設定。')
+     setRewardNote(reward?.food?'親密度 +3|典故點心 +1|親密度可解鎖家中裝飾；經驗值需完成學習取得':reward?'這個成語今天已領過獎勵，你仍然答得很好！':'獎勵未能儲存，請檢查瀏覽器儲存設定。')
      const c=chooseLesson(s.store.profiles[s.store.active],activeQuestion);setQuestion(c)
      response+='\n\n再和你聊一個：'+questionFor(c)
     }
