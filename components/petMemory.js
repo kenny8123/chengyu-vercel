@@ -27,11 +27,13 @@ export function applyLearning(profile,event,now=Date.now()){
 }
 export function recordLearning(event){const x=readPet();x.profiles[x.active]=applyLearning(x.profiles[x.active],event);return savePet(x)}
 export function startRewardRun(mode){return {id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,mode,profileId:readPet().active}}
+export const bondExperienceBonus=bond=>bond>=100?10:bond>=30?5:0
 export function applyCompletion(profile,run,answers){
  const total={practice:4,free:10,video:10,battle:40}[run?.mode]
  if(!run?.id||!total||answers.length!==total||answers.some(a=>typeof a.correct!=='boolean')||profile.completedRuns?.[run.id])return null
- const xp=answers.reduce((n,a)=>n+(a.correct?10:2),0),food=answers.reduce((n,a)=>n+(a.correct?2:1),0)
- return {profile:{...profile,xp:(profile.xp||0)+xp,food:(profile.food||0)+food,completedRuns:{...profile.completedRuns,[run.id]:true}},xp,food}
+ const baseXp=answers.reduce((n,a)=>n+(a.correct?10:2),0),food=answers.reduce((n,a)=>n+(a.correct?2:1),0)
+ const bondBonus=bondExperienceBonus(profile.bond||0),xp=baseXp+bondBonus
+ return {profile:{...profile,xp:(profile.xp||0)+xp,food:(profile.food||0)+food,completedRuns:{...profile.completedRuns,[run.id]:true}},xp,food,baseXp,bondBonus}
 }
 export function completeRewardRun(run,answers){
  const x=readPet()
@@ -39,7 +41,7 @@ export function completeRewardRun(run,answers){
  const result=applyCompletion(x.profiles[x.active],run,answers)
  if(!result)return null
  x.profiles[x.active]=result.profile
- return savePet(x)?{xp:result.xp,food:result.food}:null
+ return savePet(x)?{xp:result.xp,food:result.food,baseXp:result.baseXp,bondBonus:result.bondBonus}:null
 }
 export function makeProfile(name){const x=readPet(),id=`student-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;x.profiles[id]={name:name.trim().slice(0,24),...fresh()};x.active=id;return savePet(x)}
 export function switchProfile(id){const x=readPet();if(x.profiles[id]){x.active=id;return savePet(x)}}
@@ -48,7 +50,7 @@ export function careForPet(action){
  const x=readPet(),p=x.profiles[x.active],day=new Date().toLocaleDateString('en-CA')
  if(!['feed','pat','rest'].includes(action))return '請選擇一個陪伴方式。'
  if(action==='feed'){
-  if(!(p.food>0))return '典故點心吃完了，完成一輪練習或挑戰，或答對典故切磋，就能帶點心回家。'
+  if(!(p.food>0))return '典故點心吃完了，完成一輪練習或挑戰，或在聊天中答中成語重點，就能帶點心回家。'
   p.food--;p.bond=(p.bond||0)+5
  }else{
   if(p.care?.day!==day)p.care={day,pat:0,rest:0}

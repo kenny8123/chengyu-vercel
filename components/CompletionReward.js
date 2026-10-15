@@ -1,3 +1,3 @@
 export default function CompletionReward({reward}){
- return reward?<p role="status" style={{padding:'12px 18px',margin:'16px 0',borderRadius:14,background:'#e4f4dc',color:'#365e3a',fontWeight:700}}>🎉 全部完成！經驗 +{reward.xp} · 點心 +{reward.food}，已送給鼎鼎。</p>:null
+ return reward?<section role="status" className="completion-reward"><strong>🎉 全部完成！獎勵已送給鼎鼎</strong><ul><li>學習經驗：+{reward.baseXp??reward.xp}</li>{reward.bondBonus>0&&<li>親密度加成：+{reward.bondBonus} 經驗</li>}<li>總經驗：+{reward.xp}</li><li>典故點心：+{reward.food}</li></ul></section>:null
 }

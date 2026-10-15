@@ -153,3 +153,15 @@
 .dd-home .dd-room-hotspot,.dd-home .dd-room:has(.dd-sleep) .dd-room-hotspot{left:30%;width:40%;height:74%;bottom:1%}
 .dd-action-bubble{top:3%;padding:8px 20px}
 @media(max-width:700px){.dd-home .dd-resident,.dd-home .dd-resident.dd-sleep{width:62%;height:70%;bottom:0}.dd-action-bubble{font-size:14px}}
+
+.dd-home .dd-resident{animation:none}
+.dd-home .dd-resident picture{display:block;width:100%;height:100%}
+.dd-home .dd-resident picture img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 6px #586b5226)}
+.dd-quick-guide{grid-column:1;grid-row:4;min-width:0;background:#fffaf0;border:2px solid #e5d4ae;border-radius:20px;padding:16px 22px;color:#654c38}
+.dd-quick-guide summary{cursor:pointer;font-size:20px;font-weight:700;line-height:1.6}
+.dd-quick-guide summary:focus-visible{outline:3px solid #9275c9;outline-offset:4px}
+.dd-quick-guide section{padding:8px 0;border-bottom:1px solid #e5d4ae}
+.dd-chat-reward ul,.completion-reward ul{margin:8px 0 0;padding-left:24px;line-height:1.6}
+.completion-reward{padding:12px 18px;margin:16px 0;border-radius:14px;background:#e4f4dc;color:#365e3a;font-weight:700}
+.dd-stats{flex-wrap:wrap}.dd-stats>span{white-space:normal}
+@media(max-width:700px){.dd-quick-guide{padding:14px 12px}.dd-quick-guide summary{font-size:17px}.dd-quick-guide table{min-width:320px}.dd-header{min-height:150px}.dd-stats{gap:8px}.dd-stats>span{font-size:15px}}
