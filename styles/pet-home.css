@@ -187,3 +187,12 @@
 .dd-home .dd-room-art{object-fit:cover}
 
 .dd-sound-toggle{position:absolute;right:12px;bottom:12px;z-index:5;border:1px solid #b4c9a5;border-radius:18px;background:#fff9ed;color:#71563e;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer}
+
+#pet-music-control{position:absolute;right:12px;bottom:52px;z-index:5}
+#pet-music-control .game-music-toggle{position:static;font-size:14px;padding:7px 12px}
+.dd-help-current{padding:14px 18px;background:#e8f2df;border-radius:16px}
+.dd-help table caption{text-align:left;font-weight:700;padding:12px 0;color:#71563e}
+.dd-help table{table-layout:fixed}.dd-help thead th{background:#dcebcf}
+.dd-help tbody th{background:#f7f0df;font-weight:600}.dd-help tbody tr:nth-child(even) td{background:#fffdf6}
+.dd-help th,.dd-help td{overflow-wrap:anywhere}.dd-help section{margin:24px 0}
+@media(max-width:600px){.dd-help table{font-size:14px}.dd-help th,.dd-help td{padding:8px 5px}.dd-help-current{font-size:16px!important}}
