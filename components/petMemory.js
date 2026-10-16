@@ -1,15 +1,17 @@
+import CATALOG from './petCatalog.json'
 // Local learning memory; no remote AI service or student data transmission.
 const KEY='dingding-students-v1'
-const fresh=()=>({xp:0,food:0,bond:0,care:{},lessons:{},history:[],rewards:{},outfit:null,bag:[],reviewBag:[],turn:0})
+const fresh=()=>({xp:0,food:0,bond:0,care:{},lessons:{},history:[],rewards:{},outfit:null,ownedOutfits:[],bag:[],reviewBag:[],turn:0})
 export function readPet(){
  if(typeof window==='undefined')return {active:'default',profiles:{default:{name:'我的學習檔案',...fresh()}}}
- try{const x=JSON.parse(localStorage.getItem(KEY));if(x?.profiles?.[x.active]?.lessons)return x}catch{}
+ try{const x=JSON.parse(localStorage.getItem(KEY));if(x?.profiles?.[x.active]?.lessons){for(const p of Object.values(x.profiles)){if(!p.ownedOutfits)p.ownedOutfits=Object.entries(p.lessons||{}).filter(([,l])=>!!l.read&&(Object.keys(l.stages||{}).length===4||(l.challengeCorrect||0)>=2)).map(([id])=>id);if(p.outfit&&!p.ownedOutfits.includes(p.outfit))p.ownedOutfits.push(p.outfit)}return x}}catch{}
  return {active:'default',profiles:{default:{name:'我的學習檔案',...fresh()}}}
 }
 export function savePet(x){
  try{localStorage.setItem(KEY,JSON.stringify(x));window.dispatchEvent(new Event('dingding-memory'));return true}catch{return false}
 }
-export const unlocked=p=>!!p?.read&&(Object.keys(p.stages||{}).length===4||(p.challengeCorrect||0)>=2)
+export const outfitBond=id=>{const i=CATALOG.findIndex(c=>c.idiom===id);return i<0?Infinity:(i+1)*20}
+export const unlocked=(profile,id)=>CATALOG.some(c=>c.idiom===id)&&((profile?.bond||0)>=outfitBond(id)||(profile?.ownedOutfits||[]).includes(id))
 export function applyLearning(profile,event,now=Date.now()){
  const p=JSON.parse(JSON.stringify(profile)),{idiom,kind,correct,stage}=event
  if(!idiom)return p
@@ -22,14 +24,10 @@ export function applyLearning(profile,event,now=Date.now()){
   if(correct&&!stage)l.challengeCorrect++
  }
  p.history=[{...event,at:now},...p.history].slice(0,200)
- if(!p.outfit&&unlocked(l))p.outfit=idiom
  return p
 }
 export function recordLearning(event){const x=readPet();x.profiles[x.active]=applyLearning(x.profiles[x.active],event);return savePet(x)}
 export function startRewardRun(mode){return {id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,mode,profileId:readPet().active}}
-export const BOND_DECORATIONS=[{id:'hearts',bond:30,name:'愛心掛飾',icon:'♡'},{id:'stars',bond:100,name:'星光燈串',icon:'☆'},{id:'garden',bond:200,name:'花朵盆栽',icon:'❀'}]
-export const canWearDecoration=(profile,id)=>id===null||BOND_DECORATIONS.some(d=>d.id===id&&(profile?.bond||0)>=d.bond)
-export function wearDecoration(id){const x=readPet(),p=x.profiles[x.active];if(!canWearDecoration(p,id))return false;p.decoration=id;return savePet(x)}
 export function applyCompletion(profile,run,answers){
  const total={practice:4,free:10,video:10,battle:40}[run?.mode]
  if(!run?.id||!total||answers.length!==total||answers.some(a=>typeof a.correct!=='boolean')||profile.completedRuns?.[run.id])return null
@@ -47,7 +45,7 @@ export function completeRewardRun(run,answers){
 }
 export function makeProfile(name){const x=readPet(),id=`student-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;x.profiles[id]={name:name.trim().slice(0,24),...fresh()};x.active=id;return savePet(x)}
 export function switchProfile(id){const x=readPet();if(x.profiles[id]){x.active=id;return savePet(x)}}
-export function wearOutfit(id){const x=readPet(),p=x.profiles[x.active];if(id===null||unlocked(p.lessons[id])){p.outfit=id;return savePet(x)}return false}
+export function wearOutfit(id){const x=readPet(),p=x.profiles[x.active];if(id===null||unlocked(p,id)){p.outfit=id;return savePet(x)}return false}
 export function careForPet(action){
  const x=readPet(),p=x.profiles[x.active],day=new Date().toLocaleDateString('en-CA')
  if(!['feed','pat','rest'].includes(action))return '請選擇一個陪伴方式。'

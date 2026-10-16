@@ -5,7 +5,7 @@ import {readClaudeStream} from './readClaudeStream'
 import {rewardStoryAnswer} from './petMemory'
 const questionFor=c=>'「'+c.idiom+'」讓你想到甚麼意思？也可以說一個生活例子給我聽。'
 const chooseLesson=(profile,previous)=>{const recent=CATALOG.find(c=>c.idiom===profile?.history?.[0]?.idiom&&c.id!==previous?.id);const pool=CATALOG.filter(c=>c.id!==previous?.id);return recent||pool[Math.floor(Math.random()*pool.length)]}
-export default function PetChat({notice='',action='study',onBusy,onCelebrate}){
+export default function PetChat({notice='',action='study',onBusy,onCelebrate,onSend}){
  const store=usePet(),[messages,setMessages]=useState([]),[input,setInput]=useState(''),[reply,setReply]=useState('回來啦，今天一起聊個成語吧。'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[question,setQuestion]=useState(null),[rewardNote,setRewardNote]=useState('')
  const request=useRef(null),state=useRef({}),lastQuestion=useRef(null)
  state.current={store,messages,action,onBusy,onCelebrate,input,question}
@@ -35,7 +35,7 @@ export default function PetChat({notice='',action='study',onBusy,onCelebrate}){
     if(data.correct===true){
      const reward=rewardStoryAnswer(activeQuestion.idiom,profileId)
      s.onCelebrate?.()
-     setRewardNote(reward?.food?'親密度 +3|典故點心 +1|親密度可解鎖家中裝飾；經驗值需完成學習取得':reward?'這個成語今天已領過獎勵，你仍然答得很好！':'獎勵未能儲存，請檢查瀏覽器儲存設定。')
+     setRewardNote(reward?.food?'親密度 +3|典故點心 +1':reward?'這個成語今天已領過獎勵，你仍然答得很好！':'獎勵未能儲存，請檢查瀏覽器儲存設定。')
      const c=chooseLesson(s.store.profiles[s.store.active],activeQuestion);setQuestion(c)
      response+='\n\n再和你聊一個：'+questionFor(c)
     }
@@ -59,5 +59,5 @@ export default function PetChat({notice='',action='study',onBusy,onCelebrate}){
   return()=>{request.current?.abort.abort();request.current=null;state.current.onBusy?.(false)}
  },[store?.active])
  useEffect(()=>{if(notice){cancel();setError('');setRewardNote('');setReply(notice+(state.current.question?'\n\n'+questionFor(state.current.question):''))}},[notice])
- return <div className="dd-conversation"><div className="dd-speech" aria-live="polite"><strong>鼎鼎 <span>{busy?'正在想你的話…':'陪你聊聊'}</span></strong><p>{reply}</p>{rewardNote&&<div className="dd-chat-reward" role="status"><strong>這次聊天獎勵</strong><ul>{rewardNote.split('|').map(line=><li key={line}>{line}</li>)}</ul></div>}{error&&<div role="alert"><small>{error}</small> <button type="button" className="dd-key" onClick={()=>ask(lastQuestion.current.text,true)} disabled={busy}>重試原問題</button></div>}</div><form onSubmit={e=>{e.preventDefault();if(input.trim())ask(input.trim())}}><input aria-label="對鼎鼎說話" placeholder="跟鼎鼎說說你的想法…" value={input} onChange={e=>setInput(e.target.value)} maxLength={600}/><button className="dd-send" disabled={!input.trim()||!store} aria-label="送出訊息">送出</button></form></div>
+ return <div className="dd-conversation"><div className="dd-speech" aria-live="polite"><strong>鼎鼎 <span>{busy?'正在想你的話…':'陪你聊聊'}</span></strong><p>{reply}</p>{rewardNote&&<div className="dd-chat-reward" role="status"><strong>這次聊天獎勵</strong><ul>{rewardNote.split('|').map(line=><li key={line}>{line}</li>)}</ul></div>}{error&&<div role="alert"><small>{error}</small> <button type="button" className="dd-key" onClick={()=>ask(lastQuestion.current.text,true)} disabled={busy}>重試原問題</button></div>}</div><form onSubmit={e=>{e.preventDefault();if(input.trim()){onSend?.();ask(input.trim())}}}><input aria-label="對鼎鼎說話" placeholder="跟鼎鼎說說你的想法…" value={input} onChange={e=>setInput(e.target.value)} maxLength={600}/><button className="dd-send" disabled={!input.trim()||!store} aria-label="送出訊息">送出</button></form></div>
 }
