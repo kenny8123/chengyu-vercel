@@ -22,22 +22,14 @@ export function applyLearning(profile,event,now=Date.now()){
   l.lastCorrect=correct;l[correct?'correct':'wrong']++
   if(correct&&stage)l.stages[stage]=true
   if(correct&&!stage)l.challengeCorrect++
-  // Any new mistake reopens a cleared idiom; review successes must be consecutive.
-  if(!correct)l.reviewCleared=0
-  else if(event.review)l.reviewCleared=Math.min(2,(l.reviewCleared||0)+1)
  }
  p.history=[{...event,at:now},...p.history].slice(0,200)
  return p
 }
-// Review oldest unresolved mistakes first; keep original profile data untouched.
-export function weakIdioms(profile,catalog=CATALOG){
- return catalog.filter(c=>{const l=profile?.lessons?.[c.idiom];return l&&(l.wrong||0)>0&&(l.reviewCleared||0)<2})
-  .sort((a,b)=>(profile.lessons[a.idiom].lastAt||0)-(profile.lessons[b.idiom].lastAt||0))
-}
 export function recordLearning(event){const x=readPet();x.profiles[x.active]=applyLearning(x.profiles[x.active],event);return savePet(x)}
 export function startRewardRun(mode){return {id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,mode,profileId:readPet().active}}
 export function applyCompletion(profile,run,answers){
- const total={practice:4,free:10,video:10,review:10,battle:40}[run?.mode]
+ const total={practice:4,free:10,video:10,battle:40}[run?.mode]
  if(!run?.id||!total||answers.length!==total||answers.some(a=>typeof a.correct!=='boolean')||profile.completedRuns?.[run.id])return null
  const baseXp=answers.reduce((n,a)=>n+(a.correct?10:2),0),food=answers.reduce((n,a)=>n+(a.correct?2:1),0)
  const xp=baseXp

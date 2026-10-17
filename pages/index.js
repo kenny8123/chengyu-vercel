@@ -1,5 +1,5 @@
 import CompletionReward from '../components/CompletionReward'
-import {recordLearning,startRewardRun,completeRewardRun,weakIdioms,readPet} from '../components/petMemory'
+import {recordLearning,startRewardRun,completeRewardRun} from '../components/petMemory'
 import {Guide, TextScaleControl, BotFace, PlayerFace} from '../components/GameControls'
 import Head from 'next/head'
 import { useState, useEffect, useRef, useCallback } from 'react'
@@ -476,21 +476,6 @@ function buildFreeQuizQueue(round){
   return shuffle(Object.entries(UNITS).flatMap(([unitKey,unit])=>unit.idioms.map((_,idiomIdx)=>({unitKey,idiomIdx,round})))).slice(0,10)
 }
 
-/* 成語名稱 → 題庫座標，錯題本只記名稱，要對回 UNITS */
-const IDIOM_POS=Object.fromEntries(
-  Object.entries(UNITS).flatMap(([unitKey,unit])=>unit.idioms.map((it,idiomIdx)=>[it.idiom,{unitKey,idiomIdx}]))
-)
-
-/* 錯題複習：只出答錯過、還沒連續答對兩次的成語。
-   階段由易到難爬升，先重建信心再加壓；錯題不足 10 題時循環補滿，重複本來就是複習。 */
-const REVIEW_RAMP=[2,2,2,2,3,3,3,4,4,4]
-function buildReviewQueue(profile){
-  const weak=weakIdioms(profile).map(c=>c.idiom).filter(n=>IDIOM_POS[n])
-  if(!weak.length)return []
-  const picked=shuffle(weak.slice(0,10))
-  return REVIEW_RAMP.map((round,i)=>({...IDIOM_POS[picked[i%picked.length]],round}))
-}
-
 /* AI對決設定 */
 /* 各階段的難度說明，選階段畫面用 */
 const ROUND_DESC = {
@@ -725,7 +710,7 @@ function burst(count=14){
 /* ═══════════════════════════════════════════
    導覽機器人「鼎鼎」－ 依畫面狀態提醒下一步
    ═══════════════════════════════════════════ */
-function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount,quizMode}){
+function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount}){
   switch(screen){
     case 'home':
       return '嗨，我是鼎鼎！點選一個單元，展開成語清單吧！'
@@ -738,7 +723,6 @@ function getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount,qui
     case 'rank-mode-a-round':
       return '選一個階段吧！從 40 個成語隨機抽 10 題，同一回合不重複。'
     case 'rank-drill':
-      if(quizMode==='review')return '這些都是你之前答錯的，連續答對兩次就從錯題本畢業！'
       return `每題只有一次機會，看清楚再把字拖進空格！`
     case 'rank-diagnosis':
       return '來看看你的成績吧！'
@@ -763,8 +747,7 @@ export default function Home(){
   const[practiceCycleDone,setPracticeCycleDone]=useState(false) // 一鍵四階段是否已跑完
   const[practiceMistakes,setPracticeMistakes]=useState({1:0,2:0,3:0,4:0}) // 本輪練習各階段答錯次數
 
-  const[quizMode,setQuizMode]=useState(null)   // 挑戰系統：'a'（隨機選題）/ 'review'（錯題複習）/ 'battle'（AI對決）
-  const[reviewEmpty,setReviewEmpty]=useState(false)   // 錯題本是空的
+  const[quizMode,setQuizMode]=useState(null)   // 挑戰系統：'a'（隨機選題）或 'b'（隨機40題）
   const[quizQueue,setQuizQueue]=useState([])   // [{unitKey,idiomIdx,round}]
   const[quizIdx,setQuizIdx]=useState(0)
   const[quizScore,setQuizScore]=useState(0)
@@ -908,21 +891,6 @@ export default function Home(){
     setScreen('rank-drill')
   }
 
-  /* ── 錯題複習 ── */
-  function startReview(){
-    const store=readPet(),profile=store.profiles[store.active]
-    const queue=buildReviewQueue(profile)
-    if(!queue.length){setReviewEmpty(true);return}
-    rewardRun.current=startRewardRun('review');setCompletionReward(null)
-    setQuizMode('review')
-    setQuizQueue(queue)
-    setQuizIdx(0)
-    setQuizScore(0)
-    quizAnswersRef.current=[]
-    setViewingRecord(null)
-    setScreen('rank-drill')
-  }
-
   /* ── AI對決 ── */
   function startBattle(){
     rewardRun.current=startRewardRun('battle');setCompletionReward(null)
@@ -1040,7 +1008,7 @@ export default function Home(){
     const next={...placed}
     blanks.forEach(pos=>{const ok=next[pos]?.ch===chars[pos];next[pos]={...next[pos],correct:ok};if(!ok)allOk=false})
     setPlaced(next)
-    recordLearning({idiom:q.idiom,kind:'answer',correct:allOk,review:quizMode==='review'})
+    recordLearning({idiom:q.idiom,kind:'answer',correct:allOk})
     quizAnswersRef.current.push({unitKey:item.unitKey,idiomIdx:item.idiomIdx,round:item.round,correct:allOk})
     if(allOk){
       setQuizScore(s=>s+1)
@@ -1052,7 +1020,7 @@ export default function Home(){
       if(quizIdx<quizQueue.length-1){
         setQuizIdx(i=>i+1)
       }else{
-        const key = quizMode==='a' ? 'mode-a' : quizMode==='review' ? 'review' : 'full-random'
+        const key = quizMode==='a' ? 'mode-a' : 'full-random'
         const res = diagnoseQuiz(quizAnswersRef.current)
         setDiagnosis(res)
         saveHistoryRecord(key, res)
@@ -1174,7 +1142,7 @@ export default function Home(){
     {round:4,label:'第四階段'},
   ]
 
-  const guideTip=getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount:IDIOMS.length,quizMode})
+  const guideTip=getGuideTip({screen,unit,practiceRound,practiceCycleDone,idiomCount:IDIOMS.length})
 
   return(
     <>
@@ -1329,17 +1297,10 @@ export default function Home(){
         {/* ════ 挑戰系統：選模式 ════ */}
         <section className={`screen${screen==='hub-rank-select'?' show':''}`}>
           <div className="menu-head"><h2>📝 挑戰系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
-          {reviewEmpty&&(
-            <p className="weak-round-tip">
-              📌 <span className="nb">目前沒有待複習的錯題，</span>
-              <span className="nb">先去其他模式練習，答錯的成語會自動收進來。</span>
-            </p>
-          )}
           <div className="level-grid">
             <ModeCard modeKey="pet" displayName="🌱 寵物的家" desc="學習就是養分，累積經驗、回顧記憶，解鎖 40 套典故造型" onStart={()=>{window.location.href="/pet"}}/>
             <ModeCard modeKey="video" displayName="🎬 影片答題" desc="40 抽 10，不重複。每題先看約 30 秒影片，再比較成語作答；完成後查看知識點與錯誤解析。" onStart={()=>{window.location.href="/video-challenge"}}/>
             <ModeCard modeKey="mode-a" displayName="隨機選題" desc="只選階段，從全部 40 個成語隨機抽 10 題" onStart={()=>setScreen('rank-mode-a-round')}/>
-            <ModeCard modeKey="review" displayName="🔁 錯題複習" desc="只出你答錯過的成語，階段由易到難；複習同一成語連續答對 2 次可移除，最多 10 題；不足時會重複練習" onStart={()=>{setReviewEmpty(false);startReview()}}/>
             <ModeCard modeKey="ai-battle" displayName="⚔️ AI對決" desc={`跟${AI_NAME}搶答${BATTLE_TOTAL}題，全部第四階段，每題${BATTLE_SECONDS}秒，AI 隨機在 11–18 秒作答`} onStart={startBattle}/>
           </div>
         </section>
@@ -1363,7 +1324,7 @@ export default function Home(){
         {/* ════ 挑戰系統：評測作答 ════ */}
         <section className={`screen${screen==='rank-drill'?' show':''}`}>
           <div className="topbar">
-            <div className="score-pill">{quizMode==='review'?'🔁 錯題複習':'📝 挑戰測驗'}</div>
+            <div className="score-pill">📝 挑戰測驗</div>
             <ProgressBar idx={quizIdx} total={quizQueue.length}/>
             <div className="score-pill">✅ {quizScore}</div>
           </div>
