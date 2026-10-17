@@ -4,6 +4,7 @@ import Head from 'next/head'
 import {useEffect,useRef,useState} from 'react'
 import {Guide,TextScaleControl} from '../components/GameControls'
 import COMPARISONS from '../components/videoComparisons.json'
+import {videoOptions} from '../components/videoOptions'
 
 const shuffle=list=>{const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
@@ -22,7 +23,7 @@ export default function VideoChallenge(){
  function start(){
   if(lessons.length!==40)return
   rewardRun.current=startRewardRun('video');setCompletionReward(null);submitted.current=-1
-  setRound(shuffle(lessons).slice(0,10).map(item=>({item,options:shuffle([item,...COMPARISONS[item.id-1].map(id=>lessons.find(x=>x.id===id))])})))
+  setRound(shuffle(lessons).slice(0,10).map(item=>({item,options:shuffle(videoOptions(lessons,item,COMPARISONS[item.id-1]))})))
   setIndex(0);setAnswers([]);setChoice(null);setWatched(false);setFinished(false);setVideoError(false);setGuideOpen(false);furthest.current=0
  }
  function submit(){
