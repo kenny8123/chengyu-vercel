@@ -1,8 +1,12 @@
 import {useEffect,useState,useRef} from 'react'
+import OutfitSprite from './OutfitSprite'
 const STATES=['study','eat','shy','sleep','happy']
 // Keep every decoder mounted. Switch only after the requested GIF is loaded,
 // retaining the previous frame rather than removing the pet during downloads.
-export default function PetAnimation({action,label}){
+export default function PetAnimation({action,label,outfit}){
+ return <OutfitSprite outfit={outfit} action={action} size="large" label={label} fallback={<BasePetAnimation action={action} label={label}/>}/>
+}
+function BasePetAnimation({action,label}){
  const images=useRef({})
  const [ready,setReady]=useState({}),[shown,setShown]=useState('study')
  useEffect(()=>{const loaded={}; for(const state of STATES){const img=images.current[state]; if(img?.complete&&img.naturalWidth>0)loaded[state]=true} setReady(prev=>({...prev,...loaded}))},[])

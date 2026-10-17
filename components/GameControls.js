@@ -1,5 +1,7 @@
 import {useState,useEffect} from 'react'
 import usePet from './usePet'
+import OutfitSprite from './OutfitSprite'
+import {outfitAsset} from './outfitAssets'
 import CATALOG from './petCatalog.json'
 import {readPet,savePet,nextReminder} from './petMemory'
 export function BotFace({size=64,mood='idle'}){
@@ -16,6 +18,7 @@ export function PlayerFace({size=64,mood='idle'}){
 }
 export function PetLook({size=80,mood='idle',outfit=null}){
  const c=CATALOG.find(c=>c.idiom===outfit)
+ if(outfitAsset(outfit,mood))return <span className="pet-look" style={{width:size,height:size}}><OutfitSprite outfit={outfit} action={mood} label={`鼎鼎・${outfit}`} fallback={<BotFace size={size} mood={mood}/>}/></span>
  return <span className={`pet-look ${c?'dressed':''}`} style={{'--pet-hue':`${(c?.id||0)*137.5%360}deg`,width:size,height:size}}><BotFace size={size} mood={mood}/>{c&&<><span className="pet-hat" aria-hidden="true">{c.emoji}</span><span className="pet-badge" aria-hidden="true">{c.emoji}</span></>}</span>
 }
 export function Guide({tip,open,onToggle,mood='idle',quiet=false}){
