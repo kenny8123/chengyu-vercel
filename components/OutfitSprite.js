@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react'
 import {outfitAsset,OUTFIT_STATES} from './outfitAssets'
+import patAlignment from './patAlignment.json'
 
 export default function OutfitSprite({outfit,action='idle',size='small',label='鼎鼎',fallback}) {
  const requested=outfitAsset(outfit,action,size)
@@ -19,5 +20,7 @@ export default function OutfitSprite({outfit,action='idle',size='small',label='�
  },[outfit,size])
  // Keep the last decoded action visible until the next request is ready.
  if(!requested||!shown)return fallback
- return <picture data-outfit-id={shown.id} data-action={shown.state} style={{display:'block',width:'100%',height:'100%'}}><source media="(prefers-reduced-motion: reduce)" srcSet={shown.still}/><img src={shown.gif} alt={label} style={{display:'block',width:'100%',height:'100%',objectFit:'contain'}}/></picture>
+ const alignment=shown.state==='shy'?patAlignment[shown.id]:null
+ const poseStyle=alignment?{transformOrigin:'0 0',transform:'translate('+alignment.x+'%, '+alignment.y+'%) scale('+alignment.scale+')'}:{}
+ return <picture data-outfit-id={shown.id} data-action={shown.state} style={{display:'block',width:'100%',height:'100%'}}><source media="(prefers-reduced-motion: reduce)" srcSet={shown.still}/><img src={shown.gif} alt={label} style={{display:'block',width:'100%',height:'100%',objectFit:'contain',...poseStyle}}/></picture>
 }

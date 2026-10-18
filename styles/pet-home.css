@@ -196,3 +196,13 @@
 .dd-help tbody th{background:#f7f0df;font-weight:600}.dd-help tbody tr:nth-child(even) td{background:#fffdf6}
 .dd-help th,.dd-help td{overflow-wrap:anywhere}.dd-help section{margin:24px 0}
 @media(max-width:600px){.dd-help table{font-size:14px}.dd-help th,.dd-help td{padding:8px 5px}.dd-help-current{font-size:16px!important}}
+/* Keep reward labels and number/unit phrases readable on narrow screens. */
+.dd-help th,.dd-help td{overflow-wrap:normal;word-break:normal;vertical-align:top}
+.dd-help table{min-width:460px}
+.dd-help .dd-completion-table{min-width:480px}
+.dd-completion-table th:first-child{width:36%}
+.dd-completion-table td{white-space:nowrap;font-variant-numeric:tabular-nums}
+.dd-mode-name{display:block;white-space:nowrap;margin-bottom:5px}
+.dd-mode-condition{display:block;font-weight:400;font-size:.9em;line-height:1.7;white-space:nowrap}
+.dd-help-table{overscroll-behavior-x:contain}
+@media(max-width:600px){.dd-help .dd-completion-table{min-width:0;table-layout:fixed}.dd-completion-table th:first-child{width:34%}.dd-completion-table th,.dd-completion-table td{padding:9px 4px;font-size:13px}.dd-completion-table thead th{font-size:12px}}
