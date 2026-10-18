@@ -1,19 +1,36 @@
-// 用法: node build-outfit.mjs <來源資料夾> <repo> <造型編號>
-// 把 ChatGPT 的 2x2 四格表切開、去白底、統一位置，輸出大(512)細(64) GIF 和靜態 PNG。
+// 用法: node build-outfit.mjs <來源資料夾> <repo> <造型編號> [--holes 面積]
+// 把 ChatGPT 的 2x2 四格表切開、去背、統一位置，輸出大(512)細(64) GIF 和靜態 PNG。
+// 背景色自動偵測：
+//   洋紅色底（建議）：全圖接近洋紅的像素都去掉，連被圍住的空隙也乾淨。
+//   白色底（舊圖）：只去掉跟格邊相連的白色，避免挖穿頭盔、眼白。
+//   --holes N：白色底時，再去掉面積大於 N 的被圍住純白空隙（例如第 17 套釣魚綫後面）。
 import { createRequire } from 'module'
 import fs from 'fs'
 import path from 'path'
 
-const [src, repo, idArg] = process.argv.slice(2)
+const args = process.argv.slice(2)
+const [src, repo, idArg] = args
+const holesAt = args.indexOf('--holes'), HOLES = holesAt > 0 ? +args[holesAt + 1] : 0
 const require = createRequire(path.resolve(repo, 'package.json'))
 const sharp = require('sharp')
 const id = String(idArg).padStart(2, '0')
 const STATES = ['idle', 'thinking', 'happy', 'sad', 'celebrate', 'eat', 'shy', 'sleep']
 const OUT = 512, MARGIN = 14, DELAY = 220
 
+let BG = [255, 255, 255], KEYED = false
+const dist = (d, i) => Math.hypot(d[i] - BG[0], d[i + 1] - BG[1], d[i + 2] - BG[2])
 const isWhite = (d, i, t) => d[i] > t && d[i + 1] > t && d[i + 2] > t
 
-// 找格與格之間最白的那條直線/橫線
+// 四個角的平均色 = 背景色；夠鮮豔就當作洋紅色鍵控底
+function detectBg(d, w, h) {
+  const acc = [0, 0, 0]; let n = 0
+  for (const [cx, cy] of [[0, 0], [w - 6, 0], [0, h - 6], [w - 6, h - 6]])
+    for (let y = cy; y < cy + 6; y++) for (let x = cx; x < cx + 6; x++) { const i = (y * w + x) * 4; acc[0] += d[i]; acc[1] += d[i + 1]; acc[2] += d[i + 2]; n++ }
+  BG = acc.map(v => v / n)
+  KEYED = Math.max(...BG) - Math.min(...BG) > 80
+}
+
+// 找格與格之間最像背景的那條直線/橫線
 function findGap(d, w, h, vertical) {
   const len = vertical ? w : h, other = vertical ? h : w
   let best = -1, bestScore = -1
@@ -21,32 +38,48 @@ function findGap(d, w, h, vertical) {
     let s = 0
     for (let b = 0; b < other; b += 2) {
       const x = vertical ? a : b, y = vertical ? b : a
-      if (isWhite(d, (y * w + x) * 4, 240)) s++
+      if (dist(d, (y * w + x) * 4) < 26) s++
     }
     if (s > bestScore) { bestScore = s; best = a }
   }
   return best
 }
 
-// 由格邊開始把相連的白色變透明，再柔化邊緣
+// 洋紅色底：按顏色距離去背，半透明邊緣把洋紅色「減走」避免紫邊
+function cutoutKeyed(rgba, w, h) {
+  for (let p = 0; p < w * h; p++) {
+    const i = p * 4, dd = dist(rgba, i)
+    if (dd < 70) { rgba[i + 3] = 0; continue }
+    if (dd < 140) {
+      const a = (dd - 70) / 70
+      for (let c = 0; c < 3; c++) rgba[i + c] = Math.max(0, Math.min(255, Math.round((rgba[i + c] - (1 - a) * BG[c]) / a)))
+      rgba[i + 3] = Math.round(255 * a)
+    }
+  }
+  return rgba
+}
+
+// 白色底：由格邊開始把相連的白色變透明，再柔化邊緣
 function cutout(rgba, w, h) {
+  if (KEYED) return cutoutKeyed(rgba, w, h)
   const bg = new Uint8Array(w * h), stack = []
   const push = (x, y) => { if (x >= 0 && y >= 0 && x < w && y < h) { const p = y * w + x; if (!bg[p] && isWhite(rgba, p * 4, 232)) { bg[p] = 1; stack.push(p) } } }
   for (let x = 0; x < w; x++) { push(x, 0); push(x, h - 1) }
   for (let y = 0; y < h; y++) { push(0, y); push(w - 1, y) }
   while (stack.length) { const p = stack.pop(), x = p % w, y = (p / w) | 0; push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1) }
-  // 被釣綫、樹枝圍住的大片純白也是背景（角色身上的米白色不夠白，不會被選中）
-  const seen = new Uint8Array(w * h)
-  for (let s = 0; s < w * h; s++) {
-    if (bg[s] || seen[s] || !isWhite(rgba, s * 4, 246)) continue
-    const region = [s], q = [s]; seen[s] = 1
-    while (q.length) {
-      const p = q.pop(), x = p % w, y = (p / w) | 0
-      for (const n of [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, y > 0 ? p - w : -1, y < h - 1 ? p + w : -1]) {
-        if (n >= 0 && !bg[n] && !seen[n] && isWhite(rgba, n * 4, 246)) { seen[n] = 1; q.push(n); region.push(n) }
+  if (HOLES) {
+    const seen = new Uint8Array(w * h)
+    for (let s = 0; s < w * h; s++) {
+      if (bg[s] || seen[s] || !isWhite(rgba, s * 4, 246)) continue
+      const region = [s], q = [s]; seen[s] = 1
+      while (q.length) {
+        const p = q.pop(), x = p % w, y = (p / w) | 0
+        for (const n of [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, y > 0 ? p - w : -1, y < h - 1 ? p + w : -1]) {
+          if (n >= 0 && !bg[n] && !seen[n] && isWhite(rgba, n * 4, 246)) { seen[n] = 1; q.push(n); region.push(n) }
+        }
       }
+      if (region.length > HOLES) for (const p of region) bg[p] = 1
     }
-    if (region.length > 500) for (const p of region) bg[p] = 1
   }
   for (let p = 0; p < w * h; p++) {
     if (bg[p]) { rgba[p * 4 + 3] = 0; continue }
@@ -72,6 +105,7 @@ const cells = {}
 for (const st of STATES) {
   const { data, info } = await sharp(path.join(src, st + '.png')).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
   const { width: w, height: h } = info
+  detectBg(data, w, h)
   const gx = findGap(data, w, h, true), gy = findGap(data, w, h, false)
   const rects = [[0, 0, gx, gy], [gx, 0, w - gx, gy], [0, gy, gx, h - gy], [gx, gy, w - gx, h - gy]]
   cells[st] = []
