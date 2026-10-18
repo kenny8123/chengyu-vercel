@@ -2,9 +2,9 @@
   "name": "chengyu-game",
   "version": "1.0.0",
   "scripts": {
-    "dev": "node scripts/run-next.cjs dev",
+    "dev": "next dev",
     "build": "next build",
-    "start": "node scripts/run-next.cjs start"
+    "start": "next start"
   },
   "dependencies": {
     "next": "14.0.0",
