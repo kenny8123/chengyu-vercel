@@ -8,8 +8,11 @@ export default function PetHelp({open,onClose,profile}){
  return <dialog ref={ref} className="dd-closet dd-help" onCancel={onClose} onClose={onClose}><header><h2>養成說明</h2><button className="dd-key" onClick={onClose} aria-label="關閉養成說明">✕</button></header>
  <p className="dd-help-current"><strong>目前：Lv. {level} · 累積 {xp} 經驗值</strong><br/>再得 <strong>{100-xp%100} 經驗值</strong>，就升到 Lv. {level+1}。<br/>親密度：{bond}／800（40 套造型門檻）</p>
  <section><h3>📚 做題目</h3><ul>
-  <li>練習：通過全部 4 階段 → <strong>40 經驗、8 點心</strong>。</li>
-  <li>其他模式：答對 10 經驗、2 點心；答錯 2 經驗、1 點心。</li>
+  <li><strong>練習</strong>（同一成語 4 階段）→ 全部通過得 <strong>40 經驗、8 點心</strong>。</li>
+  <li><strong>隨機選題</strong>（10 題）→ 得 <strong>20～100 經驗、10～20 點心</strong>。</li>
+  <li><strong>影片答題</strong>（10 題）→ 得 <strong>20～100 經驗、10～20 點心</strong>。</li>
+  <li><strong>AI 對決</strong>（40 題）→ 得 <strong>80～400 經驗、40～80 點心</strong>。</li>
+  <li>隨機選題、影片答題、AI 對決：每題答對 10 經驗、2 點心；答錯 2 經驗、1 點心。</li>
   <li>做完整輪才有獎勵。</li></ul></section>
  <section><h3>💗 親密度</h3><ul>
   <li>做題目<strong>不會</strong>加親密度。</li>
