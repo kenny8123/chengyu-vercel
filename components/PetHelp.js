@@ -8,8 +8,8 @@ export default function PetHelp({open,onClose,profile}){
  return <dialog ref={ref} className="dd-closet dd-help" onCancel={onClose} onClose={onClose}><header><h2>養成說明</h2><button className="dd-key" onClick={onClose} aria-label="關閉養成說明">✕</button></header>
  <p className="dd-help-current"><strong>目前：Lv. {level} · 累積 {xp} 經驗值</strong><br/>再得 <strong>{100-xp%100} 經驗值</strong>，就升到 Lv. {level+1}。<br/>親密度：{bond}／800（40 套造型門檻）</p>
  <section><h3>📚 做題目</h3>
- <Table title="做完一整輪得到" heads={['模式','題數','經驗','點心']} rows={[['練習','4 階段','40','8'],['隨機選題','10 題','20～100','10～20'],['影片答題','10 題','20～100','10～20'],['AI 對決','40 題','80～400','40～80']]}/>
- <Table title="隨機選題、影片答題、AI 對決：每一題" heads={['結果','經驗','點心']} rows={[['答對','10','2'],['答錯','2','1']]}/></section>
+ <Table title="完成就有獎勵（中途離開沒有）" heads={['模式','完成方式','經驗','點心']} rows={[['練習','通過 4 階段','40','8'],['隨機選題','完成 10 題','20～100','10～20'],['影片答題','完成 10 題','20～100','10～20'],['AI 對決','完成 40 題','80～400','40～80']]}/>
+ <p>答對越多，得到越多（每題答對 10 經驗、2 點心；答錯 2 經驗、1 點心）。</p></section>
  <section><h3>💗 親密度</h3>
  <Table title="怎樣增加親密度（做題目不會加）" heads={['做甚麼','親密度','限制']} rows={[['餵點心','每顆 +5','用 1 顆點心'],['摸摸','+2','每日 3 次'],['休息','+2','每日 3 次'],['聊天答對','+3（再送 1 點心）','同一成語每日 1 次']]}/></section>
  <section><h3>⭐ 升級</h3>
