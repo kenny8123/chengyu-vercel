@@ -212,3 +212,30 @@
 .dd-key-row{display:flex;gap:8px}.dd-key-row input{flex:1;min-width:0;font-size:16px;padding:10px 12px;border:2px solid #e9dac2;border-radius:12px;font-family:monospace}
 .dd-key-dialog .dd-key-remember{display:flex;gap:8px;align-items:flex-start;font-weight:500;font-size:15px}.dd-key-remember input{margin-top:4px}
 .dd-key-status code{background:#fff3dc;padding:2px 6px;border-radius:6px;word-break:break-all}.dd-key-dialog [role=alert]{color:#b8325a;margin:0}
+.dd-key-trigger{position:relative}.dd-key-label{font-weight:inherit;margin-left:4px}.dd-key-dot{position:absolute;top:4px;right:4px;width:9px;height:9px;border-radius:50%;background:#e0567f}
+
+/* 手機版：全部改用自動高度，避免頂部、房間、按鈕、對話互相重疊或被切走。 */
+@media(max-width:700px){
+ .dd-home{height:auto;min-height:100dvh;grid-template-rows:auto auto auto;gap:10px;padding:8px 12px 16px;overflow:visible}
+ .dd-home .dd-header{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:0;height:auto}
+ .dd-home .dd-header>a.dd-key{order:1;flex:none}
+ .dd-home .dd-title{order:2;flex:1;min-width:0;justify-content:center}
+ .dd-home .dd-title h1{font-size:22px}
+ .dd-home .dd-help-trigger{order:3;flex:none;min-height:40px;font-size:15px;padding:6px 10px}
+ .dd-home .dd-key-trigger{order:4;min-width:44px;padding:6px 8px}.dd-key-label{display:none}
+ .dd-home .dd-stats{order:5;flex:1 1 100%;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 14px;font-size:15px;margin:0}
+ .dd-home .dd-stats>span{font-size:15px}.dd-home .dd-stats>span:first-child{flex:1 1 100%;justify-content:center;gap:4px 8px}
+ .dd-home .dd-room{height:auto;aspect-ratio:1/0.82;min-height:0}
+ .dd-home .dd-console{height:auto;grid-template-rows:auto auto;gap:10px}
+ .dd-home .dd-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .dd-home .dd-conversation{grid-template-rows:auto 48px;min-height:0}
+ .dd-home .dd-speech{overflow:visible;min-height:120px}
+ .dd-home .dd-speech p{font-size:18px;line-height:1.6}
+ .dd-home .dd-speech [role=alert]{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+ .dd-home .dd-speech [role=alert] .dd-key{font-size:15px;min-height:38px;padding:5px 10px}
+ .dd-key-dialog{padding:16px}.dd-key-dialog h2{font-size:21px}.dd-key-dialog p{font-size:16px}
+}
+/* 電腦／平板：🔑 放喺「說明」旁邊同一行，統計列留喺第二行。 */
+@media(min-width:701px){.dd-home .dd-header{grid-template-columns:auto 1fr auto auto}.dd-home .dd-stats{grid-column:1/-1}}
+@media(min-width:701px){.dd-home .dd-console{grid-template-rows:auto minmax(0,1fr)}}
+@media(min-width:701px) and (max-width:1000px){.dd-home{height:auto;min-height:100dvh;grid-template-rows:auto minmax(300px,48dvh) auto}.dd-home .dd-conversation{grid-template-rows:auto 52px}.dd-home .dd-speech{overflow:visible;min-height:110px}}
