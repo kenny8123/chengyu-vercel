@@ -239,3 +239,4 @@
 @media(min-width:701px){.dd-home .dd-header{grid-template-columns:auto 1fr auto auto}.dd-home .dd-stats{grid-column:1/-1}}
 @media(min-width:701px){.dd-home .dd-console{grid-template-rows:auto minmax(0,1fr)}}
 @media(min-width:701px) and (max-width:1000px){.dd-home{height:auto;min-height:100dvh;grid-template-rows:auto minmax(300px,48dvh) auto}.dd-home .dd-conversation{grid-template-rows:auto 52px}.dd-home .dd-speech{overflow:visible;min-height:110px}}
+.dd-help .dd-help-lead{font-size:20px;margin:14px 0 10px;color:#654c38;text-align:center}@media(max-width:600px){.dd-help .dd-help-lead{font-size:17px}}

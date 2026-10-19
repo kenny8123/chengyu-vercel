@@ -6,6 +6,7 @@ export default function PetHelp({open,onClose,profile}){
  const ref=useRef(null),xp=profile?.xp||0,bond=profile?.bond||0,level=Math.floor(xp/100)+1
  useEffect(()=>{if(open)ref.current?.showModal();else ref.current?.close()},[open])
  return <dialog ref={ref} className="dd-closet dd-help" onCancel={onClose} onClose={onClose}><header><h2>養成說明</h2><button className="dd-key" onClick={onClose} aria-label="關閉養成說明">✕</button></header>
+ <p className="dd-help-lead"><strong>⭐ 經驗值解鎖稱號　💗 親密度解鎖造型</strong></p>
  <p className="dd-help-current"><strong>目前：Lv. {level} · 累積 {xp} 經驗值</strong><br/>再得 <strong>{100-xp%100} 經驗值</strong>，就升到 Lv. {level+1}。<br/>親密度：{bond}／800（40 套造型門檻）</p>
  <section><h3>📚 做題目</h3>
  <Table title="完成就有獎勵（中途離開沒有）" heads={['模式','完成方式','經驗','點心']} rows={[['練習','通過 4 階段','40','8'],['隨機選題','完成 10 題','20～100','10～20'],['影片答題','完成 10 題','20～100','10～20'],['AI 對決','完成 40 題','80～400','40～80']]}/>
