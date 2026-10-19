@@ -24,7 +24,8 @@ export default function GameAudio(){
   document.addEventListener('pointerdown',activate);document.addEventListener('keydown',activate);document.addEventListener('visibilitychange',visibility)
   return()=>{document.removeEventListener('pointerdown',activate);document.removeEventListener('keydown',activate);document.removeEventListener('visibilitychange',visibility);bg.removeEventListener('play',onPlay);bg.removeEventListener('pause',onPause);bg.pause();up.pause();bg.removeAttribute('src');up.removeAttribute('src');bg.load();up.load()}
  },[])
- useEffect(()=>{const a=music.current;if(!a)return;if(router.pathname==='/pet'&&unlocked.current&&enabledRef.current&&!document.hidden)a.play().catch(()=>{});else a.pause()},[router.pathname])
+ // 每次進入鼎鼎的家都重新開啟音樂並即時嘗試播放；瀏覽器未允許自動播放時，第一下點擊畫面就會開始
+ useEffect(()=>{const a=music.current;if(!a)return;if(router.pathname==='/pet'){enabledRef.current=true;setEnabled(true);try{localStorage.removeItem('game-bgm-muted')}catch{};if(!document.hidden)a.play().then(()=>{unlocked.current=true}).catch(()=>{})}else a.pause()},[router.pathname])
  useEffect(()=>{
   if(!store)return
   const current={id:store.active,level:Math.floor((store.profiles[store.active]?.xp||0)/100)+1},old=previous.current
