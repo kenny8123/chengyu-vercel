@@ -12,7 +12,7 @@ export default function ApiKeyDialog({open,onClose}){
  }
  return <dialog ref={dialog} className="dd-closet dd-key-dialog" onCancel={onClose} onClose={onClose}>
  <header><h2>🔑 鼎鼎的金鑰</h2><button type="button" className="dd-key" onClick={onClose} aria-label="關閉金鑰設定">✕</button></header>
- <p>和鼎鼎聊天要用你自己的 API 金鑰，沒有金鑰也可以照顧鼎鼎、換造型。</p>
+ <ul className="dd-key-intro"><li><strong>💬 和鼎鼎聊天</strong><span>要用你自己的 API 金鑰</span></li><li><strong>🧸 沒有金鑰</strong><span>也可以照顧鼎鼎、換造型</span></li></ul>
  {current?<p className="dd-key-status">目前使用：<code>{mask(current.key)}</code>（{current.remember?'已記住在這部裝置':'只限這個分頁，關閉後自動清除'}）</p>:<p className="dd-key-status">目前未輸入金鑰。</p>}
  <form onSubmit={submit}>
   <label htmlFor="dd-api-key">{current?'換一條新金鑰':'貼上你的金鑰'}</label>
