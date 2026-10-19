@@ -3,11 +3,12 @@ import usePet from './usePet'
 import CATALOG from './petCatalog.json'
 import {readClaudeStream} from './readClaudeStream'
 import {rewardStoryAnswer} from './petMemory'
+import {keyHeaders,readKey,useApiKey} from './userApiKey'
 const questionFor=c=>'「'+c.idiom+'」讓你想到甚麼意思？也可以說一個生活例子給我聽。'
 const chooseLesson=(profile,previous)=>{const recent=CATALOG.find(c=>c.idiom===profile?.history?.[0]?.idiom&&c.id!==previous?.id);const pool=CATALOG.filter(c=>c.id!==previous?.id);return recent||pool[Math.floor(Math.random()*pool.length)]}
-export default function PetChat({notice='',action='study',onBusy,onCelebrate,onSend}){
+export default function PetChat({notice='',action='study',onBusy,onCelebrate,onSend,onNeedKey}){
  const store=usePet(),[messages,setMessages]=useState([]),[input,setInput]=useState(''),[reply,setReply]=useState('回來啦，今天一起聊個成語吧。'),[busy,setBusy]=useState(false),[error,setError]=useState(''),[question,setQuestion]=useState(null),[rewardNote,setRewardNote]=useState('')
- const request=useRef(null),state=useRef({}),lastQuestion=useRef(null)
+ const request=useRef(null),state=useRef({}),lastQuestion=useRef(null),apiKey=useApiKey()
  state.current={store,messages,action,onBusy,onCelebrate,input,question}
  function cancel(){request.current?.abort.abort();request.current=null;setBusy(false);state.current.onBusy?.(false)}
  async function ask(text,retry=false){
@@ -17,6 +18,7 @@ export default function PetChat({notice='',action='study',onBusy,onCelebrate,onS
   }
   const stopping=!retry&&/^(先聊天|不想答|先不答|不要考我|停止提問)[！!。？?]?$/.test(text)
   if(stopping){cancel();setQuestion(null);setReply('好，我們輕鬆聊。你想問哪個成語或故事？想繼續時說「再問我」就好。');setInput('');setError('');setRewardNote('');return}
+  if(!readKey()){setError('要先輸入你自己的 Claude API 金鑰，鼎鼎才可以和你聊天。');setInput(text);lastQuestion.current={text,lesson:retry?lastQuestion.current?.lesson:s.question,needKey:true};onNeedKey?.();return}
   request.current?.abort.abort()
   const activeQuestion=retry?lastQuestion.current?.lesson:s.question
   const next=[...s.messages,{role:'user',content:text}].slice(-11),job={abort:new AbortController()},profileId=s.store.active
@@ -24,8 +26,8 @@ export default function PetChat({notice='',action='study',onBusy,onCelebrate,onS
   const deadline=setTimeout(()=>job.abort.abort(),50000)
   const payload={messages:next,memory:s.store.profiles[s.store.active].history.slice(0,20),petState:s.action,...(activeQuestion?{quiz:{id:activeQuestion.id,answer:text},conversationQuiz:true}:{stream:true})}
   try{
-   const r=await fetch('/api/dingding',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:job.abort.signal})
-   if(!r.ok){const data=await r.json();throw Error(data.error||'連線暫時中斷。')}
+   const r=await fetch('/api/dingding',{method:'POST',headers:keyHeaders(),body:JSON.stringify(payload),signal:job.abort.signal})
+   if(!r.ok){const data=await r.json();if(data.code==='NEED_KEY'||data.code==='BAD_KEY'){lastQuestion.current.needKey=true;onNeedKey?.()}throw Error(data.error||'連線暫時中斷。')}
    let response
    if(activeQuestion){
     const data=await r.json()
@@ -43,7 +45,7 @@ export default function PetChat({notice='',action='study',onBusy,onCelebrate,onS
     try{response=r.headers.get('content-type')?.includes('text/event-stream')?await readClaudeStream(r.body,value=>{if(request.current===job)setReply(value)}):(await r.json()).text}
     catch(e){
      if(job.abort.signal.aborted)throw e
-     const fallback=await fetch('/api/dingding',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,stream:false}),signal:job.abort.signal})
+     const fallback=await fetch('/api/dingding',{method:'POST',headers:keyHeaders(),body:JSON.stringify({...payload,stream:false}),signal:job.abort.signal})
      const data=await fallback.json();if(!fallback.ok)throw Error(data.error||'連線暫時中斷。');response=data.text
     }
    }
@@ -59,5 +61,5 @@ export default function PetChat({notice='',action='study',onBusy,onCelebrate,onS
   return()=>{request.current?.abort.abort();request.current=null;state.current.onBusy?.(false)}
  },[store?.active])
  useEffect(()=>{if(notice){cancel();setError('');setRewardNote('');setReply(notice+(state.current.question?'\n\n'+questionFor(state.current.question):''))}},[notice])
- return <div className="dd-conversation"><div className="dd-speech" aria-live="polite"><strong>鼎鼎 <span>{busy?'正在想你的話…':'陪你聊聊'}</span></strong><p>{reply}</p>{rewardNote&&<div className="dd-chat-reward" role="status"><strong>這次聊天獎勵</strong><ul>{rewardNote.split('|').map(line=><li key={line}>{line}</li>)}</ul></div>}{error&&<div role="alert"><small>{error}</small> <button type="button" className="dd-key" onClick={()=>ask(lastQuestion.current.text,true)} disabled={busy}>重試原問題</button></div>}</div><form onSubmit={e=>{e.preventDefault();if(input.trim()){onSend?.();ask(input.trim())}}}><input aria-label="對鼎鼎說話" placeholder="跟鼎鼎說說你的想法…" value={input} onChange={e=>setInput(e.target.value)} maxLength={600}/><button className="dd-send" disabled={!input.trim()||!store} aria-label="送出訊息">送出</button></form></div>
+ return <div className="dd-conversation"><div className="dd-speech" aria-live="polite"><strong>鼎鼎 <span>{busy?'正在想你的話…':'陪你聊聊'}</span></strong><p>{reply}</p>{rewardNote&&<div className="dd-chat-reward" role="status"><strong>這次聊天獎勵</strong><ul>{rewardNote.split('|').map(line=><li key={line}>{line}</li>)}</ul></div>}{error&&<div role="alert"><small>{error}</small> {lastQuestion.current?.needKey&&<button type="button" className="dd-key" onClick={()=>onNeedKey?.()}>🔑 {apiKey?'更換金鑰':'輸入金鑰'}</button>} {(!lastQuestion.current?.needKey||apiKey)&&<button type="button" className="dd-key" onClick={()=>ask(lastQuestion.current.text,true)} disabled={busy}>{lastQuestion.current?.needKey?'送出剛才的話':'重試原問題'}</button>}</div>}</div><form onSubmit={e=>{e.preventDefault();if(input.trim()){onSend?.();ask(input.trim())}}}><input aria-label="對鼎鼎說話" placeholder="跟鼎鼎說說你的想法…" value={input} onChange={e=>setInput(e.target.value)} maxLength={600}/><button className="dd-send" disabled={!input.trim()||!store} aria-label="送出訊息">送出</button></form></div>
 }

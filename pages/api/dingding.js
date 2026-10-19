@@ -8,7 +8,11 @@ export default async function handler(req,res){
  const origin=req.headers.origin
  if(origin){try{if(new URL(origin).host!==req.headers.host)return res.status(403).json({error:'不允許的來源。'})}catch{return res.status(403).json({error:'不允許的來源。'})}}
  if(req.body?.quiet)return res.status(409).json({error:'測驗中先安靜陪考，完成後再聊。'})
- if(!process.env.ANTHROPIC_API_KEY||!process.env.ANTHROPIC_MODEL)return res.status(503).json({error:'Claude 尚未設定完成，請由老師設定伺服器金鑰與模型。典故提醒仍可使用。'})
+ // 金鑰由用家在瀏覽器輸入，經 x-user-api-key 轉交 Anthropic；伺服器不儲存、不記錄，也不使用伺服器自己的金鑰。
+ const apiKey=String(req.headers['x-user-api-key']||'').trim()
+ if(!apiKey)return res.status(401).json({error:'要先輸入你自己的 Claude API 金鑰，鼎鼎才可以和你聊天。',code:'NEED_KEY'})
+ if(!/^sk-ant-[A-Za-z0-9_-]{20,300}$/.test(apiKey))return res.status(401).json({error:'金鑰格式不正確，請重新輸入。',code:'BAD_KEY'})
+ const model=process.env.ANTHROPIC_MODEL||'claude-haiku-5-5'
  const {messages,memory}=req.body||{}
  if(!Array.isArray(messages)||!messages.length||messages.length>12||messages.some(m=>!m||!['user','assistant'].includes(m.role)||typeof m.content!=='string'||!m.content.trim()||m.content.length>1200)||messages.at(-1).role!=='user')return res.status(400).json({error:'訊息格式不正確，單則請控制在 1200 字內。'})
  const ip=(process.env.VERCEL?String(req.headers['x-forwarded-for']||'').split(',')[0].trim():req.socket?.remoteAddress)||'local',now=Date.now(),bucket=rate.get(ip)||{at:now,n:0}
@@ -27,8 +31,9 @@ export default async function handler(req,res){
  const disconnect=()=>{if(!res.writableEnded)upstream.abort()}
  res.on('close',disconnect)
  try{
-  const response=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:process.env.ANTHROPIC_MODEL,max_tokens:600,stream:!quiz&&req.body.stream===true,system,messages:quiz?[{role:'user',content:quiz.answer}]:messages.map(({role,content})=>({role,content}))}),signal:upstream.signal})
-  if(!response.ok)return res.status(response.status===429?429:502).json({error:response.status===401?'Claude 金鑰無效，請由老師檢查設定。':response.status===429?'Claude 目前忙碌或用量不足，請稍後再試。':'Claude 暫時無法回答，請檢查模型設定或稍後再試。'})
+  const response=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},body:JSON.stringify({model,max_tokens:600,stream:!quiz&&req.body.stream===true,system,messages:quiz?[{role:'user',content:quiz.answer}]:messages.map(({role,content})=>({role,content}))}),signal:upstream.signal})
+  if(response.status===401||response.status===403)return res.status(401).json({error:'你的 Claude 金鑰無效或沒有權限，請按「🔑 金鑰」重新輸入。',code:'BAD_KEY'})
+  if(!response.ok)return res.status(response.status===429?429:502).json({error:response.status===429?'Claude 目前忙碌或你的帳戶用量不足，請稍後再試。':response.status===400?'Claude 拒絕了這次請求，請檢查帳戶餘額或稍後再試。':'Claude 暫時無法回答，請稍後再試。'})
   if(!quiz&&req.body.stream===true){
    res.setHeader('Content-Type','text/event-stream; charset=utf-8')
    res.setHeader('Cache-Control','no-cache, no-transform')

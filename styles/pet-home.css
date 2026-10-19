@@ -206,3 +206,9 @@
 .dd-mode-condition{display:block;font-weight:400;font-size:.9em;line-height:1.7;white-space:nowrap}
 .dd-help-table{overscroll-behavior-x:contain}
 @media(max-width:600px){.dd-help .dd-completion-table{min-width:0;table-layout:fixed}.dd-completion-table th:first-child{width:34%}.dd-completion-table th,.dd-completion-table td{padding:9px 4px;font-size:13px}.dd-completion-table thead th{font-size:12px}}
+
+/* 用家自行輸入 Claude API 金鑰 */
+.dd-key-dialog{max-width:560px}.dd-key-dialog form{display:grid;gap:10px;margin:12px 0}.dd-key-dialog label{font-weight:700}
+.dd-key-row{display:flex;gap:8px}.dd-key-row input{flex:1;min-width:0;font-size:16px;padding:10px 12px;border:2px solid #e9dac2;border-radius:12px;font-family:monospace}
+.dd-key-dialog .dd-key-remember{display:flex;gap:8px;align-items:flex-start;font-weight:500;font-size:15px}.dd-key-remember input{margin-top:4px}
+.dd-key-status code{background:#fff3dc;padding:2px 6px;border-radius:6px;word-break:break-all}.dd-key-dialog [role=alert]{color:#b8325a;margin:0}

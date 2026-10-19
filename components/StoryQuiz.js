@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react'
 import CATALOG from './petCatalog.json'
 import usePet from './usePet'
 import {rewardStoryAnswer} from './petMemory'
+import {keyHeaders} from './userApiKey'
 export default function StoryQuiz({open,onClose}){
  const dialog=useRef(null),job=useRef(null),store=usePet()
  const [lesson,setLesson]=useState(null),[answer,setAnswer]=useState(''),[busy,setBusy]=useState(false),[result,setResult]=useState(null),[error,setError]=useState('')
@@ -12,7 +13,7 @@ export default function StoryQuiz({open,onClose}){
   const controller=new AbortController(),profileId=store.active;job.current=controller;setBusy(true);setError('')
   const timer=setTimeout(()=>controller.abort(),50000)
   try{
-   const r=await fetch('/api/dingding',{method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,body:JSON.stringify({messages:[{role:'user',content:answer}],quiz:{id:lesson.id,answer}})})
+   const r=await fetch('/api/dingding',{method:'POST',headers:keyHeaders(),signal:controller.signal,body:JSON.stringify({messages:[{role:'user',content:answer}],quiz:{id:lesson.id,answer}})})
    const data=await r.json();if(!r.ok)throw Error(data.error||'評閱暫時中斷，請重試。')
    if(typeof data.correct!=='boolean'||data.idiom!==lesson.idiom)throw Error('評閱結果不完整，請重試。')
    if(job.current!==controller)return
