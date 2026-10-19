@@ -1,7 +1,7 @@
 import CATALOG from './petCatalog.json'
 
 // Only publish costumes whose full set of actions passed visual and file QA.
-export const READY_OUTFITS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+export const READY_OUTFITS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
 export const OUTFIT_STATES = ['idle','thinking','happy','sad','celebrate','eat','shy','sleep']
 export function outfitAsset(outfit, action='idle', size='small') {
  const item=CATALOG.find(c=>c.idiom===outfit)
