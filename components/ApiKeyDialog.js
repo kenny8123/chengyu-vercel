@@ -11,8 +11,8 @@ export default function ApiKeyDialog({open,onClose}){
   onClose?.()
  }
  return <dialog ref={dialog} className="dd-closet dd-key-dialog" onCancel={onClose} onClose={onClose}>
- <header><h2>🔑 鼎鼎的 Claude 金鑰</h2><button type="button" className="dd-key" onClick={onClose} aria-label="關閉金鑰設定">✕</button></header>
- <p>和鼎鼎聊天要用你自己的 Claude API 金鑰，費用由你的 Anthropic 帳戶支付。沒有金鑰也可以照顧鼎鼎、換造型。</p>
+ <header><h2>🔑 鼎鼎的金鑰</h2><button type="button" className="dd-key" onClick={onClose} aria-label="關閉金鑰設定">✕</button></header>
+ <p>和鼎鼎聊天要用你自己的 API 金鑰，沒有金鑰也可以照顧鼎鼎、換造型。</p>
  {current?<p className="dd-key-status">目前使用：<code>{mask(current.key)}</code>（{current.remember?'已記住在這部裝置':'只限這個分頁，關閉後自動清除'}）</p>:<p className="dd-key-status">目前未輸入金鑰。</p>}
  <form onSubmit={submit}>
   <label htmlFor="dd-api-key">{current?'換一條新金鑰':'貼上你的金鑰'}</label>
@@ -21,6 +21,5 @@ export default function ApiKeyDialog({open,onClose}){
   {error&&<p role="alert">{error}</p>}
   <div className="dd-quiz-actions"><button className="dd-key" disabled={!value.trim()}>儲存金鑰</button>{current&&<button type="button" className="dd-key" onClick={()=>{clearKey();onClose?.()}}>刪除金鑰</button>}</div>
  </form>
- <small>金鑰只存在你的瀏覽器；每次聊天經本站伺服器轉交 Anthropic，伺服器不會儲存或記錄。到 <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noreferrer">Claude 開發者平台</a> 建立金鑰，並建議設定每月用量上限。</small>
  </dialog>
 }
