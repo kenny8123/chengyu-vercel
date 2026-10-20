@@ -105,21 +105,31 @@ for (let qy = 0; qy < 2; qy++) for (let qx = 0; qx < 2; qx++) {
   const face = []
   for (let y = by0; y <= by1; y++) for (let x = bx0; x <= bx1; x++) {
     const inEllipse = ((x - ecx) / erx) ** 2 + ((y - ecy) / ery) ** 2 <= 1
-    if (!outside[(y - by0) * bw + (x - bx0)] || (inEllipse && ((x - ecx) / erx) ** 2 + ((y - ecy) / ery) ** 2 <= 0.8)) face.push(y * W + x)
+    if (!outside[(y - by0) * bw + (x - bx0)] || (inEllipse && ((x - ecx) / erx) ** 2 + ((y - ecy) / ery) ** 2 <= 1.0)) face.push(y * W + x)
   }
+  // 臉邊的灰色反光、舊面珠：在放大 15% 的橢圓內，灰色／粉紅色也塗黑（頭盔是白色，不受影響）
+  for (let y = Math.max(Y0, Math.floor(ecy - ery * 1.15)); y <= Math.min(Y1 - 1, Math.ceil(ecy + ery * 1.15)); y++)
+    for (let x = Math.max(X0, Math.floor(ecx - erx * 1.15)); x <= Math.min(X1 - 1, Math.ceil(ecx + erx * 1.15)); x++) {
+      if (((x - ecx) / (erx * 1.15)) ** 2 + ((y - ecy) / (ery * 1.15)) ** 2 > 1) continue
+      const p = y * W + x, [h, s, v] = hsv(p)
+      if ((s < 0.3 && v < 0.8) || ((h >= 320 || h <= 20) && s > 0.2 && v > 0.55)) face.push(p)
+    }
   let painted = 0
   for (const p of face) {
     const [h, s, v] = hsv(p)
-    const pink = (h >= 320 || h <= 20) && s > 0.2 && v > 0.55 && Math.abs((p % W) - ecx) / erx > 0.42
+    const pink = (h >= 320 || h <= 20) && s > 0.2 && v > 0.55 && false
     if (pink) continue
     data[p * C] = 54; data[p * C + 1] = 49; data[p * C + 2] = 52; painted++
   }
   // 幼細閉眼弧線（向下彎，安詳）＋細小嘴
-  const ew = fw * 0.2, ey = fy0 + fh * 0.5, sw = Math.max(3, fw * 0.028), col = '#ece5dc'
-  const arc = cx => `<path d="M ${cx - ew / 2} ${ey} Q ${cx} ${ey + ew * 0.32} ${cx + ew / 2} ${ey}" stroke="${col}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>`
-  const mx = fx0 + fw / 2, my = fy0 + fh * 0.67, mw = fw * 0.06
-  const mouth = `<path d="M ${mx - mw} ${my} Q ${mx - mw / 2} ${my + mw * 0.7} ${mx} ${my} Q ${mx + mw / 2} ${my + mw * 0.7} ${mx + mw} ${my}" stroke="#d9cfc6" stroke-width="${Math.max(2, sw * 0.7)}" fill="none" stroke-linecap="round"/>`
-  svgs.push(arc(fx0 + fw * 0.3) + arc(fx0 + fw * 0.7) + mouth)
+  // 照第 1–17 套的睡顏：上面細白眉弧、下面粗白彎月閉眼、細細粉紅笑嘴、兩邊粉紅面珠
+  const W_ = fw, white = '#f4efe8'
+  const brow = cx => { const bw = W_ * 0.1, by = fy0 + fh * 0.36; return `<path d="M ${cx - bw / 2} ${by + bw * 0.12} Q ${cx} ${by - bw * 0.28} ${cx + bw / 2} ${by + bw * 0.12}" stroke="${white}" stroke-width="${Math.max(3, W_ * 0.024)}" fill="none" stroke-linecap="round"/>` }
+  const eye = cx => { const ew = W_ * 0.3, ey = fy0 + fh * 0.58; return `<path d="M ${cx - ew / 2} ${ey} Q ${cx} ${ey + ew * 0.42} ${cx + ew / 2} ${ey} Q ${cx} ${ey + ew * 0.2} ${cx - ew / 2} ${ey} Z" fill="${white}" stroke="${white}" stroke-width="${Math.max(1.5, W_ * 0.008)}" stroke-linejoin="round"/>` }
+  const blush = cx => `<ellipse cx="${cx}" cy="${fy0 + fh * 0.75}" rx="${W_ * 0.065}" ry="${W_ * 0.04}" fill="#f48a9a" opacity="0.85"/>`
+  const mx = fx0 + fw / 2, my = fy0 + fh * 0.74, mw = W_ * 0.05
+  const mouth = `<path d="M ${mx - mw} ${my} Q ${mx} ${my + mw * 1.3} ${mx + mw} ${my} Z" fill="#f27c8e"/>`
+  svgs.push(blush(fx0 + fw * 0.17) + blush(fx0 + fw * 0.83) + brow(fx0 + fw * 0.3) + brow(fx0 + fw * 0.7) + eye(fx0 + fw * 0.3) + eye(fx0 + fw * 0.7) + mouth)
   dbg.push(`cell ${qx},${qy} face ${fw}x${fh} painted ${painted}`)
 }
 const svg = Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${svgs.join('')}</svg>`)
