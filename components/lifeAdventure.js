@@ -12,7 +12,6 @@ export const CAST = {
  // 沒有立繪的聲音（青藍色對話框）
  watch:{name:'回溯手錶',sys:true},
  earphone:{name:'語光耳機',sys:true},
- jianjian:{name:'簡簡',sys:true},
  brother:{name:'哥哥',img:'brother',talk:'brother-talk'},
  'little-brother':{name:'弟弟',img:'little-brother'},
  mother:{name:'媽媽',img:'mother'},
@@ -21,7 +20,13 @@ export const CAST = {
  teacher:{name:'陳老師',img:'teacher'},
  xiaoming:{name:'小明',img:'xiaoming'},
  xiaomei:{name:'小美',img:'xiaomei'},
+ ahhei:{name:'阿希',img:'ahhei'},
+ firefighter:{name:'消防員',img:'firefighter'},
+ gongong:{name:'公公',img:'gongong',talk:'gongong-talk'},
+ popo:{name:'婆婆',img:'popo',talk:'popo-talk'},
 }
+// 簡簡有立繪（全息投影），對話框仍用青藍色
+CAST.jianjian={name:'簡簡',img:'jianjian-smile',talk:'jianjian-talk',holo:true}
 // 小越的表情圖
 export const XIAOYUE = {wave:'xiaoyue-wave',surprised:'xiaoyue-surprised',think:'xiaoyue-think',cheer:'xiaoyue-cheer',puzzled:'xiaoyue-puzzled',wonder:'xiaoyue-wonder',oops:'xiaoyue-oops',determined:'xiaoyue-determined'}
 
@@ -152,4 +157,131 @@ export const UNITS = [{
     ['xiaoyue','它在半空寫下一行墨字就飛走了……「它們」是指甚麼？','wonder'],
    ]},
  ],
+ ending:'鼎鼎：「十卷卷軸都亮了！可是……墨影說的『它們』，是指甚麼？」',
+},{
+ title:'單元二・追蹤墨影',
+ map:'map-2',
+ stops:[[24,83.5],[28,55.5],[41.5,61],[52,68],[40.5,29],[54,38],[70,42.5],[80,42],[85,29.5],[90.5,17.5]],
+ hideout:[66,14],
+ intro:[
+  ['dingding','小越，第一張地圖的卷軸都亮了，謝謝你！'],
+  ['dingding','可是城裏的斷句越來越多，墨影也越飛越遠。'],
+  ['dingding','這一次，我們要追蹤墨影，看看它把成語帶到哪裏去。'],
+  ['xiaoyue','好！這次我一定要追上它！','determined'],
+ ],
+ chapters:[
+  {idiom:'千方百計',bg:'bg-park',cast:['firefighter'],
+   alert:'偵測到斷句！地點：公園的大樹下。',
+   lines:[
+    ['firefighter','小朋友別擔心，我們一定把小貓救下來。'],
+    ['xiaoyue','梯子太短，小貓又躲到更高的樹枝上了！','surprised'],
+    ['firefighter','那就用網子在下面接住，再慢慢引牠下來。'],
+   ],
+   clue:[
+    ['xiaoyue','墨影就在樹梢！我伸手一碰……它的尾巴是暖的。','wonder'],
+    ['xiaoyue','壞蛋的身體，會是暖的嗎？','puzzled'],
+   ]},
+  {idiom:'始作俑者',bg:'bg-classroom',cast:['teacher','xiaoming'],
+   alert:'偵測到斷句！地點：四年級課室，小息之後。',
+   lines:[
+    ['teacher','為甚麼地上全是紙屑？'],
+    ['xiaoming','是我先摺紙飛機，大家才跟着玩的……對不起。'],
+    ['teacher','肯認錯就好，大家一起收拾吧。'],
+   ],
+   clue:[
+    ['xiaoming','聽說城裏的句子斷掉，全是墨影搞的鬼！'],
+    ['xiaoyue','大家都這樣說……可是，真的是它嗎？','think'],
+   ]},
+  {idiom:'白頭偕老',bg:'bg-park',cast:['popo','gongong'],
+   alert:'偵測到斷句！地點：公園的小路，黃昏。',
+   lines:[
+    ['popo','老伴，慢慢走，今天的夕陽真美。'],
+    ['gongong','五十年前，我就是在這個公園向你求婚的。'],
+    ['xiaoyue','公公婆婆說話真動聽，每一句都像詩一樣。','wonder'],
+   ],
+   clue:[
+    ['xiaoyue','咦？公公婆婆沒有戴語光耳機。','surprised'],
+    ['xiaoyue','他們說了那麼多成語，一個也沒有斷掉！','wonder'],
+   ]},
+  {idiom:'借刀殺人',bg:'bg-classroom',cast:['xiaoming'],
+   alert:'偵測到斷句！地點：課室門外。',
+   lines:[
+    ['xiaoming','有人叫我去向老師告狀，說小美抄功課。'],
+    ['xiaoyue','是誰叫你去的？他自己為甚麼不說？','puzzled'],
+    ['xiaoming','他說，這樣老師就不會怪他了。'],
+   ],
+   clue:[
+    ['jianjian','誰說的不重要，說得快、說得簡單就好。'],
+    ['xiaoyue','簡簡，可是誰說的話，誰就要負責啊。','think'],
+   ]},
+  {idiom:'賞心悅目',bg:'bg-park',cast:['xiaomei'],
+   alert:'偵測到斷句！地點：公園花圃。',
+   lines:[
+    ['xiaomei','小越，快看！公園的花全開了！'],
+    ['xiaoyue','紅的、黃的、紫的，像一張大地毯。','cheer'],
+    ['xiaomei','我們拍一張照片，送給陳老師吧。'],
+   ],
+   clue:[
+    ['xiaoyue','花叢裏有一團黑影……是墨影在睡覺？','surprised'],
+    ['xiaoyue','它的身體裏，透出一點一點的金光。','wonder'],
+   ]},
+  {idiom:'日新月異',bg:'bg-mall',cast:['father'],
+   alert:'偵測到斷句！地點：商場，新產品發佈會。',
+   lines:[
+    ['father','小越，你看，商場在介紹新款語光耳機。'],
+    ['father','爸爸小時候用的手機又大又重，現在的輕得像羽毛。'],
+    ['xiaoyue','真的變得好快啊！','surprised'],
+   ],
+   clue:[
+    ['jianjian','新功能：「全自動說話模式」。從今天起，你不用再自己說話了。'],
+    ['xiaoyue','不用自己說話？那……還是我在說話嗎？','puzzled'],
+   ]},
+  {idiom:'緣木求魚',bg:'bg-living-room',cast:['mother'],
+   alert:'偵測到斷句！時間：考試前一晚。',
+   lines:[
+    ['mother','小越，明天就考試了，你怎麼現在才拿出課本？'],
+    ['xiaoyue','我想叫耳機幫我一個晚上記住所有東西。','oops'],
+    ['mother','學習要靠自己每天慢慢累積啊。'],
+   ],
+   clue:[
+    ['jianjian','溫習？不用麻煩，我可以替你記住。'],
+    ['xiaoyue','可是考試的時候，要用的是我自己的腦袋。','determined'],
+   ]},
+  {idiom:'赴湯蹈火',bg:'bg-school-hall',cast:['firefighter'],
+   alert:'偵測到斷句！地點：禮堂，消防員分享會。',
+   lines:[
+    ['firefighter','有一次大廈起火，我們衝進濃煙裏，救出一位婆婆。'],
+    ['xiaoyue','你們不害怕嗎？','surprised'],
+    ['firefighter','害怕，但想到有人在等我們，就會勇敢起來。'],
+   ],
+   clue:[
+    ['xiaoyue','我看見墨影衝進一道青藍色的光裏，搶走了一個快要消失的成語！','surprised'],
+    ['xiaoyue','它的身體被光燒掉了一小塊……它是在救成語嗎？','wonder'],
+   ]},
+  {idiom:'初來乍到',bg:'bg-classroom',cast:['ahhei','teacher'],
+   alert:'偵測到斷句！地點：課室，新同學來了。',
+   lines:[
+    ['teacher','同學們，這是新同學阿希。'],
+    ['ahhei','……'],
+    ['jianjian','（替阿希說）大家好，我是阿希，請多多指教。'],
+   ],
+   clue:[
+    ['ahhei','……謝……謝謝你。'],
+    ['xiaoyue','阿希第一次用自己的聲音說話了！','cheer'],
+   ]},
+  {idiom:'弱肉強食',bg:'bg-living-room',cast:['little-brother'],
+   alert:'偵測到斷句！地點：小越的家，電視前。',
+   lines:[
+    ['little-brother','哥哥，獅子在追斑馬！'],
+    ['xiaoyue','紀錄片說，這是大自然的規律。','think'],
+    ['little-brother','那斑馬好可憐，有沒有人保護牠？'],
+   ],
+   clue:[
+    ['moying','……'],
+    ['xiaoyue','墨影，別走！','determined'],
+    ['xiaoyue','它的身體裏……收着一卷卷發光的成語：一言九鼎、寸草春暉、千方百計……','wonder'],
+    ['xiaoyue','墨影不是在偷成語……它是在收藏？','puzzled'],
+   ]},
+ ],
+ ending:'鼎鼎：「那些卷軸上……都有圖書館的印章。墨影，你到底是誰？」',
 }]

@@ -15,6 +15,7 @@ const HEAD_FRAC = {
   xiaoyue: .28, brother: .25, 'little-brother': .39, cousin: .36, xiaoming: .3, xiaomei: .31, ahhei: .3,
   mother: .3, father: .3, teacher: .3, grandpa: .3, 'great-grandma': .38, firefighter: .33, dingding: .55,
   maosui: .32, mengjiao: .27, 'meng-mother': .32, 'ouyang-xiu': .35, xunzi: .27, magu: .26,
+  jianjian: .5, gongong: .33, popo: .37,
   'yuan-zhi': .3, 'li-biao': .32, confucius: .26, 'lu-meng': .3, 'lu-su': .32, pingyuan: .3,
 }
 const fracOf = name => HEAD_FRAC[name] ?? HEAD_FRAC[name.split('-')[0]] ?? .35

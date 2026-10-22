@@ -19,6 +19,8 @@ const SHEETS = {
   'moying-sheet': ['moying-giggle', 'moying-suck', 'moying-sad', 'moying-happy'],
   'dingding-sheet': ['dingding-wave', 'dingding-talk', 'dingding-think', 'dingding-cheer'],
   'brother-sheet': ['brother', 'brother-talk', 'brother-think', 'brother-thumb'],
+  'jianjian-sheet': ['jianjian-smile', 'jianjian-talk', 'jianjian-think', 'jianjian-surprised'],
+  'couple-sheet': ['gongong', 'gongong-talk', 'popo', 'popo-talk'],
   'shooter-sheet': ['shooter-aim', 'shooter-fire', 'shooter-recoil', 'shooter-cheer'],
   // 四個射擊角度：左上、右上、左、右（瞄準／開槍）
   'shoot-diag-sheet': ['shoot-ul-aim', 'shoot-ul-fire', 'shoot-ur-aim', 'shoot-ur-fire'],
