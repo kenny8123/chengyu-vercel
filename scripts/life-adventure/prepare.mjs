@@ -16,7 +16,9 @@ fs.mkdirSync(OUT, { recursive: true })
 const SHEETS = {
   'xiaoyue-sheet': ['xiaoyue-wave', 'xiaoyue-surprised', 'xiaoyue-think', 'xiaoyue-cheer'],
   'moying-sheet': ['moying-giggle', 'moying-suck', 'moying-sad', 'moying-happy'],
-  'family-1': ['brother', 'little-brother', 'mother', 'father'],
+  'dingding-sheet': ['dingding-wave', 'dingding-talk', 'dingding-think', 'dingding-cheer'],
+  'brother-sheet': ['brother', 'brother-talk', 'brother-think', 'brother-thumb'],
+  'family-1': ['brother-old', 'little-brother', 'mother', 'father'],
   'family-2': ['grandpa', 'great-grandma', 'teacher', 'cousin'],
   'friends': ['xiaoming', 'xiaomei', 'ahhei', 'firefighter'],
   'ancient-01': ['maosui', 'mengjiao', 'meng-mother', 'ouyang-xiu'],

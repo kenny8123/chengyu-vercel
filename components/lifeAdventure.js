@@ -1,6 +1,6 @@
 // 成語穿越者：生活成語地圖冒險（故事構思：遊戲作者）
-// 每一站：穿越到古代看典故 → 回到今天的生活 → 墨影吸走句子裏的成語，射回正確的成語。
-// 句子來自 lifeSentences.json 第一句；對白一律書面語。
+// 每一站：今天的生活對話 → 關鍵句子的成語被墨影吸走（變成墨跡）→ 射回正確的成語 → 穿越到古代看典故。
+// 關鍵句子來自 lifeSentences.json 第一句，由 say 的角色說出（預設小越）；對白一律書面語。
 
 export const CAST = {
  xiaoyue:{name:'小越',img:'xiaoyue-wave'},
@@ -39,7 +39,8 @@ export const UNITS = [{
  intro:[
   ['dingding','歡迎來到成語時空圖書館！我是管理員鼎鼎。'],
   ['moying','嘻嘻！四十卷卷軸裏的成語，全被我吸走了！'],
-  ['dingding','小越，請你幫幫忙！我們穿越到古代看懂每個成語，再回到今天，把成語填回句子裏。'],
+  ['dingding','小越，請你幫幫忙！大家說話時，句子裏的成語都變成了墨跡。你要想一想，把正確的成語射回去。'],
+  ['dingding','每找回一個成語，我們就穿越到古代，看看它是從哪個故事來的。'],
   ['xiaoyue','好！成語穿越者小越，出發！','cheer'],
  ],
  chapters:[
@@ -130,7 +131,7 @@ export const UNITS = [{
     ['li-biao','我也不讓！我們請皇帝評評理。'],
     ['dingding','皇帝說：「把路分成兩半，各走各的吧！」「分道揚鑣」比喻依各自的志向，各奔前程。'],
    ]},
-   modern:{bg:'bg-living-room',cast:['brother'],who:'哥哥說',lines:[
+   modern:{bg:'bg-living-room',cast:['brother'],say:'brother',lines:[
     ['brother','小越，我快要升中學了，可是我和最好的朋友考進了不同的學校。'],
     ['xiaoyue','那你們以後不能一起上學了？','surprised'],
     ['brother','我們約好了，各自努力，放假再見。'],
