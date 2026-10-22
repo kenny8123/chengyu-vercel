@@ -1,11 +1,13 @@
-﻿import {useEffect,useRef,useState} from 'react'
+import {useEffect,useRef,useState} from 'react'
 import CATALOG from './petCatalog.json'
 import LIFE from './lifeSentences.json'
 
-// ???瑁遘擗刻?嚗身閮????雿?
-// ??蝛輯???啣??瘥???蝡?撠望??府???頠賂???敺銝撘菜?隤?靽∠?嚗隞?偌敶拇?銵絲?梢◢嚗?// ?縑??嚗ublic/images/scroll-postcards/NN.webp嚗N嚗?隤楊??嚗?怠末?＊蝷箝鼓鋆賭葉??const READY=new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
+// 成語卷軸館藏（設計構思：遊戲作者）
+// 成語穿越者・地圖冒險每完成一站，就打開該成語的卷軸；打開後是一張成語明信片（現代水彩旅行海報風）。
+// 明信片圖：public/images/scroll-postcards/NN.webp（NN＝成語編號），未畫好的顯示「繪製中」。
+const READY=new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
 const VERSION='20261023c'
-const BLANK='嚗選撚嚗選撚'
+const BLANK='＿＿＿＿'
 const card=c=>`/images/scroll-postcards/${String(c.id).padStart(2,'0')}.webp?v=${VERSION}`
 export default function ScrollCollection({open,onClose,profile}){
  const ref=useRef(null),[view,setView]=useState(null)
@@ -13,25 +15,25 @@ export default function ScrollCollection({open,onClose,profile}){
  const owned=new Set(profile?.scrolls||[]),c=view&&CATALOG.find(x=>x.idiom===view)
  const sentence=c&&(LIFE.find(x=>x.idiom===c.idiom)?.sentences[0]||'')
  return <dialog ref={ref} className="dd-closet sc-dialog" onCancel={onClose} onClose={onClose}>
-  <header><h2>?? ???瑁遘擗刻?</h2><button className="dd-key" onClick={onClose} aria-label="???瑁遘擗刻?">??/button></header>
+  <header><h2>📜 成語卷軸館藏</h2><button className="dd-key" onClick={onClose} aria-label="關閉卷軸館藏">✕</button></header>
   {!c&&<>
-   <p>?具?隤忽頞?啣?????曉?銝??隤???撠望???銝?瑕頠詻歇?嗉? <b>{owned.size}</b> / 40 ?瑯?/p>
+   <p>在「成語穿越者・地圖冒險」每找回一個成語，這裏就會打開一卷卷軸。已收藏 <b>{owned.size}</b> / 40 卷。</p>
    <div className="sc-grid">{CATALOG.map((x,i)=>{const got=owned.has(x.idiom)
-    return <button key={x.id} className={`sc-scroll${got?' got':''}`} onClick={()=>got&&setView(x.idiom)} disabled={!got} aria-label={got?`????{x.idiom}?頠節:`蝚?${i+1} 蝡??瑁遘嚗??芣?}>
-     <span className="sc-roll" aria-hidden="true"><i/><em>{got?x.idiom:'嚗?嚗?'}</em><i/></span>
-     <small>{got?'???瑁遘':`?啣??蝚?${i+1} 蝡}</small>
+    return <button key={x.id} className={`sc-scroll${got?' got':''}`} onClick={()=>got&&setView(x.idiom)} disabled={!got} aria-label={got?`打開「${x.idiom}」卷軸`:`第 ${i+1} 站的卷軸，尚未收藏`}>
+     <span className="sc-roll" aria-hidden="true"><i/><em>{got?x.idiom:'？？？？'}</em><i/></span>
+     <small>{got?'打開卷軸':`地圖冒險第 ${i+1} 站`}</small>
     </button>})}</div>
   </>}
   {c&&<div className="sc-open">
-   <button className="dd-key sc-back" onClick={()=>setView(null)}>??餈?擗刻?</button>
+   <button className="dd-key sc-back" onClick={()=>setView(null)}>← 返回館藏</button>
    <figure className="sc-card">
     <div className="sc-photo">
-     {READY.has(c.id)?<img src={card(c)} alt={`??{c.idiom}??隤?靽∠?嚗隞?偌敶拇?銵絲?望??冑}/>:<div className="sc-wait">?縑?鼓鋆賭葉?色?/div>}     <span className="sc-postmark" aria-hidden="true">???征?擗?br/>蝚?{c.id} ??/span>
+     {READY.has(c.id)?<img src={card(c)} alt={`「${c.idiom}」成語明信片：現代水彩旅行海報插畫`}/>:<div className="sc-wait">明信片繪製中……</div>}     <span className="sc-postmark" aria-hidden="true">成語時空圖書館<br/>第 {c.id} 卷</span>
     </div>
     <figcaption>
      <h3>{c.idiom}</h3>
      <p className="sc-mean">{c.meaning}</p>
-     {sentence&&<p className="sc-say">?sentence.split(BLANK)[0]}<b>{c.idiom}</b>{sentence.split(BLANK)[1]}??/p>}
+     {sentence&&<p className="sc-say">「{sentence.split(BLANK)[0]}<b>{c.idiom}</b>{sentence.split(BLANK)[1]}」</p>}
     </figcaption>
    </figure>
   </div>}
