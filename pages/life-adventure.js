@@ -12,7 +12,9 @@ import {CAST,XIAOYUE,UNITS} from '../components/lifeAdventure'
 // 用鼎鼎的燈泡光射回正確的成語，再穿越到古代看它的典故。
 const BLANK='＿＿＿＿'
 const KEY='life-adventure-v1'
-const IMG=n=>`/images/life-adventure/${n}.webp`
+// 圖片更新後改呢個數字，瀏覽器就會重新下載，唔會顯示舊圖
+const ASSET_VERSION='20261023'
+const IMG=n=>`/images/life-adventure/${n}.webp?v=${ASSET_VERSION}`
 const LEFT=new Set(['xiaoyue','dingding'])
 // 四個射擊角度：槍口（燈泡）在圖中的位置（比例）和圖的闊高比；按目標方向選最接近的角度
 const AIM={ul:{m:[.355,.166],r:481/512},ur:{m:[.77,.158],r:481/512},l:{m:[.295,.277],r:531/512},r:{m:[.814,.264],r:531/512}}

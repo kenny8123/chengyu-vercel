@@ -36,7 +36,17 @@ const SHEETS = {
 // 動畫用的四格（開槍動作）：四格用同一個取景框，切換動作時角色才不會跳
 const SAME_FRAME = new Set(['shooter-sheet', 'shoot-diag-sheet', 'shoot-side-sheet'])
 
-const isWhite = (d, i, t) => d[i] > t && d[i + 1] > t && d[i + 2] > t
+// 全身小越：地面的米色影子和兩腳之間的白色也要去掉（淺色、低彩度、跟背景相連就當背景）
+// 只用在小越身上；鼎鼎米白色的身體、簡簡半透明的邊會被誤刪，所以不用
+const RELAX = new Set(['xiaoyue-sheet', 'xiaoyue-sheet-2', 'shooter-sheet', 'shoot-diag-sheet', 'shoot-side-sheet'])
+let relaxed = false
+
+const isWhite = (d, i, t) => {
+  if (d[i] > t && d[i + 1] > t && d[i + 2] > t) return true
+  if (!relaxed) return false
+  const r = d[i], g = d[i + 1], b = d[i + 2]
+  return (r + g + b) / 3 > 205 && Math.max(r, g, b) - Math.min(r, g, b) < 62
+}
 
 // 找格與格之間最白的那條直線/橫線
 function findGap(d, w, h, vertical) {
@@ -60,6 +70,20 @@ function cutout(rgba, w, h) {
   for (let x = 0; x < w; x++) { push(x, 0); push(x, h - 1) }
   for (let y = 0; y < h; y++) { push(0, y); push(w - 1, y) }
   while (stack.length) { const p = stack.pop(), x = p % w, y = (p / w) | 0; push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1) }
+  // 小越：被影子圍住的淺色大塊（兩腳之間）也是背景；只看下半身、面積夠大的，襪子等小塊保留
+  if (relaxed) {
+    const seen = new Uint8Array(w * h)
+    for (let s = Math.floor(h * .55) * w; s < w * h; s++) {
+      if (bg[s] || seen[s] || !isWhite(rgba, s * 4, 232)) continue
+      const region = [s], q = [s]; seen[s] = 1; let sy = 0
+      while (q.length) {
+        const p = q.pop(), x = p % w, y = (p / w) | 0; sy += y
+        for (const n of [x > 0 ? p - 1 : -1, x < w - 1 ? p + 1 : -1, y > 0 ? p - w : -1, y < h - 1 ? p + w : -1])
+          if (n >= 0 && !bg[n] && !seen[n] && isWhite(rgba, n * 4, 232)) { seen[n] = 1; q.push(n); region.push(n) }
+      }
+      if (region.length > w * h * .004 && sy / region.length > h * .62) for (const p of region) bg[p] = 1
+    }
+  }
   for (let p = 0; p < w * h; p++) {
     if (bg[p]) { rgba[p * 4 + 3] = 0; continue }
     const x = p % w, y = (p / w) | 0
@@ -88,7 +112,9 @@ for (const file of fs.readdirSync(SRC).filter(f => f.endsWith('.png'))) {
   }
   const { data, info } = await sharp(src).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
   const { width: w, height: h } = info
+  relaxed = false
   const gx = findGap(data, w, h, true), gy = findGap(data, w, h, false)
+  relaxed = RELAX.has(name)
   const rects = [[0, 0, gx, gy], [gx, 0, w - gx, gy], [0, gy, gx, h - gy], [gx, gy, w - gx, h - gy]]
   const cw0 = Math.min(gx, w - gx), ch0 = Math.min(gy, h - gy)
   for (const [n, [x, y, cw1, ch1]] of rects.entries()) {
