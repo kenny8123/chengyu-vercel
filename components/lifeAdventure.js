@@ -29,7 +29,7 @@ export const CAST = {
  'lu-su':{name:'魯肅',img:'lu-su'},
 }
 // 小越的表情圖
-export const XIAOYUE = {wave:'xiaoyue-wave',surprised:'xiaoyue-surprised',think:'xiaoyue-think',cheer:'xiaoyue-cheer'}
+export const XIAOYUE = {wave:'xiaoyue-wave',surprised:'xiaoyue-surprised',think:'xiaoyue-think',cheer:'xiaoyue-cheer',puzzled:'xiaoyue-puzzled',wonder:'xiaoyue-wonder',oops:'xiaoyue-oops',determined:'xiaoyue-determined'}
 
 export const UNITS = [{
  title:'單元一・第一次穿越',
@@ -41,9 +41,9 @@ export const UNITS = [{
   ['dingding','小越，歡迎來到成語時空圖書館！我是管理員鼎鼎。'],
   ['moying','嘻嘻！四十卷卷軸裏的成語，全被我吸走了！'],
   ['dingding','糟了！大家說話時，句子裏的成語都變成了墨跡。小越，請你幫我把成語取回來！'],
-  ['dingding','這盞燈泡送給你。聽清楚大家的話，想想哪個成語合適，就用燈泡的光把它射回去。'],
+  ['dingding','這把「成語光線槍」送給你！聽清楚大家的話，想想哪個成語合適，就用光線槍把它射回句子裏。'],
   ['dingding','每取回一個成語，你就可以穿越到古代，看看它的故事。我在圖書館等你的好消息！'],
-  ['xiaoyue','交給我吧！成語穿越者小越，出發！','cheer'],
+  ['xiaoyue','交給我吧！成語穿越者小越，出發！','determined'],
  ],
  chapters:[
   {idiom:'一言九鼎',

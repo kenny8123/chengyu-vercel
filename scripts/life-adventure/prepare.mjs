@@ -15,9 +15,11 @@ fs.mkdirSync(OUT, { recursive: true })
 // 每張四格表的格子名（左上、右上、左下、右下）
 const SHEETS = {
   'xiaoyue-sheet': ['xiaoyue-wave', 'xiaoyue-surprised', 'xiaoyue-think', 'xiaoyue-cheer'],
+  'xiaoyue-sheet-2': ['xiaoyue-puzzled', 'xiaoyue-wonder', 'xiaoyue-oops', 'xiaoyue-determined'],
   'moying-sheet': ['moying-giggle', 'moying-suck', 'moying-sad', 'moying-happy'],
   'dingding-sheet': ['dingding-wave', 'dingding-talk', 'dingding-think', 'dingding-cheer'],
   'brother-sheet': ['brother', 'brother-talk', 'brother-think', 'brother-thumb'],
+  'shooter-sheet': ['shooter-aim', 'shooter-fire', 'shooter-recoil', 'shooter-cheer'],
   'family-1': ['brother-old', 'little-brother', 'mother', 'father'],
   'family-2': ['grandpa', 'great-grandma', 'teacher', 'cousin'],
   'friends': ['xiaoming', 'xiaomei', 'ahhei', 'firefighter'],
@@ -25,6 +27,9 @@ const SHEETS = {
   'ancient-02': ['xunzi', 'magu', 'yuan-zhi', 'li-biao'],
   'ancient-03': ['confucius', 'lu-meng', 'lu-su', 'pingyuan'],
 }
+
+// 動畫用的四格（開槍動作）：四格用同一個取景框，切換動作時角色才不會跳
+const SAME_FRAME = new Set(['shooter-sheet'])
 
 const isWhite = (d, i, t) => d[i] > t && d[i + 1] > t && d[i + 2] > t
 
@@ -80,9 +85,11 @@ for (const file of fs.readdirSync(SRC).filter(f => f.endsWith('.png'))) {
   const { width: w, height: h } = info
   const gx = findGap(data, w, h, true), gy = findGap(data, w, h, false)
   const rects = [[0, 0, gx, gy], [gx, 0, w - gx, gy], [0, gy, gx, h - gy], [gx, gy, w - gx, h - gy]]
-  for (const [n, [x, y, cw, ch]] of rects.entries()) {
+  const cw0 = Math.min(gx, w - gx), ch0 = Math.min(gy, h - gy)
+  for (const [n, [x, y, cw1, ch1]] of rects.entries()) {
+    const same = SAME_FRAME.has(name), cw = same ? cw0 : cw1, ch = same ? ch0 : ch1
     const buf = await sharp(data, { raw: info }).extract({ left: x, top: y, width: cw, height: ch }).raw().toBuffer()
-    const rgba = cutout(buf, cw, ch), b = bbox(rgba, cw, ch)
+    const rgba = cutout(buf, cw, ch), b = same ? { x0: 0, y0: 0, x1: cw - 1, y1: ch - 1 } : bbox(rgba, cw, ch)
     await sharp(rgba, { raw: { width: cw, height: ch, channels: 4 } })
       .extract({ left: b.x0, top: b.y0, width: b.x1 - b.x0 + 1, height: b.y1 - b.y0 + 1 })
       .resize({ height: 512, withoutEnlargement: true })

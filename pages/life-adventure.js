@@ -14,6 +14,8 @@ const BLANK='＿＿＿＿'
 const KEY='life-adventure-v1'
 const IMG=n=>`/images/life-adventure/${n}.webp`
 const LEFT=new Set(['xiaoyue','dingding'])
+// 小越這幾個表情本身已望向右，站在左邊時不用左右反轉
+const FACES_RIGHT=new Set(['puzzled','wonder','oops','determined'])
 const shuffle=list=>{const a=[...list];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const meaning=idiom=>CATALOG.find(c=>c.idiom===idiom)?.meaning||''
 const lifeOf=idiom=>LIFE.find(x=>x.idiom===idiom)
@@ -38,7 +40,8 @@ export default function LifeAdventure(){
  const [done,setDone]=useState({}),[typed,setTyped]=useState(0),[voice,setVoice]=useState(true),[introSeen,setIntroSeen]=useState(false)
  const [targets,setTargets]=useState([]),[gone,setGone]=useState([]),[wrong,setWrong]=useState(0),[hint,setHint]=useState(''),[hit,setHit]=useState(false),[beam,setBeam]=useState(null)
  const [reward,setReward]=useState(null),[walkFrom,setWalkFrom]=useState(null),[walking,setWalking]=useState(false),[teacher,setTeacher]=useState(false)
- const run=useRef(null),stageRef=useRef(null)
+ const [pose,setPose]=useState('aim'),[gift,setGift]=useState(null)
+ const run=useRef(null),stageRef=useRef(null),gunRef=useRef(null)
  const ch=chapters[stop],life=lifeOf(ch.idiom),sentence=life.sentences[0],sayer=ch.modern.say||'xiaoyue'
 
  // 對白次序：intro＝開場；story＝今天的生活 → 關鍵句（墨跡）→ 墨影；ancient＝穿越到古代看典故
@@ -46,7 +49,9 @@ export default function LifeAdventure(){
   :phase==='story'?[...ch.modern.lines.map(l=>({bg:ch.modern.bg,cast:ch.modern.cast,line:l})),
     {bg:ch.modern.bg,cast:ch.modern.cast,line:[sayer,sentence],key:true},
     {bg:ch.modern.bg,cast:ch.modern.cast,line:['moying','嘻嘻！我把句子裏的成語吸走了，看你能不能射回去！']}]
-  :phase==='ancient'?[{portal:'穿越到古代……'},...ch.ancient.lines.map(l=>({bg:ch.ancient.bg,cast:ch.ancient.cast,line:l}))]:[]
+  // 典故只保留一句：小越疑惑「穿越到哪裏」，再由古人說出關鍵的一句（沒有古人的章節用小越的第一句）
+  :phase==='ancient'?[{portal:'穿越到古代……'},{bg:ch.ancient.bg,cast:ch.ancient.cast,line:['xiaoyue','咦？我穿越到哪一段故事裏了？','puzzled']},
+    {bg:ch.ancient.bg,cast:ch.ancient.cast,line:ch.ancient.lines.find(l=>l[0]!=='xiaoyue')||ch.ancient.lines[0]}]:[]
  const cur=seq[step]
 
  // 讀取上次的進度（同一個學習檔案才接續）
@@ -75,6 +80,13 @@ export default function LifeAdventure(){
   return()=>{clearTimeout(a);clearTimeout(b)}
  },[phase,walkFrom])
 
+ // 射中後先播「命中！」，再自動穿越去看典故
+ useEffect(()=>{
+  if(phase!=='shoot'||!hit)return
+  const t=setTimeout(toAncient,2300)
+  return()=>clearTimeout(t)
+ },[phase,hit])
+
  function next(){
   if(cur&&!cur.portal&&typed<cur.line[1].length){setTyped(cur.line[1].length);return}
   if(step+1<seq.length){setStep(step+1);return}
@@ -83,24 +95,26 @@ export default function LifeAdventure(){
   if(phase==='ancient')backToMap()
  }
  function start(){if(introSeen)setPhase('map');else{setStep(0);setPhase('intro')}}
- function openStop(i){setStop(i);setStep(0);setHit(false);setHint('');setWrong(0);setGone([]);setPhase('story')}
+ function openStop(i){setStop(i);setStep(0);setHit(false);setHint('');setWrong(0);setGone([]);setGift(null);setPhase('story')}
  function startShoot(){
   const others=chapters.map(c=>c.idiom).filter(x=>![ch.idiom,life.near,life.far].includes(x))
   setTargets(shuffle([ch.idiom,life.near,life.far,shuffle(others)[0]]))
-  setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setPhase('shoot')
+  setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setPose('aim');setPhase('shoot')
   speak(sentence,voice)
  }
  function shoot(idiom,e){
   if(hit||gone.includes(idiom))return
-  // 光束：由鼎鼎（舞台底部中間）射向被按的成語
-  const st=stageRef.current?.getBoundingClientRect(),r=e.currentTarget.getBoundingClientRect()
-  if(st){const x1=st.width/2,y1=st.height-30,x2=r.left+r.width/2-st.left,y2=r.top+r.height/2-st.top;setBeam({x:x1,y:y1,len:Math.hypot(x2-x1,y2-y1),deg:Math.atan2(y2-y1,x2-x1)*180/Math.PI,k:Date.now()})}
+  // 光束：由小越的成語光線槍槍口（燈泡）射向被按的成語；小越換成開槍、後座力的動作
+  const st=stageRef.current?.getBoundingClientRect(),r=e.currentTarget.getBoundingClientRect(),g=gunRef.current?.getBoundingClientRect()
+  if(st){const x1=g?g.left+g.width*.78-st.left:st.width/2,y1=g?g.top+g.height*.12-st.top:st.height-30,x2=r.left+r.width/2-st.left,y2=r.top+r.height/2-st.top;setBeam({x:x1,y:y1,len:Math.hypot(x2-x1,y2-y1),deg:Math.atan2(y2-y1,x2-x1)*180/Math.PI,k:Date.now()})}
+  const isHit=idiom===ch.idiom
+  setPose('fire');setTimeout(()=>setPose('recoil'),180);setTimeout(()=>setPose(isHit?'cheer':'aim'),480)
   const fresh=!(stop in done)
-  if(idiom===ch.idiom){
+  if(isHit){
    setHit(true);setHint('')
    if(fresh){
     recordLearning({idiom:ch.idiom,kind:'answer',correct:wrong===0})
-    giftOutfit(ch.idiom)
+    if(giftOutfit(ch.idiom))setGift(ch.idiom)
     const d={...done,[stop]:wrong===0};setDone(d);persist(d)
    }
    speak(sentence.replace(BLANK,ch.idiom),voice)
@@ -176,6 +190,7 @@ export default function LifeAdventure(){
     </div>
     <div className="la-side">
      <p className="la-tip">{nextStop>=0?<>★ 按地圖上發光的第 <b>{nextStop+1}</b> 站出發。先讀大家的對話，想想哪個成語適合，再把它射回句子裏。</>:'★ 十站都完成了！'}</p>
+     {gift&&<p className="la-tip gift" role="status">🎁 成語送回圖書館了！鼎鼎得到「{gift}」紀念衣服，可到<a href="/pet">寵物的家</a>換上。</p>}
      {worksheet}
      {Object.keys(done).length>0&&<button className="la-link" onClick={restart}>重新開始這張地圖</button>}
     </div>
@@ -186,10 +201,10 @@ export default function LifeAdventure(){
      {cur.portal?<p className="la-portal-text"><GameText text={cur.portal}/></p>:<>
       <div className="la-bg" style={{backgroundImage:`url(${IMG(cur.bg)})`}}/>
       {/* RPG 式：只顯示說話的人的半身立繪，小越在左下角、其他角色在右下角，站在對話框前面（busts.mjs 統一頭部大小） */}
-      {cur.line[0]!=='moying'&&<img key={step} src={IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}`}/>}
-      {(phase==='intro'||cur.key||cur.line[0]==='moying')&&<img src={IMG(cur.key||cur.line[0]==='moying'?'moying-suck-float':'moying-float')} alt="墨影" className="la-moying"/>}
+      <img key={step} src={cur.line[0]==='moying'?IMG('moying-float'):IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}${cur.line[0]==='moying'?' moying':''}${FACES_RIGHT.has(cur.line[2])?' noflip':''}`}/>
+      {cur.key&&<img src={IMG('moying-suck-float')} alt="墨影正在吸走成語" className="la-moying"/>}
       {/* 情境對話（RPG 式）：小越在左、其他角色在右，說話的人亮起；底部一個大對話框 */}
-      <div className={`la-vn ${cur.line[0]==='moying'?'mid':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${cur.line[0]==='moying'?' ink':''}`} aria-live="polite">
+      <div className={`la-vn ${cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${cur.line[0]==='moying'?' ink':''}`} aria-live="polite">
        <b>【{CAST[cur.line[0]].name}】</b>
        <p>{cur.key?(typed<cur.line[1].length?cur.line[1].slice(0,typed).replace(BLANK,'⋯⋯'):<Said text={cur.line[1]} idiom={ch.idiom} hit={false}/>):cur.line[1].slice(0,typed)}</p>
        {typed>=cur.line[1].length&&<span className="la-vn-more" aria-hidden="true">▼</span>}
@@ -212,19 +227,11 @@ export default function LifeAdventure(){
      <img src={IMG(hit?'moying-sad-float':'moying-float')} alt="墨影" className="la-moying fly"/>
      {targets.map((t,n)=><button key={t} className={`la-target t${n}${gone.includes(t)?' gone':''}${hit&&t===ch.idiom?' win':''}${hit&&t!==ch.idiom?' fade':''}`} onClick={e=>shoot(t,e)} disabled={hit||gone.includes(t)} aria-label={`射向「${t}」`}><GameText text={t}/></button>)}
      {beam&&<span key={beam.k} className="la-beam" style={{left:beam.x,top:beam.y,width:beam.len,transform:`rotate(${beam.deg}deg)`}}/>}
-     <span className={`la-bulb${hit?' win':''}`} aria-hidden="true">💡</span>
+     {/* 小越拿着成語光線槍：瞄準 → 開槍 → 後座力；射中後歡呼 */}
+     <img ref={gunRef} src={IMG('shooter-'+pose)} alt="小越拿着成語光線槍" className={`la-shooter ${pose}`}/>
+     {hit&&<p className="la-hitfx" role="status"><GameText text="命中！"/><small>穿越去看典故……</small></p>}
     </div>
-    {!hit&&<p className={`la-hint${hint?' on':''}`}>{hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用燈泡的光射回去。'}</p>}
-    {hit&&<div className="la-win" role="status">
-     {costume&&<img src={costume} alt={`鼎鼎穿上「${ch.idiom}」造型`}/>}
-     <div>
-      <h3><GameText text="命中！"/></h3>
-      <p>{done[stop]?'第一次就射中，真厲害！':'找回來了！下次先想清楚意思再射。'}</p>
-      <p>「{ch.idiom}」：{meaning(ch.idiom)}</p>
-      <p className="la-gift">🎁 成語送回圖書館了！鼎鼎得到「{ch.idiom}」紀念衣服，可到<a href="/pet">寵物的家</a>換上。</p>
-      <div className="la-win-btns"><button className="btn btn-go" onClick={toAncient}>穿越去看典故 →</button><button className="btn btn-ghost" onClick={backToMap}>回到地圖</button></div>
-     </div>
-    </div>}
+    <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${ch.idiom}」：${meaning(ch.idiom)}`:hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用成語光線槍射回去。'}</p>
    </div>}
 
    {phase==='done'&&<div className="la-done">
@@ -302,8 +309,10 @@ export default function LifeAdventure(){
    .la-portal-text{position:absolute;inset:auto 0 12%;text-align:center;font-size:clamp(1.6rem,4vw,2.6rem);margin:0}
    .la-bg{position:absolute;inset:-12px;background-size:cover;background-position:center;filter:blur(1.5px) brightness(.95)}
    .la-actor{position:absolute;bottom:0;height:56%;width:auto;max-width:30%;object-fit:cover;object-position:top center;z-index:4;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));animation:la-in .3s ease-out}
-   .la-actor.left{left:1%}
+   .la-actor.left{left:1%;scale:-1 1}
+   .la-actor.left.noflip{scale:1 1}
    .la-actor.right{right:1%}
+   .la-actor.moying{height:44%;bottom:6%;object-fit:contain}
    @keyframes la-in{from{opacity:0;transform:translateY(6%)}}
    .la-vn{position:absolute;left:2%;right:2%;bottom:3%;z-index:3;min-height:27%;background:rgba(24,22,58,.86);border:3px solid #e8c873;border-radius:14px;padding:10px 18px 14px;color:#fff;box-shadow:0 0 0 3px rgba(24,22,58,.5),0 8px 20px rgba(0,0,0,.35);cursor:pointer}
    .la-vn.pl{padding-left:29%}.la-vn.pr{padding-right:29%}.la-vn.mid{padding-left:6%;padding-right:6%}
@@ -351,16 +360,17 @@ export default function LifeAdventure(){
    .la-target.fade{opacity:.2}
    .la-target.win{border-color:#b6f5b6;background:rgba(30,110,60,.55);animation:la-glow 1s infinite;opacity:1}
    .la-beam{position:absolute;height:7px;transform-origin:0 50%;background:linear-gradient(90deg,#fff6a8,#ffd84d);border-radius:6px;box-shadow:0 0 16px #ffe27a;animation:la-beam .45s ease-out forwards;pointer-events:none}
-   .la-bulb{position:absolute;bottom:3%;left:50%;transform:translateX(-50%);font-size:clamp(2.4rem,6vw,3.6rem);filter:drop-shadow(0 0 14px #ffe27a) drop-shadow(0 0 6px #fff3b0);pointer-events:none;animation:la-float 2s ease-in-out infinite}
-   .la-bulb.win{filter:drop-shadow(0 0 26px #fff27a) drop-shadow(0 0 10px #fff)}
+   .la-shooter{position:absolute;bottom:-2%;left:50%;height:40%;transform:translateX(-50%);pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));transition:transform .08s}
+   .la-shooter.aim{animation:la-sway 2.4s ease-in-out infinite}
+   .la-shooter.recoil{transform:translateX(-50%) translateY(4%)}
+   .la-shooter.cheer{height:44%}
+   @keyframes la-sway{50%{transform:translateX(-50%) translateY(-2%) rotate(-1deg)}}
+   .la-hitfx{position:absolute;left:0;right:0;top:34%;text-align:center;margin:0;font-size:clamp(2.6rem,7vw,4.6rem);z-index:5;animation:la-pop .5s;pointer-events:none}
+   .la-hitfx small{display:block;font-size:1rem;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(60,20,80,.8);margin-top:6px}
+   .la-hint.ok{border-color:var(--grass);background:#eefbea}
    .la-hint{margin:12px 0 0;background:#fffaf0;border:3px dashed #e8d8bd;border-radius:16px;padding:10px 14px;line-height:1.7;font-weight:500}
    .la-hint.on{border-color:var(--berry);background:#fff0f4}
-   .la-win{display:flex;align-items:center;gap:16px;margin-top:12px;background:#fff;border:4px solid var(--grass);border-radius:20px;padding:14px 18px}
-   .la-win>img{width:130px;height:130px;object-fit:contain;flex:0 0 auto}
-   .la-win h3{margin:0 0 4px;font-size:2rem}.la-win p{margin:4px 0;line-height:1.6}
    .la-gift{color:var(--choc-soft)}
-   .la-win-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-   .la-win-btns .btn{padding:12px 22px;font-size:1.05rem}
    .la-done{max-width:760px;margin:0 auto;text-align:center}
    .la-done h2{font-size:clamp(1.6rem,4vw,2.4rem)}
    .la-done .la-sheet{text-align:left;margin:16px 0}
@@ -395,7 +405,7 @@ export default function LifeAdventure(){
     .la-actor{max-width:40%;height:46%}
     .la-vn{min-height:32%;padding:8px 12px 12px}
     .la-vn.pl{padding-left:38%}.la-vn.pr{padding-right:38%}
-    .la-win{flex-direction:column;text-align:center}.la-win-btns{justify-content:center}
+    .la-shooter{height:30%}
    }
   `}</style>
  </>
