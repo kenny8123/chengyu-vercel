@@ -6,7 +6,7 @@ import LIFE from './lifeSentences.json'
 // 成語穿越者・地圖冒險每完成一站，就打開該成語的卷軸；打開後是一張成語明信片（現代水彩旅行海報風）。
 // 明信片圖：public/images/scroll-postcards/NN.webp（NN＝成語編號），未畫好的顯示「繪製中」。
 const READY=new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
-const VERSION='20261023'
+const VERSION='20261023b'
 const BLANK='＿＿＿＿'
 const card=c=>`/images/scroll-postcards/${String(c.id).padStart(2,'0')}.webp?v=${VERSION}`
 export default function ScrollCollection({open,onClose,profile}){
