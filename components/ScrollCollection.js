@@ -9,9 +9,6 @@ const READY=new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
 const VERSION='20261023'
 const BLANK='＿＿＿＿'
 const card=c=>`/images/scroll-postcards/${String(c.id).padStart(2,'0')}.webp?v=${VERSION}`
-// 每張明信片的世界地標城市（郵票上顯示），與地圖冒險該站的背景同一地標
-const CITY=['倫敦','富士山','紐約','聖米歇爾山','聖托里尼','杜拜','吉薩','三藩市','悉尼','台北','長城','西安','巴黎','莫斯科','荷蘭','新加坡','威尼斯','冰島','紐約','東非草原']
-
 export default function ScrollCollection({open,onClose,profile}){
  const ref=useRef(null),[view,setView]=useState(null)
  useEffect(()=>{if(open)ref.current?.showModal();else{ref.current?.close();setView(null)}},[open])
@@ -31,9 +28,7 @@ export default function ScrollCollection({open,onClose,profile}){
    <button className="dd-key sc-back" onClick={()=>setView(null)}>← 返回館藏</button>
    <figure className="sc-card">
     <div className="sc-photo">
-     {READY.has(c.id)?<img src={card(c)} alt={`「${c.idiom}」成語明信片：現代水彩旅行海報插畫`}/>:<div className="sc-wait">明信片繪製中……</div>}
-     <span className="sc-stamp" aria-hidden="true"><b>{c.emoji}</b><small>{CITY[c.id-1]||'環遊世界'}</small></span>
-     <span className="sc-postmark" aria-hidden="true">成語時空圖書館<br/>第 {c.id} 卷</span>
+     {READY.has(c.id)?<img src={card(c)} alt={`「${c.idiom}」成語明信片：現代水彩旅行海報插畫`}/>:<div className="sc-wait">明信片繪製中……</div>}     <span className="sc-postmark" aria-hidden="true">成語時空圖書館<br/>第 {c.id} 卷</span>
     </div>
     <figcaption>
      <h3>{c.idiom}</h3>
@@ -59,10 +54,7 @@ export default function ScrollCollection({open,onClose,profile}){
    .sc-photo{position:relative;border-radius:3px;overflow:hidden;background:#f6efe2;aspect-ratio:3/2}
    .sc-photo img{display:block;width:100%;height:100%;object-fit:cover}
    .sc-wait{display:flex;align-items:center;justify-content:center;height:100%;color:#9c8466;font-weight:700}
-   .sc-stamp{position:absolute;top:10px;right:10px;width:74px;padding:6px 4px;background:#fffaf0;border:3px dotted #c9a873;text-align:center;transform:rotate(3deg);box-shadow:0 2px 6px rgba(0,0,0,.15)}
-   .sc-stamp b{display:block;font-size:1.6rem;line-height:1.2}
-   .sc-stamp small{display:block;font-size:.62rem;font-weight:800;color:#8a5a2b;letter-spacing:.04em}
-   .sc-postmark{position:absolute;top:18px;right:92px;width:84px;height:84px;border:2px solid rgba(150,60,50,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.66rem;font-weight:800;line-height:1.4;color:rgba(150,60,50,.7);transform:rotate(-12deg)}
+   .sc-postmark{position:absolute;top:14px;right:14px;width:84px;height:84px;border:2px solid rgba(150,60,50,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.66rem;font-weight:800;line-height:1.4;color:rgba(150,60,50,.7);transform:rotate(-12deg)}
    .sc-card figcaption{padding:12px 6px 0}
    .sc-card h3{margin:0;font-size:clamp(1.8rem,5vw,2.6rem);font-weight:900;letter-spacing:.12em;color:#3d2a18}
    .sc-mean{margin:6px 0 0;color:#6b5440;font-weight:600;line-height:1.7}
@@ -70,7 +62,7 @@ export default function ScrollCollection({open,onClose,profile}){
    .sc-say b{color:#b3471e}
    @keyframes sc-unroll{from{clip-path:inset(0 100% 0 0);opacity:.4}to{clip-path:inset(0 0 0 0);opacity:1}}
    @media(prefers-reduced-motion:reduce){.sc-card{animation:none}}
-   @media(max-width:600px){.sc-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.sc-roll{height:56px}.sc-roll em{font-size:.9rem}.sc-postmark{display:none}.sc-stamp{width:60px}.sc-stamp b{font-size:1.2rem}}
+   @media(max-width:600px){.sc-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.sc-roll{height:56px}.sc-roll em{font-size:.9rem}.sc-postmark{width:64px;height:64px;font-size:.55rem}}
   `}</style>
  </dialog>
 }

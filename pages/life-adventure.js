@@ -300,7 +300,9 @@ export default function LifeAdventure(){
    .la-top{display:flex;align-items:center;gap:12px;margin-bottom:12px}
    .la-top h1{flex:1;margin:0;font-size:1.5rem;font-weight:800;color:var(--choc);text-shadow:2px 2px 0 #ffd98a}
    .la-back{background:#fff;border:2px solid #e8d8bd;border-radius:999px;padding:8px 14px;font-weight:700;color:var(--choc);cursor:pointer;font-size:.95rem;white-space:nowrap}
-   .la-mapview{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start}
+   /* 地圖頁上下排：地圖在上，單元分頁、提示、學習單在下 */
+   .la-mapview{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;max-width:1000px;margin:0 auto}
+   @media(min-width:900px){.la-sheet ol{columns:2;column-gap:28px}.la-sheet li{break-inside:avoid}}
    .la-map{position:relative;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(90,61,43,.25)}
    .la-mapimg{display:block;width:100%;height:auto}
    .la-stop{position:absolute;transform:translate(-50%,-50%);width:6.4%;aspect-ratio:1;min-width:34px;border-radius:50%;border:3px solid #fff;font-weight:800;font-size:clamp(.8rem,1.6vw,1.15rem);display:flex;align-items:center;justify-content:center;padding:0}
