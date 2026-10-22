@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import {useEffect,useRef,useState} from 'react'
 import CompletionReward from '../components/CompletionReward'
-import {recordLearning,startRewardRun,completeRewardRun,readPet,giftOutfit} from '../components/petMemory'
+import {recordLearning,startRewardRun,completeRewardRun,readPet,unlockScrolls} from '../components/petMemory'
 import {outfitAsset} from '../components/outfitAssets'
 import CATALOG from '../components/petCatalog.json'
 import LIFE from '../components/lifeSentences.json'
@@ -73,6 +73,8 @@ export default function LifeAdventure(){
   if(x&&!x.units&&x.done)x={units:{0:{done:x.done,run:x.run,introSeen:x.introSeen}},voice:x.voice}  // 舊格式（只有單元一）
   prog.current=x?.units?x:{units:{}}
   setVoice(prog.current.voice!==false)
+  // 以前完成的站也補開卷軸館藏
+  unlockScrolls(UNITS.flatMap((u,k)=>Object.keys(unitSave(k)?.done||{}).map(n=>u.chapters[n]?.idiom).filter(Boolean)))
   // 由最後一個已開放、未完成的單元開始
   let i=0;while(i+1<UNITS.length&&allDone(i))i++
   loadUnit(i)
@@ -141,7 +143,7 @@ export default function LifeAdventure(){
    setHit(true);setHint('')
    if(fresh){
     recordLearning({idiom:ch.idiom,kind:'answer',correct:wrong===0})
-    if(giftOutfit(ch.idiom))setGift(ch.idiom)
+    if(unlockScrolls([ch.idiom]))setGift(ch.idiom)
     const d={...done,[stop]:wrong===0};setDone(d);persist(d)
    }
    speak(sentence.replace(BLANK,ch.idiom),voice)
@@ -214,7 +216,7 @@ export default function LifeAdventure(){
      <div className="la-units" role="tablist" aria-label="選擇單元">{UNITS.map((u,i)=><button key={u.title} role="tab" aria-selected={ui===i} disabled={!unlocked(i)} className={ui===i?'on':''} onClick={()=>goUnit(i)}>{unlocked(i)?'':'🔒 '}{u.title.split('・')[0]}<small>{u.title.split('・')[1]}</small></button>)}
       {UNITS.length<4&&<button disabled>🔒 單元{['','','三','四'][UNITS.length]||''}<small>製作中</small></button>}</div>
      <p className="la-tip">{nextStop>=0?<>★ 按地圖上發光的第 <b>{no(nextStop)}</b> 站出發。先讀大家的對話，想想哪個成語適合，再把它射回句子裏。</>:'★ 十站都完成了！'}</p>
-     {gift&&<p className="la-tip gift" role="status">🎁 成語送回圖書館了！鼎鼎得到「{gift}」紀念衣服，可到<a href="/pet">寵物的家</a>換上。</p>}
+     {gift&&<p className="la-tip gift" role="status">📜 成語送回圖書館了！<a href="/pet">寵物的家</a>的成語卷軸館藏打開了「{gift}」卷軸。</p>}
      {worksheet}
      {Object.keys(done).length>0&&<button className="la-link" onClick={restart}>重新開始這張地圖</button>}
     </div>
@@ -342,7 +344,7 @@ export default function LifeAdventure(){
    @keyframes la-in{from{opacity:0;transform:translateY(6%)}}
    .la-vn{position:absolute;left:2%;right:2%;bottom:3%;z-index:3;min-height:27%;background:rgba(24,22,58,.86);border:3px solid #e8c873;border-radius:14px;padding:10px 18px 14px;color:#fff;box-shadow:0 0 0 3px rgba(24,22,58,.5),0 8px 20px rgba(0,0,0,.35);cursor:pointer}
    .la-vn.pl{padding-left:29%}.la-vn.pr{padding-right:29%}
-   /* 回溯手錶、語光耳機、簡簡：沒有立繪的科技聲音，用青藍色全息對話框 */
+   /* 回溯手錶、簡簡：科技聲音，用青藍色全息對話框 */
    .la-vn.sys{background:rgba(8,48,70,.86);border-color:#6fe7ff;box-shadow:0 0 0 3px rgba(8,48,70,.45),0 0 18px rgba(111,231,255,.45);padding-left:5%;padding-right:5%}
    .la-vn.sys b{color:#8ff1ff}
    .la-vn.sys p{font-family:'Noto Sans TC',monospace;letter-spacing:.03em}

@@ -45,6 +45,8 @@ export function completeRewardRun(run,answers){
 }
 export function makeProfile(name){const x=readPet(),id=`student-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;x.profiles[id]={name:name.trim().slice(0,24),...fresh()};x.active=id;return savePet(x)}
 export function switchProfile(id){const x=readPet();if(x.profiles[id]){x.active=id;return savePet(x)}}
+// 地圖冒險每完成一站，成語卷軸館藏打開該成語的卷軸（明信片）
+export function unlockScrolls(ids){const x=readPet(),p=x.profiles[x.active];p.scrolls=p.scrolls||[];const add=ids.filter(id=>CATALOG.some(c=>c.idiom===id)&&!p.scrolls.includes(id));if(!add.length)return false;p.scrolls.push(...add);return savePet(x)}
 // 地圖冒險每完成一站，古人送鼎鼎該成語的紀念衣服
 export function giftOutfit(id){const x=readPet(),p=x.profiles[x.active];if(!CATALOG.some(c=>c.idiom===id))return false;p.ownedOutfits=p.ownedOutfits||[];if(p.ownedOutfits.includes(id))return false;p.ownedOutfits.push(id);return savePet(x)}
 export function wearOutfit(id){const x=readPet(),p=x.profiles[x.active];if(id===null||unlocked(p,id)){p.outfit=id;return savePet(x)}return false}
