@@ -38,7 +38,7 @@ export default function LifeAdventure(){
  const [done,setDone]=useState({}),[typed,setTyped]=useState(0),[voice,setVoice]=useState(true),[introSeen,setIntroSeen]=useState(false)
  const [targets,setTargets]=useState([]),[gone,setGone]=useState([]),[wrong,setWrong]=useState(0),[hint,setHint]=useState(''),[hit,setHit]=useState(false),[beam,setBeam]=useState(null)
  const [reward,setReward]=useState(null),[walkFrom,setWalkFrom]=useState(null),[walking,setWalking]=useState(false),[teacher,setTeacher]=useState(false)
- const run=useRef(null),stageRef=useRef(null),chatRef=useRef(null)
+ const run=useRef(null),stageRef=useRef(null)
  const ch=chapters[stop],life=lifeOf(ch.idiom),sentence=life.sentences[0],sayer=ch.modern.say||'xiaoyue'
 
  // 對白次序：intro＝開場；story＝今天的生活 → 關鍵句（墨跡）→ 墨影；ancient＝穿越到古代看典故
@@ -67,7 +67,6 @@ export default function LifeAdventure(){
   const t=setInterval(()=>{n+=1;setTyped(n);if(n>=len)clearInterval(t)},45)
   return()=>clearInterval(t)
  },[phase,stop,step])
- useEffect(()=>{const c=chatRef.current;if(c)c.scrollTop=c.scrollHeight},[step,typed,phase])
 
  // 回到地圖時，小越由剛完成的一站走到下一站
  useEffect(()=>{
@@ -109,7 +108,7 @@ export default function LifeAdventure(){
   }
   if(wrong===0&&fresh)recordLearning({idiom:ch.idiom,kind:'answer',correct:false})
   const w=wrong+1;setWrong(w);setGone([...gone,idiom])
-  const h=w===1?`「${idiom}」的意思是：${meaning(idiom)}和這句話說的事不一樣，再讀一次吧。`:`鼎鼎提示：要找的成語，意思是「${meaning(ch.idiom)}」`
+  const h=w===1?`「${idiom}」的意思是：${meaning(idiom)}和這句話說的事不一樣，再讀一次吧。`:`提示：要找的成語，意思是「${meaning(ch.idiom)}」`
   setHint(h);speak(h,voice)
  }
  function toAncient(){recordLearning({idiom:ch.idiom,kind:'read'});setStep(0);setPhase('ancient')}
@@ -127,13 +126,6 @@ export default function LifeAdventure(){
  const heroAt=walkFrom!==null&&!walking?walkFrom:nextStop>=0?nextStop:chapters.length-1
  const lastXy=[...seq.slice(0,step+1)].reverse().find(s=>s.line?.[0]==='xiaoyue'&&s.line[2])?.line[2]
  const costume=outfitAsset(ch.idiom,'celebrate','large')?.gif
-
- // 一句對白（左：小越、鼎鼎；右：其他角色）
- const bubble=(s,i,last)=>{const [sp,text,mood]=s.line,side=LEFT.has(sp)?'left':'right',shown=last?text.slice(0,typed):text
-  return <div key={i} className={`la-msg ${side}${s.key?' key':''}${sp==='moying'?' ink':''}`}>
-   <img src={faceOf(sp,mood,last)} alt="" className="la-face"/>
-   <div className="la-bub"><b>{CAST[sp].name}</b><p>{s.key?(last&&typed<text.length?shown.replace(BLANK,'⋯⋯'):<Said text={text} idiom={ch.idiom} hit={false}/>):shown}</p></div>
-  </div>}
 
  const worksheet=<aside className="la-sheet" aria-label="學習單">
   <h3>📜 學習單・{unit.title.split('・')[0]}</h3>
@@ -164,8 +156,6 @@ export default function LifeAdventure(){
      <p><b>學習單：</b>地圖旁的學習單會逐句完成；完成後可到「生活成語小教室」做 10 題總測驗。</p>
     </div>}
    </div>
-   <img src={IMG('moying-float')} alt="" className="la-cover-moying"/>
-   <img src={IMG('dingding-bounce')} alt="" className="la-cover-dd"/>
   </main>}
 
   {phase!=='cover'&&<main className="la-wrap">
@@ -182,9 +172,7 @@ export default function LifeAdventure(){
      {unit.stops.map(([x,y],i)=>{const st=i in done?'done':i===nextStop?'now':'lock'
       return <button key={i} className={`la-stop ${st}`} style={{left:x+'%',top:y+'%'}} onClick={()=>st!=='lock'&&openStop(i)} disabled={st==='lock'} aria-label={`第 ${i+1} 站${st==='done'?`：${chapters[i].idiom}（已完成，可重玩）`:st==='now'?'：按一下出發':'：未開放'}`}>{st==='done'?'✓':i+1}</button>})}
      <div className="la-party" style={{left:unit.stops[heroAt][0]+'%',top:unit.stops[heroAt][1]+'%'}}>
-      <img src={IMG(walkFrom!==null?'xiaoyue-walk':'xiaoyue-bounce')} alt="小越" className="la-hero"/>
-      <img src={IMG('dingding-bounce')} alt="鼎鼎" className="la-hero-dd"/>
-     </div>
+      <img src={IMG(walkFrom!==null?'xiaoyue-walk':'xiaoyue-bounce')} alt="小越" className="la-hero"/>     </div>
     </div>
     <div className="la-side">
      <p className="la-tip">{nextStop>=0?<>★ 按地圖上發光的第 <b>{nextStop+1}</b> 站出發。先讀大家的對話，想想哪個成語適合，再把它射回句子裏。</>:'★ 十站都完成了！'}</p>
@@ -194,17 +182,20 @@ export default function LifeAdventure(){
    </div>}
 
    {(phase==='intro'||phase==='story'||phase==='ancient')&&cur&&<div className="la-play">
-    <div className={`la-stage${cur.portal?' portal':''}`} style={{backgroundImage:`url(${IMG(cur.portal?'bg-time-portal':cur.bg)})`}} onClick={next}>
+    <div className={`la-stage scene${cur.portal?' portal':''}`} style={cur.portal?{backgroundImage:`url(${IMG('bg-time-portal')})`}:undefined} onClick={next}>
      {cur.portal?<p className="la-portal-text"><GameText text={cur.portal}/></p>:<>
-      <img src={IMG(XIAOYUE[lastXy]||XIAOYUE.wave)} alt="小越" className={`la-actor left${cur.line[0]==='xiaoyue'?' talk':''}`}/>
-      <img src={IMG(cur.line[0]==='dingding'?'dingding-talk':'dingding-bounce')} alt="鼎鼎" className={`la-dd${cur.line[0]==='dingding'?' talk':''}`}/>
-      {cur.cast.map((k,n)=><img key={k} src={IMG(CAST[k].img)} alt={CAST[k].name} className={`la-actor right r${n}${cur.line[0]===k?' talk':''}`}/>)}
-      {(cur.key||cur.line[0]==='moying')&&<img src={IMG('moying-suck-float')} alt="墨影" className="la-moying"/>}
+      <div className="la-bg" style={{backgroundImage:`url(${IMG(cur.bg)})`}}/>
+      {/* RPG 式：只顯示說話的人的半身立繪，小越在左下角、其他角色在右下角，站在對話框前面（busts.mjs 統一頭部大小） */}
+      {cur.line[0]!=='moying'&&<img key={step} src={IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}`}/>}
+      {(phase==='intro'||cur.key||cur.line[0]==='moying')&&<img src={IMG(cur.key||cur.line[0]==='moying'?'moying-suck-float':'moying-float')} alt="墨影" className="la-moying"/>}
+      {/* 情境對話（RPG 式）：小越在左、其他角色在右，說話的人亮起；底部一個大對話框 */}
+      <div className={`la-vn ${cur.line[0]==='moying'?'mid':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${cur.line[0]==='moying'?' ink':''}`} aria-live="polite">
+       <b>【{CAST[cur.line[0]].name}】</b>
+       <p>{cur.key?(typed<cur.line[1].length?cur.line[1].slice(0,typed).replace(BLANK,'⋯⋯'):<Said text={cur.line[1]} idiom={ch.idiom} hit={false}/>):cur.line[1].slice(0,typed)}</p>
+       {typed>=cur.line[1].length&&<span className="la-vn-more" aria-hidden="true">▼</span>}
+      </div>
      </>}
     </div>
-    {!cur.portal&&<div className="la-chat" ref={chatRef} aria-live="polite">
-     {seq.slice(0,step+1).map((s,i)=>s.line&&bubble(s,i,i===step))}
-    </div>}
     {!cur.portal&&<div className="la-chat-btns">
      <button onClick={()=>speak(cur.line[1],true)} aria-label="再聽一次">🔊 再聽</button>
      <button className="la-next" onClick={next}>{step+1<seq.length?'下一句 ▶':phase==='intro'?'出發 ▶':phase==='story'?'射回成語 ▶':'回到地圖 ▶'}</button>
@@ -221,16 +212,16 @@ export default function LifeAdventure(){
      <img src={IMG(hit?'moying-sad-float':'moying-float')} alt="墨影" className="la-moying fly"/>
      {targets.map((t,n)=><button key={t} className={`la-target t${n}${gone.includes(t)?' gone':''}${hit&&t===ch.idiom?' win':''}${hit&&t!==ch.idiom?' fade':''}`} onClick={e=>shoot(t,e)} disabled={hit||gone.includes(t)} aria-label={`射向「${t}」`}><GameText text={t}/></button>)}
      {beam&&<span key={beam.k} className="la-beam" style={{left:beam.x,top:beam.y,width:beam.len,transform:`rotate(${beam.deg}deg)`}}/>}
-     <img src={IMG(hit?'dingding-cheer':'dingding-bounce')} alt="鼎鼎" className="la-gun"/>
+     <span className={`la-bulb${hit?' win':''}`} aria-hidden="true">💡</span>
     </div>
-    {!hit&&<p className={`la-hint${hint?' on':''}`}>{hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用鼎鼎的燈泡光射回去。'}</p>}
+    {!hit&&<p className={`la-hint${hint?' on':''}`}>{hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用燈泡的光射回去。'}</p>}
     {hit&&<div className="la-win" role="status">
      {costume&&<img src={costume} alt={`鼎鼎穿上「${ch.idiom}」造型`}/>}
      <div>
       <h3><GameText text="命中！"/></h3>
       <p>{done[stop]?'第一次就射中，真厲害！':'找回來了！下次先想清楚意思再射。'}</p>
       <p>「{ch.idiom}」：{meaning(ch.idiom)}</p>
-      <p className="la-gift">🎁 鼎鼎得到「{ch.idiom}」紀念衣服，可到<a href="/pet">寵物的家</a>換上。</p>
+      <p className="la-gift">🎁 成語送回圖書館了！鼎鼎得到「{ch.idiom}」紀念衣服，可到<a href="/pet">寵物的家</a>換上。</p>
       <div className="la-win-btns"><button className="btn btn-go" onClick={toAncient}>穿越去看典故 →</button><button className="btn btn-ghost" onClick={backToMap}>回到地圖</button></div>
      </div>
     </div>}
@@ -272,8 +263,6 @@ export default function LifeAdventure(){
    .la-cbtn.gold{min-width:320px;background:linear-gradient(180deg,#ffe58a,#ffc94d);border-color:#fff3c4;font-size:1.25rem;padding:14px 20px;box-shadow:0 5px 0 #d39a22}
    .la-teacher{margin:14px auto 0;max-width:520px;background:rgba(255,250,240,.94);border-radius:16px;padding:12px 16px;text-align:left;line-height:1.7}
    .la-teacher p{margin:4px 0}
-   .la-cover-moying{position:absolute;right:4%;top:8%;width:min(18vw,150px);z-index:1}
-   .la-cover-dd{position:absolute;left:4%;bottom:6%;width:min(18vw,150px);z-index:1}
    .la-gtext{position:relative;display:inline-block;font-weight:900;font-family:'Noto Sans TC',sans-serif;letter-spacing:.03em}
    .la-gtext::before{content:attr(data-t);position:absolute;left:0;top:0;z-index:0;-webkit-text-stroke:.28em #3b0f45;color:#3b0f45;text-shadow:0 .12em 0 #ff4f9a,0 0 .4em rgba(255,79,154,.6)}
    .la-gtext>span{position:relative;z-index:1;background:linear-gradient(180deg,#fff68a 0%,#ffd23f 45%,#ff8db0 72%,#ff3d8b 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
@@ -289,9 +278,8 @@ export default function LifeAdventure(){
    .la-stop.now{background:var(--sun);color:var(--choc);cursor:pointer;animation:la-pulse 1.2s infinite;box-shadow:0 0 0 6px rgba(255,201,77,.45)}
    .la-stop.done{background:var(--gold);color:#fff;cursor:pointer}
    .la-hideout{position:absolute;width:11%;transform:translate(-50%,-55%);pointer-events:none}
-   .la-party{position:absolute;width:12%;transform:translate(-30%,-100%);transition:left 1.5s ease-in-out,top 1.5s ease-in-out;pointer-events:none;display:flex;align-items:flex-end}
-   .la-hero{width:62%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.3))}
-   .la-hero-dd{width:46%;margin-left:-8%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.3))}
+   .la-party{position:absolute;width:8%;transform:translate(-50%,-96%);transition:left 1.5s ease-in-out,top 1.5s ease-in-out;pointer-events:none}
+   .la-hero{width:100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.3))}
    .la-side{display:flex;flex-direction:column;gap:12px}
    .la-tip{margin:0;background:#fffaf0;border:3px dashed var(--sun);border-radius:16px;padding:10px 14px;line-height:1.7;font-weight:500}
    .la-sheet{background:#fff;border:3px solid #e8d8bd;border-radius:18px;padding:12px 16px 12px 12px}
@@ -312,14 +300,24 @@ export default function LifeAdventure(){
    .la-stage{position:relative;aspect-ratio:16/9;max-height:60vh;width:100%;background-size:cover;background-position:center;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(90,61,43,.25);cursor:pointer;user-select:none}
    .la-stage.portal{animation:la-zoom 1.6s ease-in}
    .la-portal-text{position:absolute;inset:auto 0 12%;text-align:center;font-size:clamp(1.6rem,4vw,2.6rem);margin:0}
-   .la-actor{position:absolute;bottom:3%;height:62%;filter:brightness(.86) drop-shadow(0 6px 6px rgba(0,0,0,.25));transition:filter .2s,transform .2s}
-   .la-actor.left{left:5%}
-   .la-actor.right.r0{right:6%}.la-actor.right.r1{right:27%}
-   .la-actor.talk{filter:brightness(1.05) drop-shadow(0 6px 8px rgba(0,0,0,.3));transform:translateY(-3%)}
+   .la-bg{position:absolute;inset:-12px;background-size:cover;background-position:center;filter:blur(1.5px) brightness(.95)}
+   .la-actor{position:absolute;bottom:0;height:56%;width:auto;max-width:30%;object-fit:cover;object-position:top center;z-index:4;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));animation:la-in .3s ease-out}
+   .la-actor.left{left:1%}
+   .la-actor.right{right:1%}
+   @keyframes la-in{from{opacity:0;transform:translateY(6%)}}
+   .la-vn{position:absolute;left:2%;right:2%;bottom:3%;z-index:3;min-height:27%;background:rgba(24,22,58,.86);border:3px solid #e8c873;border-radius:14px;padding:10px 18px 14px;color:#fff;box-shadow:0 0 0 3px rgba(24,22,58,.5),0 8px 20px rgba(0,0,0,.35);cursor:pointer}
+   .la-vn.pl{padding-left:29%}.la-vn.pr{padding-right:29%}.la-vn.mid{padding-left:6%;padding-right:6%}
+   .la-vn b{color:#ffb35c;font-size:1.05rem;letter-spacing:.05em}
+   .la-vn p{margin:4px 0 0;font-size:clamp(1.05rem,2.2vw,1.35rem);line-height:1.75;color:#fff}
+   .la-vn.key{border-color:#ffd84d;box-shadow:0 0 0 3px rgba(24,22,58,.5),0 0 18px rgba(255,216,77,.55)}
+   .la-vn.ink{background:rgba(46,40,82,.9);border-color:#b9b0e6}
+   .la-vn .la-ink{background:#9b8cf0}.la-vn .la-ink i{background:#9b8cf0}
+   .la-vn-more{position:absolute;right:16px;bottom:8px;color:#e8c873;animation:la-blink 1s infinite}
+   @keyframes la-blink{50%{opacity:.2}}
    .la-dd{position:absolute;bottom:2%;left:22%;height:36%;filter:brightness(.92);transition:transform .2s}
    .la-dd.talk{filter:none;transform:translateY(-5%)}
-   .la-moying{position:absolute;top:4%;right:6%;width:20%;pointer-events:none}
-   .la-moying.fly{width:15%;top:2%;right:3%}
+   .la-moying{position:absolute;top:2%;left:50%;transform:translateX(-50%);width:17%;z-index:3;pointer-events:none}
+   .la-moying.fly{width:14%;top:2%;left:auto;right:3%;transform:none}
    .la-chat{margin-top:12px;max-height:34vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px;scroll-behavior:smooth}
    .la-msg{display:flex;align-items:flex-end;gap:10px;max-width:86%}
    .la-msg.left{align-self:flex-start}
@@ -353,7 +351,8 @@ export default function LifeAdventure(){
    .la-target.fade{opacity:.2}
    .la-target.win{border-color:#b6f5b6;background:rgba(30,110,60,.55);animation:la-glow 1s infinite;opacity:1}
    .la-beam{position:absolute;height:7px;transform-origin:0 50%;background:linear-gradient(90deg,#fff6a8,#ffd84d);border-radius:6px;box-shadow:0 0 16px #ffe27a;animation:la-beam .45s ease-out forwards;pointer-events:none}
-   .la-gun{position:absolute;bottom:0;left:50%;height:28%;transform:translateX(-50%);pointer-events:none}
+   .la-bulb{position:absolute;bottom:3%;left:50%;transform:translateX(-50%);font-size:clamp(2.4rem,6vw,3.6rem);filter:drop-shadow(0 0 14px #ffe27a) drop-shadow(0 0 6px #fff3b0);pointer-events:none;animation:la-float 2s ease-in-out infinite}
+   .la-bulb.win{filter:drop-shadow(0 0 26px #fff27a) drop-shadow(0 0 10px #fff)}
    .la-hint{margin:12px 0 0;background:#fffaf0;border:3px dashed #e8d8bd;border-radius:16px;padding:10px 14px;line-height:1.7;font-weight:500}
    .la-hint.on{border-color:var(--berry);background:#fff0f4}
    .la-win{display:flex;align-items:center;gap:16px;margin-top:12px;background:#fff;border:4px solid var(--grass);border-radius:20px;padding:14px 18px}
@@ -383,7 +382,7 @@ export default function LifeAdventure(){
     .la-top h1{font-size:1.05rem}
     .la-back{padding:6px 10px;font-size:.85rem}
     .la-cbtn.gold{min-width:260px}.la-cbtn{min-width:120px}
-    .la-cover-moying,.la-cover-dd{width:22vw}
+    .la-cover{background-position:68% center}
     .la-face{width:44px;height:44px}
     .la-bub p{font-size:1.05rem}
     .la-msg{max-width:94%}
@@ -392,7 +391,10 @@ export default function LifeAdventure(){
     .la-stage.shoot{aspect-ratio:3/4;max-height:60vh;min-height:320px}
     .la-target{padding:4px 8px}
     .la-target.t0{left:4%;top:24%}.la-target.t1{left:50%;top:34%}.la-target.t2{left:6%;top:50%}.la-target.t3{left:48%;top:63%}
-    .la-gun{height:20%}
+    .la-stage.scene{aspect-ratio:3/4;max-height:66vh}
+    .la-actor{max-width:40%;height:46%}
+    .la-vn{min-height:32%;padding:8px 12px 12px}
+    .la-vn.pl{padding-left:38%}.la-vn.pr{padding-right:38%}
     .la-win{flex-direction:column;text-align:center}.la-win-btns{justify-content:center}
    }
   `}</style>

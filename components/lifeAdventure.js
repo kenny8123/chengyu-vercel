@@ -1,4 +1,5 @@
 // 成語穿越者：生活成語地圖冒險（故事構思：遊戲作者）
+// 開場由鼎鼎請小越取回成語；之後每一站小越獨自冒險。
 // 每一站：今天的生活對話 → 關鍵句子的成語被墨影吸走（變成墨跡）→ 射回正確的成語 → 穿越到古代看典故。
 // 關鍵句子來自 lifeSentences.json 第一句，由 say 的角色說出（預設小越）；對白一律書面語。
 
@@ -6,7 +7,7 @@ export const CAST = {
  xiaoyue:{name:'小越',img:'xiaoyue-wave'},
  dingding:{name:'鼎鼎'},
  moying:{name:'墨影',img:'moying-giggle'},
- brother:{name:'哥哥',img:'brother'},
+ brother:{name:'哥哥',img:'brother',talk:'brother-talk'},
  'little-brother':{name:'弟弟',img:'little-brother'},
  mother:{name:'媽媽',img:'mother'},
  father:{name:'爸爸',img:'father'},
@@ -37,19 +38,20 @@ export const UNITS = [{
  stops:[[23.5,81.5],[23.5,57.5],[38.5,59.5],[55,55],[55,35],[62,23.5],[73,29],[80.5,44],[86.5,59],[69,66]],
  hideout:[89.5,17.5],
  intro:[
-  ['dingding','歡迎來到成語時空圖書館！我是管理員鼎鼎。'],
+  ['dingding','小越，歡迎來到成語時空圖書館！我是管理員鼎鼎。'],
   ['moying','嘻嘻！四十卷卷軸裏的成語，全被我吸走了！'],
-  ['dingding','小越，請你幫幫忙！大家說話時，句子裏的成語都變成了墨跡。你要想一想，把正確的成語射回去。'],
-  ['dingding','每找回一個成語，我們就穿越到古代，看看它是從哪個故事來的。'],
-  ['xiaoyue','好！成語穿越者小越，出發！','cheer'],
+  ['dingding','糟了！大家說話時，句子裏的成語都變成了墨跡。小越，請你幫我把成語取回來！'],
+  ['dingding','這盞燈泡送給你。聽清楚大家的話，想想哪個成語合適，就用燈泡的光把它射回去。'],
+  ['dingding','每取回一個成語，你就可以穿越到古代，看看它的故事。我在圖書館等你的好消息！'],
+  ['xiaoyue','交給我吧！成語穿越者小越，出發！','cheer'],
  ],
  chapters:[
   {idiom:'一言九鼎',
    ancient:{bg:'bg-palace',cast:['maosui','pingyuan'],lines:[
-    ['dingding','我們穿越到戰國時代的楚國王宮了！趙國被秦國圍攻，平原君帶着毛遂來求救。'],
+    ['xiaoyue','我穿越到戰國時代的楚國王宮了！趙國被秦國圍攻，平原君帶着毛遂來求救。'],
     ['maosui','大王，楚國和趙國聯手，才能對抗秦國。這件事今天就要決定！'],
     ['pingyuan','毛先生一句話，比九座大鼎還要有分量。楚王終於答應結盟了！'],
-    ['dingding','「一言九鼎」形容說話很有分量，也指說話守信用、說到做到。'],
+    ['xiaoyue','原來「一言九鼎」形容說話很有分量，也指說話守信用、說到做到。'],
    ]},
    modern:{bg:'bg-living-room',cast:['brother'],lines:[
     ['brother','小越，我答應了今晚陪你溫習，一定做到。'],
@@ -58,10 +60,10 @@ export const UNITS = [{
    ]}},
   {idiom:'寸草春暉',
    ancient:{bg:'bg-study',cast:['mengjiao','meng-mother'],lines:[
-    ['dingding','這裏是唐代詩人孟郊的家。夜深了，他的母親還在燈下縫衣服。'],
+    ['xiaoyue','這裏是唐代詩人孟郊的家。夜深了，他的母親還在燈下縫衣服。'],
     ['meng-mother','孩子明天就要遠行，衣服要縫得密密的，他才不會着涼。'],
     ['mengjiao','小草怎能報答春天陽光的溫暖呢？我要把母親的愛寫成詩。'],
-    ['dingding','「寸草春暉」比喻父母的恩情深重，子女難以報答。'],
+    ['xiaoyue','原來「寸草春暉」比喻父母的恩情深重，子女難以報答。'],
    ]},
    modern:{bg:'bg-living-room',cast:['mother'],lines:[
     ['xiaoyue','媽媽每天最早起床，又最遲睡覺。','think'],
@@ -70,9 +72,9 @@ export const UNITS = [{
    ]}},
   {idiom:'人山人海',
    ancient:{bg:'bg-ancient-market',cast:[],lines:[
-    ['dingding','歡迎來到宋代杭州的瓦市！這裏有表演、有小吃，熱鬧極了。'],
+    ['xiaoyue','這裏是宋代杭州的瓦市！有表演、有小吃，熱鬧極了。'],
     ['xiaoyue','哇，人多得數也數不完！','surprised'],
-    ['dingding','古書記載，這裏的人多得像山和海一樣。「人山人海」形容人聚集得非常多。'],
+    ['xiaoyue','書上說，這裏的人多得像山和海一樣。「人山人海」形容人聚集得非常多。'],
    ]},
    modern:{bg:'bg-flower-market',cast:['mother'],lines:[
     ['mother','小越，年宵花市的人太多了，要拉緊我的手。'],
@@ -81,9 +83,9 @@ export const UNITS = [{
    ]}},
   {idiom:'水落石出',
    ancient:{bg:'bg-mountain-stream',cast:['ouyang-xiu'],lines:[
-    ['dingding','這是宋代的山林，文學家歐陽修常常到這裏遊玩。'],
+    ['xiaoyue','這是宋代的山林，文學家歐陽修常常到這裏遊玩。'],
     ['ouyang-xiu','冬天溪水變淺了，原本藏在水底的石頭，全都露出來了。'],
-    ['dingding','水退了，石頭就看得清清楚楚。「水落石出」比喻事情經過澄清，真相大白。'],
+    ['xiaoyue','水退了，石頭就看得清清楚楚。「水落石出」比喻事情經過澄清，真相大白。'],
    ]},
    modern:{bg:'bg-classroom',cast:['teacher','xiaoming'],lines:[
     ['xiaoming','課室的擺設不見了！是不是有人拿走了？'],
@@ -92,10 +94,10 @@ export const UNITS = [{
    ]}},
   {idiom:'青出於藍',
    ancient:{bg:'bg-ancient-village',cast:['xunzi'],lines:[
-    ['dingding','我們來到戰國時代，見到大學者荀子。'],
+    ['xiaoyue','我來到戰國時代，見到大學者荀子。'],
     ['xunzi','看，這種靛青顏料是從蓼藍提煉出來的，顏色卻比蓼藍更青。'],
     ['xunzi','冰是水凍成的，卻比水更冷。用心學習，學生也能勝過老師。'],
-    ['dingding','「青出於藍」比喻學生比老師更出色，晚輩超過前輩。'],
+    ['xiaoyue','原來「青出於藍」比喻學生比老師更出色，晚輩超過前輩。'],
    ]},
    modern:{bg:'bg-living-room',cast:['little-brother'],lines:[
     ['xiaoyue','弟弟，象棋是我教你的，怎麼你又贏了？','surprised'],
@@ -104,9 +106,9 @@ export const UNITS = [{
    ]}},
   {idiom:'滄海桑田',
    ancient:{bg:'bg-fairy-clouds',cast:['magu'],lines:[
-    ['dingding','這裏是仙山雲海，傳說中的仙女麻姑就住在這裏。'],
+    ['xiaoyue','這裏是仙山雲海，傳說中的仙女麻姑就住在這裏。'],
     ['magu','自從上次見面，我已經看見東海三次變成農田了。'],
-    ['dingding','大海變成農田，「滄海桑田」比喻環境變化很大，世事變化很快。'],
+    ['xiaoyue','大海變成農田，「滄海桑田」比喻環境變化很大，世事變化很快。'],
    ]},
    modern:{bg:'bg-old-fishing-village',cast:['grandpa'],lines:[
     ['grandpa','小越，這是爺爺小時候住的漁村，大家都住在棚屋裏。'],
@@ -115,9 +117,8 @@ export const UNITS = [{
    ]}},
   {idiom:'守口如瓶',
    ancient:{bg:'bg-study',cast:[],lines:[
-    ['dingding','這間古代書房裏，有一本古書寫着：「防意如城，守口如瓶。」'],
-    ['xiaoyue','這是甚麼意思呢？','think'],
-    ['dingding','管住嘴巴，要像把瓶口封緊一樣。「守口如瓶」比喻嚴守祕密。'],
+    ['xiaoyue','這間古代書房裏，有一本古書寫着：「防意如城，守口如瓶。」'],
+    ['xiaoyue','我明白了！管住嘴巴，要像把瓶口封緊一樣。「守口如瓶」比喻嚴守祕密。','think'],
    ]},
    modern:{bg:'bg-classroom',cast:['xiaomei','xiaoming'],lines:[
     ['xiaomei','下星期是陳老師的生日，我們偷偷準備一個驚喜生日會吧！'],
@@ -126,10 +127,10 @@ export const UNITS = [{
    ]}},
   {idiom:'分道揚鑣',
    ancient:{bg:'bg-ancient-village',cast:['yuan-zhi','li-biao'],lines:[
-    ['dingding','這是北魏的大路。兩位官員元志和李彪在路上相遇了。'],
+    ['xiaoyue','這是北魏的大路。兩位官員元志和李彪在路上相遇了。'],
     ['yuan-zhi','我的官職不低，你應該讓路！'],
     ['li-biao','我也不讓！我們請皇帝評評理。'],
-    ['dingding','皇帝說：「把路分成兩半，各走各的吧！」「分道揚鑣」比喻依各自的志向，各奔前程。'],
+    ['xiaoyue','皇帝說：「把路分成兩半，各走各的吧！」「分道揚鑣」比喻依各自的志向，各奔前程。'],
    ]},
    modern:{bg:'bg-living-room',cast:['brother'],say:'brother',lines:[
     ['brother','小越，我快要升中學了，可是我和最好的朋友考進了不同的學校。'],
@@ -138,23 +139,23 @@ export const UNITS = [{
    ]}},
   {idiom:'手足無措',
    ancient:{bg:'bg-ancient-village',cast:['confucius'],lines:[
-    ['dingding','孔子正在和學生談治理國家的道理。'],
+    ['xiaoyue','孔子正在和學生談治理國家的道理。'],
     ['confucius','名分不正，說話就不合道理，事情也做不成。'],
     ['confucius','刑罰不恰當，百姓就會慌張得連手和腳都不知道放在哪裏。'],
-    ['dingding','「手足無措」形容人驚慌不安，不知道怎樣才好。'],
+    ['xiaoyue','原來「手足無措」形容人驚慌不安，不知道怎樣才好。'],
    ]},
    modern:{bg:'bg-school-hall',cast:['teacher'],lines:[
     ['teacher','下一位，請小越上台演講。'],
     ['xiaoyue','我的心跳得好快……講稿怎麼拿反了？','surprised'],
-    ['dingding','深呼吸，慢慢來。看着我燈泡的光！'],
+    ['teacher','小越，深呼吸，慢慢來，你一定做得到。'],
    ]}},
   {idiom:'刮目相看',
    ancient:{bg:'bg-city-gate',cast:['lu-meng','lu-su'],lines:[
-    ['dingding','三國時代，吳國大將呂蒙小時候沒讀甚麼書，常常被人看輕。'],
+    ['xiaoyue','三國時代，吳國大將呂蒙小時候沒讀甚麼書，常常被人看輕。'],
     ['lu-meng','主公勸我多讀書，我現在每天都讀！'],
     ['lu-su','呂蒙，你的學問進步了這麼多，我真吃驚！'],
     ['lu-meng','讀書人分別三天，就要用新的眼光看待他啊！'],
-    ['dingding','「刮目相看」形容用新的眼光來看待別人。'],
+    ['xiaoyue','原來「刮目相看」形容用新的眼光來看待別人。'],
    ]},
    modern:{bg:'bg-school-hall',cast:['xiaomei'],lines:[
     ['xiaoyue','朗誦比賽的冠軍是……小美！','surprised'],
