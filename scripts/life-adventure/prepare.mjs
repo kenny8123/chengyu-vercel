@@ -20,6 +20,9 @@ const SHEETS = {
   'dingding-sheet': ['dingding-wave', 'dingding-talk', 'dingding-think', 'dingding-cheer'],
   'brother-sheet': ['brother', 'brother-talk', 'brother-think', 'brother-thumb'],
   'shooter-sheet': ['shooter-aim', 'shooter-fire', 'shooter-recoil', 'shooter-cheer'],
+  // 四個射擊角度：左上、右上、左、右（瞄準／開槍）
+  'shoot-diag-sheet': ['shoot-ul-aim', 'shoot-ul-fire', 'shoot-ur-aim', 'shoot-ur-fire'],
+  'shoot-side-sheet': ['shoot-l-aim', 'shoot-l-fire', 'shoot-r-aim', 'shoot-r-fire'],
   'family-1': ['brother-old', 'little-brother', 'mother', 'father'],
   'family-2': ['grandpa', 'great-grandma', 'teacher', 'cousin'],
   'friends': ['xiaoming', 'xiaomei', 'ahhei', 'firefighter'],
@@ -29,7 +32,7 @@ const SHEETS = {
 }
 
 // 動畫用的四格（開槍動作）：四格用同一個取景框，切換動作時角色才不會跳
-const SAME_FRAME = new Set(['shooter-sheet'])
+const SAME_FRAME = new Set(['shooter-sheet', 'shoot-diag-sheet', 'shoot-side-sheet'])
 
 const isWhite = (d, i, t) => d[i] > t && d[i + 1] > t && d[i + 2] > t
 

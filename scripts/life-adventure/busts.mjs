@@ -9,7 +9,7 @@ const require = createRequire(path.resolve('package.json'))
 const sharp = require('sharp')
 const DIR = path.resolve('public/images/life-adventure')
 const HEAD = 260, BODY = 1.05            // 輸出：頭高 260px，頸以下再留 1.05 個頭高
-const SKIP = /^(bg-|map-|cover|bust-)|-(bounce|walk|float)/
+const SKIP = /^(bg-|map-|cover|bust-|shoot)|-(bounce|walk|float)/
 // 頭部（連帽）所佔全身高度的比例：自動找頸部不穩定，改為逐個角色人手指定
 const HEAD_FRAC = {
   xiaoyue: .28, brother: .25, 'little-brother': .39, cousin: .36, xiaoming: .3, xiaomei: .31, ahhei: .3,

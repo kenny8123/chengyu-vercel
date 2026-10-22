@@ -1,12 +1,18 @@
-// 成語穿越者：生活成語地圖冒險（故事構思：遊戲作者）
-// 開場由鼎鼎請小越取回成語；之後每一站小越獨自冒險。
-// 每一站：今天的生活對話 → 關鍵句子的成語被墨影吸走（變成墨跡）→ 射回正確的成語 → 穿越到古代看典故。
-// 關鍵句子來自 lifeSentences.json 第一句，由 say 的角色說出（預設小越）；對白一律書面語。
+// 成語穿越者：語光城的斷句事件（故事構思：遊戲作者；劇本第三稿）
+// 2046 年的澳門「語光城」，人人戴語光耳機，城市助手簡簡會把話改得又快又簡單。
+// 城裏的句子開始斷掉：成語變成墨跡。鼎鼎在開場把回溯手錶和成語光線槍交給小越，之後小越獨自冒險。
+// 每一站：回溯手錶報告 → 回到斷句前 → 生活對話 → 關鍵句（墨跡）→ 射回成語 → 一條線索。
+// 關鍵句來自 lifeSentences.json 第一句，由 say 的角色說出（預設小越）；對白一律書面語。
+// 主線真相（第四十站才揭曉）見《成語穿越者-劇本第三稿.md》。
 
 export const CAST = {
  xiaoyue:{name:'小越',img:'xiaoyue-wave'},
  dingding:{name:'鼎鼎'},
  moying:{name:'墨影',img:'moying-giggle'},
+ // 沒有立繪的聲音（青藍色對話框）
+ watch:{name:'回溯手錶',sys:true},
+ earphone:{name:'語光耳機',sys:true},
+ jianjian:{name:'簡簡',sys:true},
  brother:{name:'哥哥',img:'brother',talk:'brother-talk'},
  'little-brother':{name:'弟弟',img:'little-brother'},
  mother:{name:'媽媽',img:'mother'},
@@ -15,24 +21,12 @@ export const CAST = {
  teacher:{name:'陳老師',img:'teacher'},
  xiaoming:{name:'小明',img:'xiaoming'},
  xiaomei:{name:'小美',img:'xiaomei'},
- maosui:{name:'毛遂',img:'maosui'},
- pingyuan:{name:'平原君',img:'pingyuan'},
- mengjiao:{name:'孟郊',img:'mengjiao'},
- 'meng-mother':{name:'孟郊的母親',img:'meng-mother'},
- 'ouyang-xiu':{name:'歐陽修',img:'ouyang-xiu'},
- xunzi:{name:'荀子',img:'xunzi'},
- magu:{name:'麻姑',img:'magu'},
- 'yuan-zhi':{name:'元志',img:'yuan-zhi'},
- 'li-biao':{name:'李彪',img:'li-biao'},
- confucius:{name:'孔子',img:'confucius'},
- 'lu-meng':{name:'呂蒙',img:'lu-meng'},
- 'lu-su':{name:'魯肅',img:'lu-su'},
 }
 // 小越的表情圖
 export const XIAOYUE = {wave:'xiaoyue-wave',surprised:'xiaoyue-surprised',think:'xiaoyue-think',cheer:'xiaoyue-cheer',puzzled:'xiaoyue-puzzled',wonder:'xiaoyue-wonder',oops:'xiaoyue-oops',determined:'xiaoyue-determined'}
 
 export const UNITS = [{
- title:'單元一・第一次穿越',
+ title:'單元一・斷句事件',
  map:'map-1',
  // 地圖上 10 個站的位置（百分比）；宮殿那個圈是墨影的藏身處
  stops:[[23.5,81.5],[23.5,57.5],[38.5,59.5],[55,55],[55,35],[62,23.5],[73,29],[80.5,44],[86.5,59],[69,66]],
@@ -40,127 +34,122 @@ export const UNITS = [{
  intro:[
   ['dingding','小越，歡迎來到成語時空圖書館！我是管理員鼎鼎。'],
   ['moying','嘻嘻！四十卷卷軸裏的成語，全被我吸走了！'],
-  ['dingding','糟了！大家說話時，句子裏的成語都變成了墨跡。小越，請你幫我把成語取回來！'],
-  ['dingding','這把「成語光線槍」送給你！聽清楚大家的話，想想哪個成語合適，就用光線槍把它射回句子裏。'],
-  ['dingding','每取回一個成語，你就可以穿越到古代，看看它的故事。我在圖書館等你的好消息！'],
+  ['dingding','糟了！城裏的人說話說到一半，成語就變成墨跡，大家都想不起來。'],
+  ['dingding','這隻回溯手錶可以帶你回到句子斷掉之前；這把成語光線槍，可以把成語射回句子裏。'],
+  ['dingding','記住：先聽清楚大家說甚麼，想想哪個成語合適，才可以開槍。'],
   ['xiaoyue','交給我吧！成語穿越者小越，出發！','determined'],
  ],
  chapters:[
-  {idiom:'一言九鼎',
-   ancient:{bg:'bg-palace',cast:['maosui','pingyuan'],lines:[
-    ['xiaoyue','我穿越到戰國時代的楚國王宮了！趙國被秦國圍攻，平原君帶着毛遂來求救。'],
-    ['maosui','大王，楚國和趙國聯手，才能對抗秦國。這件事今天就要決定！'],
-    ['pingyuan','毛先生一句話，比九座大鼎還要有分量。楚王終於答應結盟了！'],
-    ['xiaoyue','原來「一言九鼎」形容說話很有分量，也指說話守信用、說到做到。'],
-   ]},
-   modern:{bg:'bg-living-room',cast:['brother'],lines:[
-    ['brother','小越，我答應了今晚陪你溫習，一定做到。'],
+  {idiom:'一言九鼎',bg:'bg-living-room',cast:['brother'],
+   alert:'偵測到斷句！時間：今晚七時，地點：小越的家。',
+   lines:[
+    ['brother','小越，我答應了今晚陪你溫習數學。'],
     ['xiaoyue','可是你的朋友剛剛打電話來，約你去打球啊！','surprised'],
-    ['brother','我已經推掉了。答應了別人的事，就要做到。'],
-   ]}},
-  {idiom:'寸草春暉',
-   ancient:{bg:'bg-study',cast:['mengjiao','meng-mother'],lines:[
-    ['xiaoyue','這裏是唐代詩人孟郊的家。夜深了，他的母親還在燈下縫衣服。'],
-    ['meng-mother','孩子明天就要遠行，衣服要縫得密密的，他才不會着涼。'],
-    ['mengjiao','小草怎能報答春天陽光的溫暖呢？我要把母親的愛寫成詩。'],
-    ['xiaoyue','原來「寸草春暉」比喻父母的恩情深重，子女難以報答。'],
+    ['brother','我已經跟他們說，下次再一起打。'],
+   ],
+   clue:[
+    ['earphone','叮——句子已優化。'],
+    ['xiaoyue','咦？哥哥的耳機剛才說了甚麼？','puzzled'],
    ]},
-   modern:{bg:'bg-living-room',cast:['mother'],lines:[
+  {idiom:'寸草春暉',bg:'bg-living-room',cast:['mother'],
+   alert:'偵測到斷句！時間：母親節前一晚。',
+   lines:[
     ['xiaoyue','媽媽每天最早起床，又最遲睡覺。','think'],
-    ['mother','小越，你在畫甚麼？'],
+    ['mother','小越，這麼晚了，你在畫甚麼？'],
     ['xiaoyue','是祕密！母親節那天你就知道了。','cheer'],
-   ]}},
-  {idiom:'人山人海',
-   ancient:{bg:'bg-ancient-market',cast:[],lines:[
-    ['xiaoyue','這裏是宋代杭州的瓦市！有表演、有小吃，熱鬧極了。'],
-    ['xiaoyue','哇，人多得數也數不完！','surprised'],
-    ['xiaoyue','書上說，這裏的人多得像山和海一樣。「人山人海」形容人聚集得非常多。'],
+   ],
+   clue:[
+    ['earphone','建議改為：「想報答她很大的恩情。」'],
+    ['xiaoyue','媽媽的耳機螢幕閃過一行字……是誰想改我的句子？','puzzled'],
    ]},
-   modern:{bg:'bg-flower-market',cast:['mother'],lines:[
-    ['mother','小越，年宵花市的人太多了，要拉緊我的手。'],
+  {idiom:'人山人海',bg:'bg-flower-market',cast:['mother'],
+   alert:'偵測到多處斷句！地點：年宵花市。',
+   lines:[
+    ['mother','小越，花市的人太多了，要拉緊我的手。'],
     ['xiaoyue','媽媽，你在哪裏？我看不見你！','surprised'],
     ['mother','我在這裏！幸好你沒有走遠。'],
-   ]}},
-  {idiom:'水落石出',
-   ancient:{bg:'bg-mountain-stream',cast:['ouyang-xiu'],lines:[
-    ['xiaoyue','這是宋代的山林，文學家歐陽修常常到這裏遊玩。'],
-    ['ouyang-xiu','冬天溪水變淺了，原本藏在水底的石頭，全都露出來了。'],
-    ['xiaoyue','水退了，石頭就看得清清楚楚。「水落石出」比喻事情經過澄清，真相大白。'],
+   ],
+   clue:[
+    ['xiaoyue','我看見了！成語快要變灰的一刻，墨影就衝過去把它吸走。','wonder'],
+    ['xiaoyue','它到底在搶甚麼？','puzzled'],
    ]},
-   modern:{bg:'bg-classroom',cast:['teacher','xiaoming'],lines:[
+  {idiom:'水落石出',bg:'bg-classroom',cast:['teacher','xiaoming'],
+   alert:'偵測到斷句！地點：四年級課室。',
+   lines:[
     ['xiaoming','課室的擺設不見了！是不是有人拿走了？'],
     ['teacher','先不要亂猜，我們一起仔細查清楚。'],
     ['teacher','原來擺設被風吹倒，掉到櫃子後面了。'],
-   ]}},
-  {idiom:'青出於藍',
-   ancient:{bg:'bg-ancient-village',cast:['xunzi'],lines:[
-    ['xiaoyue','我來到戰國時代，見到大學者荀子。'],
-    ['xunzi','看，這種靛青顏料是從蓼藍提煉出來的，顏色卻比蓼藍更青。'],
-    ['xunzi','冰是水凍成的，卻比水更冷。用心學習，學生也能勝過老師。'],
-    ['xiaoyue','原來「青出於藍」比喻學生比老師更出色，晚輩超過前輩。'],
+   ],
+   clue:[
+    ['earphone','低使用率詞語：「水落石出」——已排程清除。'],
+    ['xiaoyue','白板角落寫着「清除」？成語也可以被清除的嗎？','surprised'],
    ]},
-   modern:{bg:'bg-living-room',cast:['little-brother'],lines:[
+  {idiom:'青出於藍',bg:'bg-living-room',cast:['little-brother'],
+   alert:'偵測到斷句！地點：小越的家。',
+   lines:[
     ['xiaoyue','弟弟，象棋是我教你的，怎麼你又贏了？','surprised'],
     ['little-brother','因為我每天都和爺爺練習呀！'],
-    ['xiaoyue','我有點不服氣，不過也真替你高興。','cheer'],
-   ]}},
-  {idiom:'滄海桑田',
-   ancient:{bg:'bg-fairy-clouds',cast:['magu'],lines:[
-    ['xiaoyue','這裏是仙山雲海，傳說中的仙女麻姑就住在這裏。'],
-    ['magu','自從上次見面，我已經看見東海三次變成農田了。'],
-    ['xiaoyue','大海變成農田，「滄海桑田」比喻環境變化很大，世事變化很快。'],
+    ['xiaoyue','我有點不服氣，不過也真替你高興。','oops'],
+   ],
+   clue:[
+    ['little-brother','哥哥，我也看見那團黑黑的墨水了。它在窗外，好像很孤單。'],
+    ['xiaoyue','孤單？墨影也會孤單嗎？','puzzled'],
    ]},
-   modern:{bg:'bg-old-fishing-village',cast:['grandpa'],lines:[
+  {idiom:'滄海桑田',bg:'bg-old-fishing-village',cast:['grandpa'],
+   alert:'偵測到斷句！地點：爺爺的舊相片裏。',
+   lines:[
     ['grandpa','小越，這是爺爺小時候住的漁村，大家都住在棚屋裏。'],
     ['xiaoyue','可是那裏現在全是高樓大廈呀！','surprised'],
     ['grandpa','是啊，幾十年間，海邊都變了樣。'],
-   ]}},
-  {idiom:'守口如瓶',
-   ancient:{bg:'bg-study',cast:[],lines:[
-    ['xiaoyue','這間古代書房裏，有一本古書寫着：「防意如城，守口如瓶。」'],
-    ['xiaoyue','我明白了！管住嘴巴，要像把瓶口封緊一樣。「守口如瓶」比喻嚴守祕密。','think'],
+   ],
+   clue:[
+    ['jianjian','你好，小越，我是城市助手簡簡。舊相片的說明太長了，要我幫你改得簡單一點嗎？'],
+    ['xiaoyue','不用了，謝謝你。爺爺說的話，我想原原本本記住。','think'],
    ]},
-   modern:{bg:'bg-classroom',cast:['xiaomei','xiaoming'],lines:[
-    ['xiaomei','下星期是陳老師的生日，我們偷偷準備一個驚喜生日會吧！'],
+  {idiom:'守口如瓶',bg:'bg-classroom',cast:['xiaomei','xiaoming'],
+   alert:'偵測到斷句！地點：課室，陳老師生日的前一天。',
+   lines:[
+    ['xiaomei','明天是陳老師的生日，我們偷偷準備一個驚喜生日會吧！'],
     ['xiaoming','大家記住，千萬不要讓老師知道！'],
     ['xiaoyue','生日會那天，老師真的完全不知道，還感動得流下眼淚。','cheer'],
-   ]}},
-  {idiom:'分道揚鑣',
-   ancient:{bg:'bg-ancient-village',cast:['yuan-zhi','li-biao'],lines:[
-    ['xiaoyue','這是北魏的大路。兩位官員元志和李彪在路上相遇了。'],
-    ['yuan-zhi','我的官職不低，你應該讓路！'],
-    ['li-biao','我也不讓！我們請皇帝評評理。'],
-    ['xiaoyue','皇帝說：「把路分成兩半，各走各的吧！」「分道揚鑣」比喻依各自的志向，各奔前程。'],
+   ],
+   clue:[
+    ['jianjian','提醒：明天上午十時，陳老師驚喜生日會。'],
+    ['xiaoyue','噓！簡簡，你差點把祕密說出來了！','oops'],
    ]},
-   modern:{bg:'bg-living-room',cast:['brother'],say:'brother',lines:[
+  {idiom:'分道揚鑣',bg:'bg-living-room',cast:['brother'],say:'brother',
+   alert:'偵測到斷句！地點：小越的家，哥哥畢業那天。',
+   lines:[
     ['brother','小越，我快要升中學了，可是我和最好的朋友考進了不同的學校。'],
     ['xiaoyue','那你們以後不能一起上學了？','surprised'],
     ['brother','我們約好了，各自努力，放假再見。'],
-   ]}},
-  {idiom:'手足無措',
-   ancient:{bg:'bg-ancient-village',cast:['confucius'],lines:[
-    ['xiaoyue','孔子正在和學生談治理國家的道理。'],
-    ['confucius','名分不正，說話就不合道理，事情也做不成。'],
-    ['confucius','刑罰不恰當，百姓就會慌張得連手和腳都不知道放在哪裏。'],
-    ['xiaoyue','原來「手足無措」形容人驚慌不安，不知道怎樣才好。'],
+   ],
+   clue:[
+    ['xiaoyue','墨影飛走時掉下一卷小卷軸……上面印着一個「鼎」字。','wonder'],
+    ['xiaoyue','這不是圖書館的印章嗎？','puzzled'],
    ]},
-   modern:{bg:'bg-school-hall',cast:['teacher'],lines:[
+  {idiom:'手足無措',bg:'bg-school-hall',cast:['teacher'],
+   alert:'偵測到斷句！地點：禮堂，演講比賽。',
+   lines:[
     ['teacher','下一位，請小越上台演講。'],
     ['xiaoyue','我的心跳得好快……講稿怎麼拿反了？','surprised'],
-    ['teacher','小越，深呼吸，慢慢來，你一定做得到。'],
-   ]}},
-  {idiom:'刮目相看',
-   ancient:{bg:'bg-city-gate',cast:['lu-meng','lu-su'],lines:[
-    ['xiaoyue','三國時代，吳國大將呂蒙小時候沒讀甚麼書，常常被人看輕。'],
-    ['lu-meng','主公勸我多讀書，我現在每天都讀！'],
-    ['lu-su','呂蒙，你的學問進步了這麼多，我真吃驚！'],
-    ['lu-meng','讀書人分別三天，就要用新的眼光看待他啊！'],
-    ['xiaoyue','原來「刮目相看」形容用新的眼光來看待別人。'],
+    ['jianjian','別緊張，我可以替你把講稿讀出來。'],
+   ],
+   clue:[
+    ['xiaoyue','謝謝你，簡簡。不過，我想自己說。','determined'],
    ]},
-   modern:{bg:'bg-school-hall',cast:['xiaomei'],lines:[
+  {idiom:'刮目相看',bg:'bg-school-hall',cast:['xiaomei'],
+   alert:'偵測到斷句！地點：禮堂，朗誦比賽頒獎。',
+   lines:[
     ['xiaoyue','朗誦比賽的冠軍是……小美！','surprised'],
     ['xiaomei','我每天都對着鏡子練習，終於不害怕了。'],
     ['xiaoyue','一向害羞的小美原來這麼厲害，大家都對她改觀了。','cheer'],
-   ]}},
+   ],
+   clue:[
+    ['moying','……'],
+    ['xiaoyue','墨影，你今天怎麼不笑了？你到底想做甚麼？','puzzled'],
+    ['moying','別讓它們消失。'],
+    ['xiaoyue','它在半空寫下一行墨字就飛走了……「它們」是指甚麼？','wonder'],
+   ]},
  ],
 }]
