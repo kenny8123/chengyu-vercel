@@ -29,8 +29,8 @@ export const CAST = {
 }
 // 簡簡有立繪（全息投影），對話框仍用青藍色
 CAST.jianjian={name:'簡簡',img:'jianjian-smile',talk:'jianjian-talk',holo:true}
-// 空白魔王：單元三結尾由簡簡變成（暫用簡簡的圖加效果，之後換正式立繪）
-CAST.boss={name:'空白魔王',img:'jianjian-surprised',holo:true,boss:true}
+// 空白魔王：單元三結尾由簡簡變成的邪惡版（boss-laugh／attack／hurt／fade）
+CAST.boss={name:'空白魔王',img:'boss-laugh',talk:'boss-laugh',holo:true,boss:true}
 // 小越的表情圖
 export const XIAOYUE = {wave:'xiaoyue-wave',surprised:'xiaoyue-surprised',think:'xiaoyue-think',cheer:'xiaoyue-cheer',puzzled:'xiaoyue-puzzled',wonder:'xiaoyue-wonder',oops:'xiaoyue-oops',determined:'xiaoyue-determined'}
 
@@ -439,7 +439,7 @@ export const BOSS = {
  // 心用完時：墨墨補滿
  revive:['momo','別放棄！我把收藏的成語能量分給你！'],
  ending:[
-  ['boss','我的光……越來越小了……'],
+  ['boss','我的光……越來越小了……','fade'],
   ['jianjian','原來成語不是麻煩，是大家的回憶……對不起。'],
   ['dingding','墨墨，原來一直保護卷軸的是你。我終於記起來了：你是我很久以前做的墨水守護者。'],
   ['momo','鼎鼎……謝謝你記得我。'],

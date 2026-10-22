@@ -48,7 +48,7 @@ export default function LifeAdventure(){
  const [targets,setTargets]=useState([]),[gone,setGone]=useState([]),[wrong,setWrong]=useState(0),[hint,setHint]=useState(''),[hit,setHit]=useState(false),[beam,setBeam]=useState(null)
  const [reward,setReward]=useState(null),[walkFrom,setWalkFrom]=useState(null),[walking,setWalking]=useState(false)
  const [pose,setPose]=useState('aim'),[dir,setDir]=useState('ur'),[gift,setGift]=useState(null)
- const [boss,setBoss]=useState(null),[bossNote,setBossNote]=useState('')
+ const [boss,setBoss]=useState(null),[bossNote,setBossNote]=useState(''),[bossAtk,setBossAtk]=useState(false)
  const run=useRef(null),stageRef=useRef(null),gunRef=useRef(null)
  const ch=chapters[stop],life=lifeOf(ch.idiom),sentence=life.sentences[0],sayer=ch.say||'xiaoyue'
  const bq=boss&&LIFE[boss.order[boss.i]],bossSentence=bq?.sentences[1]||''   // 魔王關用另一句例句
@@ -222,6 +222,7 @@ export default function LifeAdventure(){
   const w=wrong+1;setWrong(w);setGone([...gone,idiom])
   const first=bq.idiom in boss.first?boss.first:{...boss.first,[bq.idiom]:false}
   if(!(bq.idiom in boss.first))recordLearning({idiom:bq.idiom,kind:'answer',correct:false})
+  setBossAtk(true);setTimeout(()=>setBossAtk(false),900)
   let hearts=boss.hearts-1
   if(hearts<=0){hearts=BOSS.hearts;setBossNote(`【${CAST.momo.name}】${BOSS.revive[1]}`)}
   saveBoss({...boss,hearts,first})
@@ -292,7 +293,7 @@ export default function LifeAdventure(){
      {cur.portal?<p className="la-portal-text"><GameText text={cur.portal}/></p>:<>
       <div className="la-bg" style={{backgroundImage:`url(${IMG(cur.bg)})`}}/>
       {/* RPG 式：只顯示說話的人的半身立繪，小越在左下角、其他角色在右下角，站在對話框前面（busts.mjs 統一頭部大小） */}
-      {!CAST[cur.line[0]].sys&&<img key={step} src={cur.line[0]==='moying'?IMG('moying-float'):cur.line[0]==='momo'?IMG('moying-happy'):IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}${INK.has(cur.line[0])?' moying':''}${CAST[cur.line[0]].holo?' holo':''}${CAST[cur.line[0]].boss?' bossy':''}${FACES_RIGHT.has(cur.line[2])?' noflip':''}`}/>}
+      {!CAST[cur.line[0]].sys&&<img key={step} src={cur.line[0]==='moying'?IMG('moying-float'):cur.line[0]==='momo'?IMG('moying-happy'):cur.line[0]==='boss'?IMG('bust-boss-'+(cur.line[2]||'laugh')):IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}${INK.has(cur.line[0])?' moying':''}${CAST[cur.line[0]].holo?' holo':''}${CAST[cur.line[0]].boss?' bossy':''}${FACES_RIGHT.has(cur.line[2])?' noflip':''}`}/>}
       {cur.key&&<img src={IMG('moying-suck-float')} alt="墨影正在吸走成語" className="la-moying"/>}
       {/* 情境對話（RPG 式）：小越在左、其他角色在右，說話的人亮起；底部一個大對話框 */}
       <div className={`la-vn ${CAST[cur.line[0]].sys?'sys':CAST[cur.line[0]].holo?'sys pr':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${INK.has(cur.line[0])?' ink':''}${CAST[cur.line[0]].boss?' bossbox':''}`} aria-live="polite">
@@ -334,12 +335,12 @@ export default function LifeAdventure(){
      <span className="la-hearts" aria-label={`小越還有 ${boss.hearts} 顆心`}>{Array.from({length:BOSS.hearts},(_,n)=><b key={n} className={n<boss.hearts?'on':''}>♥</b>)}</span>
     </div>
     <div className="la-msg big right key">
-     <img src={IMG('bust-jianjian-surprised')} alt="" className="la-face bossface"/>
+     <img src={IMG('bust-boss-laugh')} alt="" className="la-face bossface"/>
      <div className="la-bub"><b>第 {boss.i+1} / 40 題・空白魔王把成語擦成墨跡</b><p><Said text={bossSentence} idiom={bq.idiom} hit={hit}/></p></div>
      <button className="la-say" onClick={()=>speak(hit?bossSentence.replace(BLANK,bq.idiom):bossSentence,true)} aria-label="朗讀句子">🔊</button>
     </div>
     <div ref={stageRef} className="la-stage shoot bossfield" style={{backgroundImage:`url(${IMG(BOSS.bg)})`}}>
-     <img src={IMG('bust-jianjian-surprised')} alt="空白魔王" className={`la-bossimg${hit?' hurt':''}`}/>
+     <img src={IMG(hit?'boss-hurt':bossAtk?'boss-attack':'boss-laugh')} alt="空白魔王" className={`la-bossimg${hit?' hurt':''}`}/>
      <span className="la-pages" aria-hidden="true"><i/><i/><i/><i/><i/></span>
      {boss.joined&&<img src={IMG('moying-happy')} alt="墨墨在旁邊幫忙" className="la-momo-help"/>}
      {targets.map((t,n)=><button key={t} className={`la-target t${n}${gone.includes(t)?' gone':''}${hit&&t===bq.idiom?' win':''}${hit&&t!==bq.idiom?' fade':''}${boss.joined&&!hit&&t===bq.idiom?' glowhint':''}`} onClick={e=>bossShoot(t,e)} disabled={hit||gone.includes(t)} aria-label={`射向「${t}」`}><GameText text={t}/></button>)}
@@ -523,7 +524,7 @@ export default function LifeAdventure(){
    .la-hearts b{color:#6b6390;font-size:1.25rem;margin-left:2px}.la-hearts b.on{color:#ff6b9a}
    .la-stage.bossfield{filter:none}
    .la-stage.bossfield::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.35),rgba(40,30,80,.45) 70%);pointer-events:none}
-   .la-bossimg{position:absolute;top:2%;left:50%;width:30%;transform:translateX(-50%);filter:grayscale(.7) brightness(1.35) drop-shadow(0 0 28px #fff) drop-shadow(0 0 10px #cfe0ff);animation:la-float 2.6s ease-in-out infinite;pointer-events:none}
+   .la-bossimg{position:absolute;top:0;left:50%;width:34%;transform:translateX(-50%);filter:drop-shadow(0 0 24px rgba(255,255,255,.9)) drop-shadow(0 0 10px rgba(150,110,220,.7));animation:la-float 2.6s ease-in-out infinite;pointer-events:none}
    .la-bossimg.hurt{animation:la-hurt .5s}
    @keyframes la-hurt{30%{transform:translateX(-46%) scale(.94);filter:grayscale(1) brightness(2)}60%{transform:translateX(-54%) scale(.96)}}
    .la-pages{position:absolute;inset:0;pointer-events:none}
@@ -533,8 +534,8 @@ export default function LifeAdventure(){
    @keyframes la-page{0%{transform:translateY(0) rotate(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-60%) rotate(200deg);opacity:0}}
    .la-momo-help{position:absolute;left:3%;bottom:4%;width:16%;animation:la-float 2s ease-in-out infinite;pointer-events:none}
    .la-target.glowhint{border-color:#ffe27a;box-shadow:0 0 18px #ffe27a}
-   .la-face.bossface{filter:grayscale(.7) brightness(1.3);border-color:#b9b0e6}
-   .la-actor.bossy{filter:grayscale(.7) brightness(1.35) drop-shadow(0 0 26px #fff) drop-shadow(0 0 8px #cfe0ff);height:64%}
+   .la-face.bossface{border-color:#8f7fd6;background:#2a2450}
+   .la-actor.bossy{filter:drop-shadow(0 0 22px rgba(255,255,255,.85)) drop-shadow(0 0 8px rgba(150,110,220,.7));height:64%}
    .la-vn.bossbox{background:rgba(30,26,60,.9);border-color:#fff;box-shadow:0 0 22px rgba(255,255,255,.6)}
    .la-cert{background:#fffaf0;border:4px solid var(--gold);border-radius:24px;padding:22px 18px}
    .la-cert-name{font-size:1.4rem;font-weight:900;color:var(--choc)}
