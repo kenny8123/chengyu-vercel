@@ -1,6 +1,6 @@
 // 成語穿越者：墨墨與空白魔王（故事構思：遊戲作者；劇本第四稿）
-// 小越一家和同學參加學校的「環遊世界成語交流團」。世界各地的句子開始斷掉：成語變成墨跡。
-// 鼎鼎在開場把回溯手錶和成語光線槍交給小越，之後小越獨自冒險；每站背景是一個世界地標。
+// 大家說話說到一半，句子裏的成語變成墨跡。鼎鼎在開場把回溯手錶和成語光線槍交給小越：
+// 手錶帶小越穿越到之前的回憶，回到句子斷掉的一刻；之後小越獨自冒險（每站背景畫上一個世界地標，只作畫面）。
 // 每一站：回溯手錶報告 → 回到斷句前 → 生活對話 → 關鍵句（墨跡）→ 射回成語 → 一條線索。
 // 關鍵句來自 lifeSentences.json 第一句，由 say 的角色說出（預設小越）；對白一律書面語。
 // 主線：墨墨（墨影）前期像反派、後期是正派；簡簡把成語擦成空白，單元三結尾變成空白魔王。見《成語穿越者-劇本第四稿.md》。
@@ -38,14 +38,14 @@ export const UNITS = [{
  intro:[
   ['dingding','小越，歡迎來到成語時空圖書館！我是管理員鼎鼎。'],
   ['moying','嘻嘻！四十卷卷軸裏的成語，全被我吸走了！'],
-  ['dingding','糟了！世界各地的人說話說到一半，成語就變成墨跡，大家都想不起來。'],
-  ['dingding','你和同學正參加環遊世界的交流團，正好！這隻回溯手錶會帶你到句子斷掉的城市，回到斷掉之前；這把成語光線槍，可以把成語射回句子裏。'],
+  ['dingding','糟了！大家說話說到一半，成語就變成墨跡，大家都想不起來。'],
+  ['dingding','這隻回溯手錶可以帶你穿越到之前的回憶，回到句子斷掉的一刻；這把成語光線槍，可以把成語射回句子裏。'],
   ['dingding','記住：先聽清楚大家說甚麼，想想哪個成語合適，才可以開槍。'],
   ['xiaoyue','交給我吧！成語穿越者小越，出發！','determined'],
  ],
  chapters:[
   {idiom:'一言九鼎',bg:'w01',cast:['brother'],
-   alert:'偵測到斷句！地點：倫敦，交流團住的旅館。時間：今晚七時。',
+   alert:'偵測到斷句！穿越到回憶：哥哥答應陪我溫習的那一晚。',
    lines:[
     ['brother','小越，我答應了今晚陪你溫習數學。'],
     ['xiaoyue','可是你的朋友剛剛打電話來，約你去打球啊！','surprised'],
@@ -55,7 +55,7 @@ export const UNITS = [{
     ['xiaoyue','咦？墨跡出現之前，好像有一道白光閃過？','puzzled'],
    ]},
   {idiom:'寸草春暉',bg:'w02',cast:['mother'],
-   alert:'偵測到斷句！地點：日本富士山下的民宿。時間：母親節前一晚。',
+   alert:'偵測到斷句！穿越到回憶：母親節前一晚，我偷偷畫卡片。',
    lines:[
     ['xiaoyue','媽媽每天最早起床，又最遲睡覺。','think'],
     ['mother','小越，這麼晚了，你在畫甚麼？'],
@@ -66,7 +66,7 @@ export const UNITS = [{
     ['xiaoyue','是誰先把字擦掉的？','puzzled'],
    ]},
   {idiom:'人山人海',bg:'w03',cast:['mother'],
-   alert:'偵測到多處斷句！地點：紐約時代廣場旁的年宵花市。',
+   alert:'偵測到多處斷句！穿越到回憶：和媽媽逛年宵花市的那天。',
    lines:[
     ['mother','小越，花市的人太多了，要拉緊我的手。'],
     ['xiaoyue','媽媽，你在哪裏？我看不見你！','surprised'],
@@ -77,7 +77,7 @@ export const UNITS = [{
     ['xiaoyue','它到底在搶甚麼？','puzzled'],
    ]},
   {idiom:'水落石出',bg:'w04',cast:['teacher','xiaoming'],
-   alert:'偵測到斷句！地點：法國聖米歇爾山旁的交流學校。',
+   alert:'偵測到斷句！穿越到回憶：課室擺設不見了的那個早上。',
    lines:[
     ['xiaoming','課室的擺設不見了！是不是有人拿走了？'],
     ['teacher','先不要亂猜，我們一起仔細查清楚。'],
@@ -88,7 +88,7 @@ export const UNITS = [{
     ['xiaoyue','成語也會被擦掉的嗎？','puzzled'],
    ]},
   {idiom:'青出於藍',bg:'w05',cast:['little-brother'],
-   alert:'偵測到斷句！地點：希臘聖托里尼的民宿。',
+   alert:'偵測到斷句！穿越到回憶：弟弟第一次下象棋贏我的那天。',
    lines:[
     ['xiaoyue','弟弟，象棋是我教你的，怎麼你又贏了？','surprised'],
     ['little-brother','因為我每天都和爺爺練習呀！'],
@@ -99,7 +99,7 @@ export const UNITS = [{
     ['xiaoyue','孤單？墨影也會孤單嗎？','puzzled'],
    ]},
   {idiom:'滄海桑田',bg:'w06',cast:['grandpa'],
-   alert:'偵測到斷句！地點：杜拜，爺爺小時候住過的海灣。',
+   alert:'偵測到斷句！穿越到回憶：爺爺給我看舊相片的那個下午。',
    lines:[
     ['grandpa','小越，這是爺爺小時候住的漁村，大家都住在棚屋裏。'],
     ['xiaoyue','可是那裏現在全是高樓大廈呀！','surprised'],
@@ -110,7 +110,7 @@ export const UNITS = [{
     ['xiaoyue','不用了，謝謝你。爺爺說的話，我想原原本本記住。','think'],
    ]},
   {idiom:'守口如瓶',bg:'w07',cast:['xiaomei','xiaoming'],
-   alert:'偵測到斷句！地點：埃及開羅的交流學校，陳老師生日的前一天。',
+   alert:'偵測到斷句！穿越到回憶：陳老師生日的前一天。',
    lines:[
     ['xiaomei','明天是陳老師的生日，我們偷偷準備一個驚喜生日會吧！'],
     ['xiaoming','大家記住，千萬不要讓老師知道！'],
@@ -121,7 +121,7 @@ export const UNITS = [{
     ['xiaoyue','噓！簡簡，你差點把祕密說出來了！','oops'],
    ]},
   {idiom:'分道揚鑣',bg:'w08',cast:['brother'],say:'brother',
-   alert:'偵測到斷句！地點：三藩市的旅館，哥哥畢業那天。',
+   alert:'偵測到斷句！穿越到回憶：哥哥畢業的那一天。',
    lines:[
     ['brother','小越，我快要升中學了，可是我和最好的朋友考進了不同的學校。'],
     ['xiaoyue','那你們以後不能一起上學了？','surprised'],
@@ -132,7 +132,7 @@ export const UNITS = [{
     ['xiaoyue','這不是圖書館的印章嗎？','puzzled'],
    ]},
   {idiom:'手足無措',bg:'w09',cast:['teacher'],
-   alert:'偵測到斷句！地點：悉尼歌劇院，演講比賽。',
+   alert:'偵測到斷句！穿越到回憶：我第一次上台演講。',
    lines:[
     ['teacher','下一位，請小越上台演講。'],
     ['xiaoyue','我的心跳得好快……講稿怎麼拿反了？','surprised'],
@@ -142,7 +142,7 @@ export const UNITS = [{
     ['xiaoyue','謝謝你，簡簡。不過，我想自己說。','determined'],
    ]},
   {idiom:'刮目相看',bg:'w10',cast:['xiaomei'],
-   alert:'偵測到斷句！地點：台北 101 旁的禮堂，朗誦比賽頒獎。',
+   alert:'偵測到斷句！穿越到回憶：朗誦比賽頒獎的那一刻。',
    lines:[
     ['xiaoyue','朗誦比賽的冠軍是……小美！','surprised'],
     ['xiaomei','我每天都對着鏡子練習，終於不害怕了。'],
@@ -169,7 +169,7 @@ export const UNITS = [{
  ],
  chapters:[
   {idiom:'千方百計',bg:'w11',cast:['firefighter'],
-   alert:'偵測到斷句！地點：萬里長城腳下的大樹。',
+   alert:'偵測到斷句！穿越到回憶：公園大樹上有小貓的那天。',
    lines:[
     ['firefighter','小朋友別擔心，我們一定把小貓救下來。'],
     ['xiaoyue','梯子太短，小貓又躲到更高的樹枝上了！','surprised'],
@@ -180,7 +180,7 @@ export const UNITS = [{
     ['xiaoyue','壞蛋的身體，會是暖的嗎？','puzzled'],
    ]},
   {idiom:'始作俑者',bg:'w12',cast:['teacher','xiaoming'],
-   alert:'偵測到斷句！地點：西安的交流學校，小息之後。',
+   alert:'偵測到斷句！穿越到回憶：課室滿地紙飛機的小息。',
    lines:[
     ['teacher','為甚麼地上全是紙屑？'],
     ['xiaoming','是我先摺紙飛機，大家才跟着玩的……對不起。'],
@@ -191,7 +191,7 @@ export const UNITS = [{
     ['xiaoyue','大家都這樣說……可是，真的是它嗎？','think'],
    ]},
   {idiom:'白頭偕老',bg:'w13',cast:['popo','gongong'],
-   alert:'偵測到斷句！地點：巴黎塞納河畔，黃昏。',
+   alert:'偵測到斷句！穿越到回憶：在公園遇見公公婆婆的黃昏。',
    lines:[
     ['popo','老伴，慢慢走，今天的夕陽真美。'],
     ['gongong','五十年前，我就是在這個公園向你求婚的。'],
@@ -202,7 +202,7 @@ export const UNITS = [{
     ['xiaoyue','他們的成語，一個也沒有變成空白！','wonder'],
    ]},
   {idiom:'借刀殺人',bg:'w14',cast:['xiaoming'],
-   alert:'偵測到斷句！地點：莫斯科交流學校的課室門外。',
+   alert:'偵測到斷句！穿越到回憶：有人叫小明去告狀的那一天。',
    lines:[
     ['xiaoming','有人叫我去向老師告狀，說小美抄功課。'],
     ['xiaoyue','是誰叫你去的？他自己為甚麼不說？','puzzled'],
@@ -213,7 +213,7 @@ export const UNITS = [{
     ['xiaoyue','簡簡，可是誰說的話，誰就要負責啊。','think'],
    ]},
   {idiom:'賞心悅目',bg:'w15',cast:['xiaomei'],
-   alert:'偵測到斷句！地點：荷蘭的鬱金香花園。',
+   alert:'偵測到斷句！穿越到回憶：公園的花全開了的那天。',
    lines:[
     ['xiaomei','小越，快看！公園的花全開了！'],
     ['xiaoyue','紅的、黃的、紫的，像一張大地毯。','cheer'],
@@ -224,7 +224,7 @@ export const UNITS = [{
     ['xiaoyue','它的身體裏，透出一點一點的金光。','wonder'],
    ]},
   {idiom:'日新月異',bg:'w16',cast:['father'],
-   alert:'偵測到斷句！地點：新加坡濱海灣的商場。',
+   alert:'偵測到斷句！穿越到回憶：和爸爸逛商場看新手機的那天。',
    lines:[
     ['father','小越，你看，商場在介紹最新款的手機。'],
     ['father','爸爸小時候用的手機又大又重，現在的輕得像羽毛。'],
@@ -235,7 +235,7 @@ export const UNITS = [{
     ['xiaoyue','全部換掉？那……還是我在說話嗎？','puzzled'],
    ]},
   {idiom:'緣木求魚',bg:'w17',cast:['mother'],
-   alert:'偵測到斷句！地點：威尼斯的旅館，考試前一晚。',
+   alert:'偵測到斷句！穿越到回憶：考試前一晚才拿出課本的我。',
    lines:[
     ['mother','小越，明天就考試了，你怎麼現在才拿出課本？'],
     ['xiaoyue','我想叫耳機幫我一個晚上記住所有東西。','oops'],
@@ -246,7 +246,7 @@ export const UNITS = [{
     ['xiaoyue','可是考試的時候，要用的是我自己的腦袋。','determined'],
    ]},
   {idiom:'赴湯蹈火',bg:'w18',cast:['firefighter'],
-   alert:'偵測到斷句！地點：冰島的遊客中心，消防員分享會。',
+   alert:'偵測到斷句！穿越到回憶：消防員來學校分享的那天。',
    lines:[
     ['firefighter','有一次大廈起火，我們衝進濃煙裏，救出一位婆婆。'],
     ['xiaoyue','你們不害怕嗎？','surprised'],
@@ -257,7 +257,7 @@ export const UNITS = [{
     ['xiaoyue','它的身體被光燒掉了一小塊……它是在救成語嗎？','wonder'],
    ]},
   {idiom:'初來乍到',bg:'w19',cast:['ahhei','teacher'],
-   alert:'偵測到斷句！地點：紐約的交流學校，新同學來了。',
+   alert:'偵測到斷句！穿越到回憶：阿希第一天轉校來的早上。',
    lines:[
     ['teacher','同學們，這是新同學阿希。'],
     ['ahhei','……'],
@@ -268,7 +268,7 @@ export const UNITS = [{
     ['xiaoyue','阿希第一次用自己的聲音說話了！','cheer'],
    ]},
   {idiom:'弱肉強食',bg:'w20',cast:['little-brother'],
-   alert:'偵測到斷句！地點：東非草原的旅舍，電視前。',
+   alert:'偵測到斷句！穿越到回憶：和弟弟看動物紀錄片的晚上。',
    lines:[
     ['little-brother','哥哥，獅子在追斑馬！'],
     ['xiaoyue','紀錄片說，這是大自然的規律。','think'],

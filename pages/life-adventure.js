@@ -53,7 +53,7 @@ export default function LifeAdventure(){
  // 對白次序：intro＝開場；story＝時間回溯 → 手錶報告 → 生活對話 → 關鍵句（墨跡）→ 墨影；clue＝射中後的一條線索
  const at=l=>({bg:ch.bg,cast:ch.cast,line:l})
  const seq=phase==='intro'?unit.intro.map(l=>({bg:'bg-time-library',cast:[],line:l}))
-  :phase==='story'?[{portal:'時間回溯……'},at(['watch',ch.alert]),...ch.lines.map(at),
+  :phase==='story'?[{portal:'穿越到回憶……'},at(['watch',ch.alert]),...ch.lines.map(at),
     {...at([sayer,sentence]),key:true},at(['moying','嘻嘻！我把句子裏的成語吸走了，看你能不能射回去！'])]
   :phase==='clue'?ch.clue.map(at):[]
  const cur=seq[step]
