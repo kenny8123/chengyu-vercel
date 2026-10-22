@@ -5,11 +5,12 @@ import {recordLearning,startRewardRun,completeRewardRun,readPet,unlockScrolls} f
 import {outfitAsset} from '../components/outfitAssets'
 import CATALOG from '../components/petCatalog.json'
 import LIFE from '../components/lifeSentences.json'
-import {CAST,XIAOYUE,UNITS} from '../components/lifeAdventure'
+import {CAST,XIAOYUE,UNITS,BOSS} from '../components/lifeAdventure'
 
 // 成語穿越者：生活成語地圖冒險（設計構思：遊戲作者）
-// 學習單地圖 × 射擊：每站先看今天的生活對話，句子裏的成語被墨影吸走變成墨跡，
-// 用鼎鼎的燈泡光射回正確的成語，再穿越到古代看它的典故。
+// 學習單地圖 × 射擊：每站穿越到回憶，句子裏的成語被吸走變成墨跡，用成語光線槍射回正確的成語，再看一條線索。
+// 單元一至三是地圖；單元四是決戰空白魔王（四十個成語輪流出題，射中一個魔王少一格血），打贏後看結局。
+const INK=new Set(['moying','momo'])   // 墨影／墨墨：用整團墨水圖，不用半身像
 const BLANK='＿＿＿＿'
 const KEY='life-adventure-v1'
 // 圖片更新後改呢個數字，瀏覽器就會重新下載，唔會顯示舊圖
@@ -47,15 +48,21 @@ export default function LifeAdventure(){
  const [targets,setTargets]=useState([]),[gone,setGone]=useState([]),[wrong,setWrong]=useState(0),[hint,setHint]=useState(''),[hit,setHit]=useState(false),[beam,setBeam]=useState(null)
  const [reward,setReward]=useState(null),[walkFrom,setWalkFrom]=useState(null),[walking,setWalking]=useState(false)
  const [pose,setPose]=useState('aim'),[dir,setDir]=useState('ur'),[gift,setGift]=useState(null)
+ const [boss,setBoss]=useState(null),[bossNote,setBossNote]=useState('')
  const run=useRef(null),stageRef=useRef(null),gunRef=useRef(null)
  const ch=chapters[stop],life=lifeOf(ch.idiom),sentence=life.sentences[0],sayer=ch.say||'xiaoyue'
+ const bq=boss&&LIFE[boss.order[boss.i]],bossSentence=bq?.sentences[1]||''   // 魔王關用另一句例句
 
- // 對白次序：intro＝開場；story＝時間回溯 → 手錶報告 → 生活對話 → 關鍵句（墨跡）→ 墨影；clue＝射中後的一條線索
+ // 對白次序：intro＝開場；story＝穿越到回憶 → 手錶報告 → 生活對話 → 關鍵句（墨跡）→ 墨影；clue＝射中後的一條線索
+ // bossIntro／bossMid／bossEnd＝魔王關的開場、墨墨歸隊、結局
  const at=l=>({bg:ch.bg,cast:ch.cast,line:l})
+ const atBoss=l=>({bg:BOSS.bg,cast:[],line:l})
  const seq=phase==='intro'?unit.intro.map(l=>({bg:'bg-time-library',cast:[],line:l}))
   :phase==='story'?[{portal:'穿越到回憶……'},at(['watch',ch.alert]),...ch.lines.map(at),
     {...at([sayer,sentence]),key:true},at(['moying','嘻嘻！我把句子裏的成語吸走了，看你能不能射回去！'])]
-  :phase==='clue'?ch.clue.map(at):[]
+  :phase==='clue'?ch.clue.map(l=>({...at(l),bg:ch.clueBg||ch.bg}))
+  :phase==='bossIntro'?BOSS.intro.map(atBoss):phase==='bossMid'?BOSS.mid.map(atBoss):phase==='bossEnd'?BOSS.ending.map(atBoss):[]
+ const VN=['intro','story','clue','bossIntro','bossMid','bossEnd']
  const cur=seq[step]
 
  // 進度按單元分開儲存：{units:{0:{done,run,introSeen},1:{…}},voice}；同一個學習檔案才接續
@@ -72,7 +79,7 @@ export default function LifeAdventure(){
   let x=load()
   if(x&&!x.units&&x.done)x={units:{0:{done:x.done,run:x.run,introSeen:x.introSeen}},voice:x.voice}  // 舊格式（只有單元一）
   prog.current=x?.units?x:{units:{}}
-  setVoice(prog.current.voice!==false)
+  setVoice(prog.current.voice!==false);setBoss(prog.current.boss||null)
   // 以前完成的站也補開卷軸館藏
   unlockScrolls(UNITS.flatMap((u,k)=>Object.keys(unitSave(k)?.done||{}).map(n=>u.chapters[n]?.idiom).filter(Boolean)))
   // 由最後一個已開放、未完成的單元開始
@@ -117,6 +124,8 @@ export default function LifeAdventure(){
   if(phase==='intro'){setIntroSeen(true);persist(done);setPhase('map');return}
   if(phase==='story'){startShoot();return}
   if(phase==='clue')backToMap()
+  if(phase==='bossIntro'||phase==='bossMid'){saveBoss({...boss,started:true});setPhase('boss');return}
+  if(phase==='bossEnd')setPhase('cert')
  }
  function start(){if(introSeen)setPhase('map');else{setStep(0);setPhase('intro')}}
  function openStop(i){setStop(i);setStep(0);setHit(false);setHint('');setWrong(0);setGone([]);setGift(null);setPhase('story')}
@@ -126,9 +135,8 @@ export default function LifeAdventure(){
   setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setPose('aim');setDir('ur');setPhase('shoot')
   speak(sentence,voice)
  }
- function shoot(idiom,e){
-  if(hit||gone.includes(idiom))return
-  // 小越先轉身面向目標（選最接近的射擊角度），光束由該角度的槍口直線射向目標，不會轉彎
+ // 小越先轉身面向目標（選最接近的射擊角度），光束由該角度的槍口直線射向目標，不會轉彎
+ function aimAt(e,isHit){
   const st=stageRef.current?.getBoundingClientRect(),r=e.currentTarget.getBoundingClientRect(),g=gunRef.current?.getBoundingClientRect()
   if(st&&g){
    const gcx=g.left+g.width/2,tx=r.left+r.width/2,ty=r.top+r.height/2
@@ -136,8 +144,12 @@ export default function LifeAdventure(){
    const x1=gcx-w/2+w*AIM[d].m[0]-st.left,y1=g.top+g.height*AIM[d].m[1]-st.top,x2=tx-st.left,y2=ty-st.top
    setDir(d);setBeam({x:x1,y:y1,len:Math.hypot(x2-x1,y2-y1),deg:Math.atan2(y2-y1,x2-x1)*180/Math.PI,k:Date.now()})
   }
-  const isHit=idiom===ch.idiom
   setPose('fire');setTimeout(()=>setPose(isHit?'cheer':'aim'),isHit?520:300)
+ }
+ function shoot(idiom,e){
+  if(hit||gone.includes(idiom))return
+  const isHit=idiom===ch.idiom
+  aimAt(e,isHit)
   const fresh=!(stop in done)
   if(isHit){
    setHit(true);setHint('')
@@ -164,6 +176,59 @@ export default function LifeAdventure(){
   setWalkFrom(stop);setWalking(false);setPhase('map')
  }
  function restart(){if(!window.confirm('重新開始會清除這張地圖的進度，確定嗎？'))return;run.current=startRewardRun('adventure');setDone({});setReward(null);setWalkFrom(null);persist({});setPhase('map')}
+
+ // ── 單元四：決戰空白魔王 ──
+ // 進度存在 prog.boss：{order,i,hp,hearts,first,joined,started,finished,run}；中途離開下次可接續
+ const bossReady=()=>allDone(UNITS.length-1)
+ function saveBoss(b){setBoss(b);prog.current={...prog.current,boss:b};save(prog.current)}
+ function newBoss(){return {order:shuffle(LIFE.map((_,n)=>n)),i:0,hp:BOSS.hp,hearts:BOSS.hearts,first:{},joined:false,started:false,finished:false,run:startRewardRun('boss')}}
+ function startBoss(fresh=false){
+  if(!bossReady())return
+  try{speechSynthesis.cancel()}catch{}
+  const b=prog.current.boss,ok=!fresh&&b&&b.run?.profileId===readPet().active&&!b.finished
+  const nb=ok?b:newBoss();saveBoss(nb);setReward(null);setBossNote('');setStep(0)
+  setPhase(nb.started?'boss':'bossIntro')
+ }
+ // 每題：正確成語＋相近＋無關＋另一個成語
+ useEffect(()=>{
+  if(phase!=='boss'||!bq)return
+  const others=LIFE.map(x=>x.idiom).filter(x=>![bq.idiom,bq.near,bq.far].includes(x))
+  setTargets(shuffle([bq.idiom,bq.near,bq.far,shuffle(others)[0]]))
+  setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setPose('aim');setDir('ur')
+  speak(bossSentence,voice)
+ },[phase,boss?.i])
+ function bossShoot(idiom,e){
+  if(hit||gone.includes(idiom)||!bq)return
+  const isHit=idiom===bq.idiom
+  aimAt(e,isHit);setBossNote('')
+  if(isHit){
+   setHit(true);setHint('')
+   const first={...boss.first};if(!(bq.idiom in first)){first[bq.idiom]=wrong===0;recordLearning({idiom:bq.idiom,kind:'answer',correct:wrong===0})}
+   unlockScrolls([bq.idiom])
+   const hp=boss.hp-1,joinNow=!boss.joined&&hp<=BOSS.half
+   speak(bossSentence.replace(BLANK,bq.idiom),voice)
+   setTimeout(()=>{
+    if(hp<=0){
+     const answers=boss.order.map(n=>({correct:first[LIFE[n].idiom]===true}))
+     setReward(completeRewardRun(boss.run,answers)||{already:true})
+     saveBoss({...boss,hp:0,first,finished:true});setStep(0);setPhase('bossEnd');return
+    }
+    saveBoss({...boss,hp,first,i:boss.i+1,joined:boss.joined||joinNow})
+    if(joinNow){setStep(0);setPhase('bossMid')}
+   },1300)
+   return
+  }
+  // 射錯：空白波打中小越，少一顆心；心用完時墨墨補滿
+  const w=wrong+1;setWrong(w);setGone([...gone,idiom])
+  const first=bq.idiom in boss.first?boss.first:{...boss.first,[bq.idiom]:false}
+  if(!(bq.idiom in boss.first))recordLearning({idiom:bq.idiom,kind:'answer',correct:false})
+  let hearts=boss.hearts-1
+  if(hearts<=0){hearts=BOSS.hearts;setBossNote(`【${CAST.momo.name}】${BOSS.revive[1]}`)}
+  saveBoss({...boss,hearts,first})
+  const h=`空白波！「${idiom}」的意思是：${meaning(idiom)}和這句話說的事不一樣。`
+  setHint(h);speak(h,voice)
+ }
+ const bossFirst=boss?Object.values(boss.first).filter(v=>v===true).length:0
  const no=i=>ui*10+i+1   // 全劇的站號（第 1–40 站）
 
  const nextStop=chapters.findIndex((_,i)=>!(i in done)),firstCount=Object.values(done).filter(v=>v===true).length
@@ -199,7 +264,7 @@ export default function LifeAdventure(){
   {phase!=='cover'&&<main className="la-wrap">
    <header className="la-top">
     <button className="la-back" onClick={()=>{try{speechSynthesis.cancel()}catch{};setPhase(phase==='map'||phase==='intro'||phase==='done'?'cover':'map')}}>{phase==='map'||phase==='intro'||phase==='done'?'← 封面':'← 地圖'}</button>
-    <h1>🗺️ {unit.title}</h1>
+    <h1>{/^boss|cert/.test(phase)?`⚔️ ${BOSS.title}`:`🗺️ ${unit.title}`}</h1>
     <button className="la-back" onClick={toggleVoice} aria-pressed={voice}>{voice?'🔊 開':'🔇 關'}</button>
    </header>
 
@@ -214,7 +279,7 @@ export default function LifeAdventure(){
     </div>
     <div className="la-side">
      <div className="la-units" role="tablist" aria-label="選擇單元">{UNITS.map((u,i)=><button key={u.title} role="tab" aria-selected={ui===i} disabled={!unlocked(i)} className={ui===i?'on':''} onClick={()=>goUnit(i)}>{unlocked(i)?'':'🔒 '}{u.title.split('・')[0]}<small>{u.title.split('・')[1]}</small></button>)}
-      {UNITS.length<4&&<button disabled>🔒 單元{['','','三','四'][UNITS.length]||''}<small>製作中</small></button>}</div>
+      <button role="tab" aria-selected={false} disabled={!bossReady()} className="boss" onClick={()=>startBoss()}>{bossReady()?'⚔️ ':'🔒 '}{BOSS.title.split('・')[0]}<small>{BOSS.title.split('・')[1]}</small></button></div>
      <p className="la-tip">{nextStop>=0?<>★ 按地圖上發光的第 <b>{no(nextStop)}</b> 站出發。先讀大家的對話，想想哪個成語適合，再把它射回句子裏。</>:'★ 十站都完成了！'}</p>
      {gift&&<p className="la-tip gift" role="status">📜 成語送回圖書館了！<a href="/pet">寵物的家</a>的成語卷軸館藏打開了「{gift}」卷軸。</p>}
      {worksheet}
@@ -222,15 +287,15 @@ export default function LifeAdventure(){
     </div>
    </div>}
 
-   {(phase==='intro'||phase==='story'||phase==='clue')&&cur&&<div className="la-play">
+   {VN.includes(phase)&&cur&&<div className="la-play">
     <div className={`la-stage scene${cur.portal?' portal':''}`} style={cur.portal?{backgroundImage:`url(${IMG('bg-time-portal')})`}:undefined} onClick={next}>
      {cur.portal?<p className="la-portal-text"><GameText text={cur.portal}/></p>:<>
       <div className="la-bg" style={{backgroundImage:`url(${IMG(cur.bg)})`}}/>
       {/* RPG 式：只顯示說話的人的半身立繪，小越在左下角、其他角色在右下角，站在對話框前面（busts.mjs 統一頭部大小） */}
-      {!CAST[cur.line[0]].sys&&<img key={step} src={cur.line[0]==='moying'?IMG('moying-float'):IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}${cur.line[0]==='moying'?' moying':''}${CAST[cur.line[0]].holo?' holo':''}${FACES_RIGHT.has(cur.line[2])?' noflip':''}`}/>}
+      {!CAST[cur.line[0]].sys&&<img key={step} src={cur.line[0]==='moying'?IMG('moying-float'):cur.line[0]==='momo'?IMG('moying-happy'):IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}${INK.has(cur.line[0])?' moying':''}${CAST[cur.line[0]].holo?' holo':''}${CAST[cur.line[0]].boss?' bossy':''}${FACES_RIGHT.has(cur.line[2])?' noflip':''}`}/>}
       {cur.key&&<img src={IMG('moying-suck-float')} alt="墨影正在吸走成語" className="la-moying"/>}
       {/* 情境對話（RPG 式）：小越在左、其他角色在右，說話的人亮起；底部一個大對話框 */}
-      <div className={`la-vn ${CAST[cur.line[0]].sys?'sys':CAST[cur.line[0]].holo?'sys pr':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${cur.line[0]==='moying'?' ink':''}`} aria-live="polite">
+      <div className={`la-vn ${CAST[cur.line[0]].sys?'sys':CAST[cur.line[0]].holo?'sys pr':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${INK.has(cur.line[0])?' ink':''}${CAST[cur.line[0]].boss?' bossbox':''}`} aria-live="polite">
        <b>【{CAST[cur.line[0]].name}】</b>
        <p>{cur.key?(typed<cur.line[1].length?cur.line[1].slice(0,typed).replace(BLANK,'⋯⋯'):<Said text={cur.line[1]} idiom={ch.idiom} hit={false}/>):cur.line[1].slice(0,typed)}</p>
        {typed>=cur.line[1].length&&<span className="la-vn-more" aria-hidden="true">▼</span>}
@@ -260,6 +325,49 @@ export default function LifeAdventure(){
     <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${ch.idiom}」：${meaning(ch.idiom)}`:hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用成語光線槍射回去。'}</p>
    </div>}
 
+   {phase==='boss'&&boss&&bq&&<div className="la-play">
+    {/* 魔王血量和小越的心 */}
+    <div className="la-bossbar" aria-live="polite">
+     <span className="la-bossname">空白魔王</span>
+     <span className="la-hp" role="progressbar" aria-valuemin={0} aria-valuemax={BOSS.hp} aria-valuenow={boss.hp} aria-label="空白魔王血量"><i style={{width:`${boss.hp/BOSS.hp*100}%`}}/></span>
+     <span className="la-hpnum">{boss.hp} / {BOSS.hp}</span>
+     <span className="la-hearts" aria-label={`小越還有 ${boss.hearts} 顆心`}>{Array.from({length:BOSS.hearts},(_,n)=><b key={n} className={n<boss.hearts?'on':''}>♥</b>)}</span>
+    </div>
+    <div className="la-msg big right key">
+     <img src={IMG('bust-jianjian-surprised')} alt="" className="la-face bossface"/>
+     <div className="la-bub"><b>第 {boss.i+1} / 40 題・空白魔王把成語擦成墨跡</b><p><Said text={bossSentence} idiom={bq.idiom} hit={hit}/></p></div>
+     <button className="la-say" onClick={()=>speak(hit?bossSentence.replace(BLANK,bq.idiom):bossSentence,true)} aria-label="朗讀句子">🔊</button>
+    </div>
+    <div ref={stageRef} className="la-stage shoot bossfield" style={{backgroundImage:`url(${IMG(BOSS.bg)})`}}>
+     <img src={IMG('bust-jianjian-surprised')} alt="空白魔王" className={`la-bossimg${hit?' hurt':''}`}/>
+     <span className="la-pages" aria-hidden="true"><i/><i/><i/><i/><i/></span>
+     {boss.joined&&<img src={IMG('moying-happy')} alt="墨墨在旁邊幫忙" className="la-momo-help"/>}
+     {targets.map((t,n)=><button key={t} className={`la-target t${n}${gone.includes(t)?' gone':''}${hit&&t===bq.idiom?' win':''}${hit&&t!==bq.idiom?' fade':''}${boss.joined&&!hit&&t===bq.idiom?' glowhint':''}`} onClick={e=>bossShoot(t,e)} disabled={hit||gone.includes(t)} aria-label={`射向「${t}」`}><GameText text={t}/></button>)}
+     {beam&&<span key={beam.k} className="la-beam" style={{left:beam.x,top:beam.y,width:beam.len,transform:`rotate(${beam.deg}deg)`}}/>}
+     <img ref={gunRef} src={IMG(pose==='cheer'?'shooter-cheer':`shoot-${dir}-${pose}`)} alt="小越拿着成語光線槍" className={`la-shooter ${pose}`}/>
+     {hit&&<p className="la-hitfx" role="status"><GameText text="命中！"/><small>空白魔王 −1</small></p>}
+    </div>
+    {bossNote&&<p className="la-hint ok">{bossNote}</p>}
+    <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${bq.idiom}」：${meaning(bq.idiom)}`:hint||(boss.joined?'★ 墨墨歸隊了！發光的卷軸就是正確答案的提示。':'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個成語，再用成語光線槍射回去。')}</p>
+   </div>}
+
+   {phase==='cert'&&boss&&<div className="la-done la-cert">
+    <h2><GameText text="結局證書"/></h2>
+    <p className="la-cert-name">成語穿越者・小越 任務完成！</p>
+    <ul className="la-cert-list">
+     <li>打敗空白魔王，四十卷卷軸全部亮起</li>
+     <li>決戰中第一次就射中：<b>{bossFirst}</b> / 40 個成語</li>
+     <li>成語卷軸館藏：<b>{(readPet().profiles[readPet().active]?.scrolls||[]).length}</b> / 40 卷</li>
+    </ul>
+    {reward&&!reward.already&&<CompletionReward reward={reward}/>}
+    <p className="la-cert-credit">故事構思：遊戲作者</p>
+    <div className="la-actions">
+     <a className="btn btn-go" href="/pet">去卷軸館藏看明信片 →</a>
+     <button className="btn btn-ghost" onClick={()=>{if(window.confirm('再挑戰一次空白魔王？'))startBoss(true)}}>再挑戰魔王</button>
+     <button className="btn btn-ghost" onClick={()=>setPhase('cover')}>回到封面</button>
+    </div>
+   </div>}
+
    {phase==='done'&&<div className="la-done">
     <h2><GameText text="十卷卷軸全部亮起了！"/></h2>
     <p>{unit.ending}</p>
@@ -267,6 +375,7 @@ export default function LifeAdventure(){
     {worksheet}
     <div className="la-actions">
      {UNITS[ui+1]&&<button className="btn btn-go" onClick={()=>goUnit(ui+1)}>前往{UNITS[ui+1].title.split('・')[0]} →</button>}
+     {!UNITS[ui+1]&&<button className="btn btn-go" onClick={()=>startBoss()}>⚔️ 前往決戰空白魔王 →</button>}
      <button className="btn btn-ghost" onClick={()=>setPhase('map')}>看地圖</button>
      <button className="btn btn-ghost" onClick={restart}>重新開始</button>
     </div>
@@ -404,6 +513,34 @@ export default function LifeAdventure(){
    .la-hitfx{position:absolute;left:0;right:0;top:34%;text-align:center;margin:0;font-size:clamp(2.6rem,7vw,4.6rem);z-index:5;animation:la-pop .5s;pointer-events:none}
    .la-hitfx small{display:block;font-size:1rem;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(60,20,80,.8);margin-top:6px}
    .la-hint.ok{border-color:var(--grass);background:#eefbea}
+   /* 魔王關 */
+   .la-units button.boss:not(:disabled){border-color:#b9b0e6;background:#f3f0ff;color:#3b2a6b}
+   .la-bossbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#241f4a;color:#fff;border-radius:16px;padding:10px 14px;margin-bottom:10px;border:3px solid #e8c873}
+   .la-bossname{font-weight:900;letter-spacing:.08em;color:#ffd6f0}
+   .la-hp{flex:1;min-width:140px;height:16px;background:#4a4380;border-radius:999px;overflow:hidden;border:2px solid #fff3}
+   .la-hp i{display:block;height:100%;background:linear-gradient(90deg,#fff,#d9e8ff);transition:width .5s}
+   .la-hpnum{font-weight:800;font-size:.9rem;min-width:56px}
+   .la-hearts b{color:#6b6390;font-size:1.25rem;margin-left:2px}.la-hearts b.on{color:#ff6b9a}
+   .la-stage.bossfield{filter:none}
+   .la-stage.bossfield::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.35),rgba(40,30,80,.45) 70%);pointer-events:none}
+   .la-bossimg{position:absolute;top:2%;left:50%;width:30%;transform:translateX(-50%);filter:grayscale(.7) brightness(1.35) drop-shadow(0 0 28px #fff) drop-shadow(0 0 10px #cfe0ff);animation:la-float 2.6s ease-in-out infinite;pointer-events:none}
+   .la-bossimg.hurt{animation:la-hurt .5s}
+   @keyframes la-hurt{30%{transform:translateX(-46%) scale(.94);filter:grayscale(1) brightness(2)}60%{transform:translateX(-54%) scale(.96)}}
+   .la-pages{position:absolute;inset:0;pointer-events:none}
+   .la-pages i{position:absolute;width:5%;aspect-ratio:3/4;background:#fffef8;border:1px solid #ddd;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,.2);animation:la-page 6s linear infinite}
+   .la-pages i:nth-child(1){left:20%;top:10%;animation-delay:0s}.la-pages i:nth-child(2){left:70%;top:16%;animation-delay:1.2s}
+   .la-pages i:nth-child(3){left:35%;top:30%;animation-delay:2.4s}.la-pages i:nth-child(4){left:80%;top:40%;animation-delay:3.6s}.la-pages i:nth-child(5){left:12%;top:45%;animation-delay:4.8s}
+   @keyframes la-page{0%{transform:translateY(0) rotate(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-60%) rotate(200deg);opacity:0}}
+   .la-momo-help{position:absolute;left:3%;bottom:4%;width:16%;animation:la-float 2s ease-in-out infinite;pointer-events:none}
+   .la-target.glowhint{border-color:#ffe27a;box-shadow:0 0 18px #ffe27a}
+   .la-face.bossface{filter:grayscale(.7) brightness(1.3);border-color:#b9b0e6}
+   .la-actor.bossy{filter:grayscale(.7) brightness(1.35) drop-shadow(0 0 26px #fff) drop-shadow(0 0 8px #cfe0ff);height:64%}
+   .la-vn.bossbox{background:rgba(30,26,60,.9);border-color:#fff;box-shadow:0 0 22px rgba(255,255,255,.6)}
+   .la-cert{background:#fffaf0;border:4px solid var(--gold);border-radius:24px;padding:22px 18px}
+   .la-cert-name{font-size:1.4rem;font-weight:900;color:var(--choc)}
+   .la-cert-list{text-align:left;display:inline-block;line-height:2;font-weight:600}
+   .la-cert-credit{color:var(--choc-soft);font-size:.9rem}
+   @media(prefers-reduced-motion:reduce){.la-pages i,.la-bossimg,.la-momo-help{animation:none}}
    .la-hint{margin:12px 0 0;background:#fffaf0;border:3px dashed #e8d8bd;border-radius:16px;padding:10px 14px;line-height:1.7;font-weight:500}
    .la-hint.on{border-color:var(--berry);background:#fff0f4}
    .la-gift{color:var(--choc-soft)}

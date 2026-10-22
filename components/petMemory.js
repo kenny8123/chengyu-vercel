@@ -29,7 +29,7 @@ export function applyLearning(profile,event,now=Date.now()){
 export function recordLearning(event){const x=readPet();x.profiles[x.active]=applyLearning(x.profiles[x.active],event);return savePet(x)}
 export function startRewardRun(mode){return {id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,mode,profileId:readPet().active}}
 export function applyCompletion(profile,run,answers){
- const total={practice:4,free:10,video:10,battle:40,life:10,adventure:10}[run?.mode]
+ const total={practice:4,free:10,video:10,battle:40,life:10,adventure:10,boss:40}[run?.mode]
  if(!run?.id||!total||answers.length!==total||answers.some(a=>typeof a.correct!=='boolean')||profile.completedRuns?.[run.id])return null
  const baseXp=answers.reduce((n,a)=>n+(a.correct?10:2),0),food=answers.reduce((n,a)=>n+(a.correct?2:1),0)
  const xp=baseXp

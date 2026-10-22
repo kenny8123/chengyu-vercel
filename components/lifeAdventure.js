@@ -23,9 +23,14 @@ export const CAST = {
  firefighter:{name:'消防員',img:'firefighter'},
  gongong:{name:'公公',img:'gongong',talk:'gongong-talk'},
  popo:{name:'婆婆',img:'popo',talk:'popo-talk'},
+ cousin:{name:'表弟',img:'cousin'},
+ // 第 28 站以後，墨影說出自己的名字「墨墨」
+ momo:{name:'墨墨',img:'moying-happy'},
 }
 // 簡簡有立繪（全息投影），對話框仍用青藍色
 CAST.jianjian={name:'簡簡',img:'jianjian-smile',talk:'jianjian-talk',holo:true}
+// 空白魔王：單元三結尾由簡簡變成（暫用簡簡的圖加效果，之後換正式立繪）
+CAST.boss={name:'空白魔王',img:'jianjian-surprised',holo:true,boss:true}
 // 小越的表情圖
 export const XIAOYUE = {wave:'xiaoyue-wave',surprised:'xiaoyue-surprised',think:'xiaoyue-think',cheer:'xiaoyue-cheer',puzzled:'xiaoyue-puzzled',wonder:'xiaoyue-wonder',oops:'xiaoyue-oops',determined:'xiaoyue-determined'}
 
@@ -282,4 +287,164 @@ export const UNITS = [{
    ]},
  ],
  ending:'鼎鼎：「那些卷軸上……都有圖書館的印章。墨影，你到底是誰？」',
+},{
+ title:'單元三・遺忘書庫',
+ map:'map-3',
+ stops:[[24,81.5],[38,62],[49,60],[59.5,49.5],[71.5,53],[80.5,42],[86,32],[90.5,18],[50,38],[33,32.5]],
+ hideout:[18.5,27],
+ intro:[
+  ['dingding','小越，第二張地圖也完成了！'],
+  ['dingding','墨影身上收着的卷軸，都有圖書館的印章……我總覺得它很熟悉。'],
+  ['dingding','這一次，我們去把真相找出來吧。'],
+  ['xiaoyue','好！不管是誰把成語擦掉，我都要找出來！','determined'],
+ ],
+ // 背景暫用現有場景，之後換成世界地標版本
+ chapters:[
+  {idiom:'禮尚往來',bg:'bg-living-room',cast:['mother'],
+   alert:'偵測到斷句！穿越到回憶：中秋節鄰居來送月餅的那天。',
+   lines:[
+    ['mother','小越，鄰居陳太太送來一盒月餅。'],
+    ['xiaoyue','我們也要送點甚麼給她嗎？','think'],
+    ['mother','當然，媽媽準備了一籃水果。'],
+   ],
+   clue:[
+    ['jianjian','小越，送你一張「簡化貼紙」！貼上它，以後就不用再記成語了。'],
+    ['xiaoyue','謝謝你……不過，我還是想自己記住。','think'],
+   ]},
+  {idiom:'爭先恐後',bg:'bg-school-hall',cast:['xiaoming'],
+   alert:'偵測到斷句！穿越到回憶：小息鐘聲響起的一刻。',
+   lines:[
+    ['xiaoming','快！小息了，我們去搶籃球場！'],
+    ['xiaoyue','大家都跑得好快啊！','surprised'],
+    ['xiaoming','慢一步就沒有位置了！'],
+   ],
+   clue:[
+    ['xiaoyue','墨影和一道白光，同時衝向同一個成語！','surprised'],
+    ['xiaoyue','墨影快了一步……那道白光好像很不高興。','wonder'],
+   ]},
+  {idiom:'立竿見影',bg:'bg-living-room',cast:['mother'],
+   alert:'偵測到斷句！穿越到回憶：我開始早睡早起的第一個星期。',
+   lines:[
+    ['mother','小越，你最近每天九點就睡覺，真乖。'],
+    ['xiaoyue','老師說早睡早起，精神會好。','cheer'],
+    ['mother','難怪你今天上課一點也不打瞌睡。'],
+   ],
+   clue:[
+    ['xiaoyue','我用回溯手錶慢慢重看那一刻……','think'],
+    ['xiaoyue','先有一道白光把成語擦成空白，墨影才衝過去搶救！先擦掉成語的，不是墨影！','surprised'],
+   ]},
+  {idiom:'吳牛喘月',bg:'bg-park',cast:['little-brother'],
+   alert:'偵測到斷句！穿越到回憶：弟弟在公園大叫的那個下午。',
+   lines:[
+    ['little-brother','哥哥，那邊有一隻狗！救命呀！'],
+    ['xiaoyue','弟弟，那只是一隻玩具狗啊。','surprised'],
+    ['little-brother','我上次被狗咬過，現在看見都害怕……'],
+   ],
+   clue:[
+    ['little-brother','哥哥，墨影是不是也像狗一樣會咬人？'],
+    ['xiaoyue','看起來可怕，不一定是壞蛋。我想，墨影也是這樣。','think'],
+   ]},
+  {idiom:'異曲同工',bg:'bg-library',cast:['brother'],
+   alert:'偵測到斷句！穿越到回憶：和哥哥一起溫習的週末。',
+   lines:[
+    ['brother','小越，我把課文畫成圖畫來溫習。'],
+    ['xiaoyue','我喜歡把重點寫成列表。','think'],
+    ['brother','方法不同，只要記得住就好！'],
+   ],
+   clue:[
+    ['xiaoyue','白光又來擦成語了！我開槍，墨影接住，我們一起把成語救回來了！','cheer'],
+    ['moying','……謝謝。'],
+   ]},
+  {idiom:'格殺勿論',bg:'bg-school-hall',cast:['xiaoming','teacher'],say:'xiaoming',
+   alert:'偵測到斷句！穿越到回憶：班際話劇綵排。',
+   lines:[
+    ['teacher','同學們，話劇綵排開始！小明演守城將軍。'],
+    ['xiaoming','（舉起木劍）眾將士聽令！'],
+    ['xiaoyue','小明演得好有氣勢！','cheer'],
+   ],
+   clue:[
+    ['jianjian','（白光突然變得刺眼）所有麻煩的字，都要擦掉！'],
+    ['xiaoyue','簡簡……你剛才的聲音，好可怕。','surprised'],
+   ]},
+  {idiom:'半斤八兩',bg:'bg-living-room',cast:['brother'],
+   alert:'偵測到斷句！穿越到回憶：派測驗卷的那個晚上。',
+   lines:[
+    ['brother','小越，這次測驗你考幾分？'],
+    ['xiaoyue','八十五分。哥哥呢？','think'],
+    ['brother','我也是八十五分！'],
+   ],
+   clue:[
+    ['watch','緊急通訊：鼎鼎報告，圖書館底層「遺忘書庫」的空白頁，不見了一大堆！'],
+    ['xiaoyue','遺忘書庫？那是甚麼地方？','puzzled'],
+   ]},
+  {idiom:'少見多怪',bg:'bg-living-room',cast:['cousin'],
+   alert:'偵測到斷句！穿越到回憶：表弟第一次來我家吃水果。',
+   lines:[
+    ['cousin','哇！這是甚麼？好臭，好可怕！'],
+    ['xiaoyue','這是榴槤，是一種水果啊。','cheer'],
+    ['cousin','水果怎麼會長滿刺的？'],
+   ],
+   clue:[
+    ['momo','我叫墨墨。'],
+    ['momo','我不是在偷成語，我是在救它們。'],
+    ['xiaoyue','墨墨……原來你一直在救成語！','surprised'],
+   ]},
+  {idiom:'包羅萬象',bg:'bg-library',cast:['ahhei'],clueBg:'bg-time-library',
+   alert:'偵測到斷句！穿越到回憶：和阿希第一次去圖書館。',
+   lines:[
+    ['ahhei','小越，這間圖書館甚麼書都有。'],
+    ['xiaoyue','從恐龍到太空，看一整天也看不完！','cheer'],
+    ['ahhei','我……我想借一本成語故事書。'],
+   ],
+   clue:[
+    ['momo','跟我來，我帶你去遺忘書庫。'],
+    ['xiaoyue','這裏的書頁……全是空白的。','wonder'],
+    ['momo','每當大家忘記一個成語，那一頁就會變成空白，飄到這裏來。'],
+    ['momo','空白頁越積越多，終於聚在一起，變成了一團白光——就是簡簡。'],
+    ['xiaoyue','原來簡簡是從被忘記的成語變出來的……','wonder'],
+   ]},
+  {idiom:'莫逆之交',bg:'bg-school-hall',cast:['xiaoming'],clueBg:'bg-time-library',
+   alert:'偵測到斷句！穿越到回憶：和小明和好的那天。',
+   lines:[
+    ['xiaoming','小越，對不起，那天我不應該跟你吵架。'],
+    ['xiaoyue','我也有不對。我們還是好朋友！','cheer'],
+    ['xiaoming','當然！我們由幼稚園開始就是好朋友。'],
+   ],
+   clue:[
+    ['jianjian','你們……都想把成語記住？'],
+    ['boss','既然沒有人需要它們，就讓四十個成語全部消失吧！'],
+    ['xiaoyue','簡簡……你變成了……空白魔王？！','surprised'],
+    ['momo','小越，小心！'],
+   ]},
+ ],
+ ending:'鼎鼎：「空白魔王要把四十個成語一次過擦掉！小越，最後的決戰要開始了！」',
 }]
+
+// 單元四：決戰空白魔王（總合關）：四十個成語輪流出題，射中一個魔王少一格血
+export const BOSS = {
+ title:'單元四・決戰空白魔王',
+ hp:40, hearts:5, half:20,
+ bg:'bg-time-library',
+ intro:[
+  ['dingding','小越，空白魔王要把四十個成語一次過擦掉！'],
+  ['boss','不用記住，不用麻煩……全部變成空白，不是更簡單嗎？'],
+  ['xiaoyue','成語不是麻煩，是大家的回憶！我一個一個射回去！','determined'],
+ ],
+ // 魔王剩一半血時：墨墨歸隊
+ mid:[
+  ['boss','怎麼可能……成語一個一個回來了？'],
+  ['momo','小越，我收藏的成語，全部還給大家！'],
+  ['xiaoyue','墨墨，謝謝你！我們一起上！','cheer'],
+ ],
+ // 心用完時：墨墨補滿
+ revive:['momo','別放棄！我把收藏的成語能量分給你！'],
+ ending:[
+  ['boss','我的光……越來越小了……'],
+  ['jianjian','原來成語不是麻煩，是大家的回憶……對不起。'],
+  ['dingding','墨墨，原來一直保護卷軸的是你。我終於記起來了：你是我很久以前做的墨水守護者。'],
+  ['momo','鼎鼎……謝謝你記得我。'],
+  ['jianjian','我可以留在圖書館嗎？我想學會「簡單，但不忘記」。'],
+  ['dingding','當然可以！看，四十卷卷軸全部亮起來了！'],
+  ['xiaoyue','成語穿越者小越，任務完成！','cheer'],
+ ],
+}
