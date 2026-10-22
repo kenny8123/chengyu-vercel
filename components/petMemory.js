@@ -29,7 +29,7 @@ export function applyLearning(profile,event,now=Date.now()){
 export function recordLearning(event){const x=readPet();x.profiles[x.active]=applyLearning(x.profiles[x.active],event);return savePet(x)}
 export function startRewardRun(mode){return {id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,mode,profileId:readPet().active}}
 export function applyCompletion(profile,run,answers){
- const total={practice:4,free:10,video:10,battle:40,life:10}[run?.mode]
+ const total={practice:4,free:10,video:10,battle:40,life:10,adventure:10}[run?.mode]
  if(!run?.id||!total||answers.length!==total||answers.some(a=>typeof a.correct!=='boolean')||profile.completedRuns?.[run.id])return null
  const baseXp=answers.reduce((n,a)=>n+(a.correct?10:2),0),food=answers.reduce((n,a)=>n+(a.correct?2:1),0)
  const xp=baseXp
@@ -45,6 +45,8 @@ export function completeRewardRun(run,answers){
 }
 export function makeProfile(name){const x=readPet(),id=`student-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;x.profiles[id]={name:name.trim().slice(0,24),...fresh()};x.active=id;return savePet(x)}
 export function switchProfile(id){const x=readPet();if(x.profiles[id]){x.active=id;return savePet(x)}}
+// 地圖冒險每完成一站，古人送鼎鼎該成語的紀念衣服
+export function giftOutfit(id){const x=readPet(),p=x.profiles[x.active];if(!CATALOG.some(c=>c.idiom===id))return false;p.ownedOutfits=p.ownedOutfits||[];if(p.ownedOutfits.includes(id))return false;p.ownedOutfits.push(id);return savePet(x)}
 export function wearOutfit(id){const x=readPet(),p=x.profiles[x.active];if(id===null||unlocked(p,id)){p.outfit=id;return savePet(x)}return false}
 export function careForPet(action){
  const x=readPet(),p=x.profiles[x.active],day=new Date().toLocaleDateString('en-CA')
