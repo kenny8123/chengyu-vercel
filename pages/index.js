@@ -479,10 +479,10 @@ function buildFreeQuizQueue(round){
 /* AI對決設定 */
 /* 各階段的難度說明，選階段畫面用 */
 const ROUND_DESC = {
-  1:'挖 1 個字，最容易',
-  2:'挖 2 個字，稍微難一點',
-  3:'整句挖空，要全部記得',
-  4:'整句挖空＋干擾字，最難',
+  1:'一字留白，初窺門徑',
+  2:'兩字留白，漸入佳境',
+  3:'全句留白，熟記於心',
+  4:'真偽相雜，爐火純青',
 }
 
 const BATTLE_SECONDS = 20   // 每題限時
@@ -691,7 +691,7 @@ function RoundCard({round,active,onStart}){
   useEffect(()=>{if(active)setBest(getBestScore(`mode-a-round-${round.id}`))},[active,round.id])
   return <div className="level-card open round-pick-card" role="button" tabIndex={0} onClick={onStart} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onStart()}}}>
     <span className="lv-emoji">{['🟢','🟡','🟠','🔴'][round.id-1]}</span>
-    <h3>{round.label}</h3><div className="lv-desc">{ROUND_DESC[round.id]}</div>
+    <h3>{round.label}</h3><div className="lv-desc">{ROUND_DESC[round.id].split('，').map((t,i)=><span key={i} style={{display:'block'}}>{t}</span>)}</div>
     <div className="lv-desc" style={{marginTop:18}}>{best?`🏆 最佳成績：${best.totalScore} 分`:'尚未挑戰過'}</div>
   </div>
 }
@@ -1210,11 +1210,6 @@ export default function Home(){
 
         {/* ════ 學習與練習：典故+練習入口（同一頁） ════ */}
         <section className={`screen${screen==='hub-learn-detail'?' show':''}`}>
-          {selIdiom&&(
-          <div className="topbar">
-            <button className="back-btn" onClick={()=>setScreen('home')}>← 返回首頁</button>
-          </div>
-          )}
           {selIdiom&&practiceRound===null&&!practiceCycleDone&&(
             <div className="card">
               <div className="level-banner">📖 {selIdiom.idiom}</div>
@@ -1398,7 +1393,7 @@ export default function Home(){
 
               <p className="weak-round-tip">
                 📌 <span className="nb">挑戰模式全部採用「{DRILL_ROUNDS[BATTLE_ROUND-1].label}」，</span>
-                <span className="nb">是整句挖空加干擾字的最高難度。</span>
+                <span className="nb">全句留白又真偽相雜，是最高難度。</span>
               </p>
 
               {(diag.topWrong||[]).length>0&&(<>
