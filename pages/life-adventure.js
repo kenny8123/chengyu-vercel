@@ -6,6 +6,7 @@ import {outfitAsset} from '../components/outfitAssets'
 import CATALOG from '../components/petCatalog.json'
 import LIFE from '../components/lifeSentences.json'
 import {CAST,XIAOYUE,UNITS,BOSS} from '../components/lifeAdventure'
+import {sfx} from '../components/adventureSfx'
 
 // 成語穿越者：生活成語地圖冒險（設計構思：遊戲作者）
 // 學習單地圖 × 射擊：每站穿越到回憶，句子裏的成語被吸走變成墨跡，用成語光線槍射回正確的成語，再看一條線索。
@@ -37,6 +38,8 @@ function speak(text,on){
 // 墨跡：被墨影吸走的成語；射中後變回成語
 function Gap({idiom,hit}){return hit?<b className="la-found">{idiom}</b>:<span className="la-ink" aria-label="被墨影吸走的成語"><i/><i/><i/></span>}
 function Said({text,idiom,hit}){const [a,b]=text.split(BLANK);return <>{a}<Gap idiom={idiom} hit={hit}/>{b}</>}
+// 光束打中的位置：射中爆出星星，射錯冒出灰色墨點
+function Burst({x,y,ok}){return <span className={`la-burst${ok?' ok':' no'}`} style={{left:x,top:y}} aria-hidden="true">{Array.from({length:8},(_,n)=><i key={n} style={{'--a':`${n*45}deg`}}/>)}</span>}
 // 遊戲字：漸層填色＋粗描邊
 function GameText({text,className=''}){return <span className={`la-gtext ${className}`} data-t={text}><span>{text}</span></span>}
 
@@ -49,6 +52,8 @@ export default function LifeAdventure(){
  const [reward,setReward]=useState(null),[walkFrom,setWalkFrom]=useState(null),[walking,setWalking]=useState(false)
  const [pose,setPose]=useState('aim'),[dir,setDir]=useState('ur'),[gift,setGift]=useState(null)
  const [boss,setBoss]=useState(null),[bossNote,setBossNote]=useState(''),[bossAtk,setBossAtk]=useState(false)
+ // 遊戲手感：音效開關、射中時的星星爆開、射錯時畫面震一震、魔王關連續第一次就射中的連擊數
+ const [sound,setSound]=useState(true),[burst,setBurst]=useState(null),[shake,setShake]=useState(false),[combo,setCombo]=useState(0)
  const run=useRef(null),stageRef=useRef(null),gunRef=useRef(null)
  // 手機畫面矮：射錯／射中後的提示在射擊場下面，看不到時就把畫面輕輕捲下去
  useEffect(()=>{if(!hint&&!hit&&!bossNote)return
@@ -84,7 +89,7 @@ export default function LifeAdventure(){
   let x=load()
   if(x&&!x.units&&x.done)x={units:{0:{done:x.done,run:x.run,introSeen:x.introSeen}},voice:x.voice}  // 舊格式（只有單元一）
   prog.current=x?.units?x:{units:{}}
-  setVoice(prog.current.voice!==false);setBoss(prog.current.boss||null)
+  setVoice(prog.current.voice!==false);setSound(prog.current.sfx!==false);setBoss(prog.current.boss||null)
   // 以前完成的站也補開卷軸館藏
   unlockScrolls(UNITS.flatMap((u,k)=>Object.keys(unitSave(k)?.done||{}).map(n=>u.chapters[n]?.idiom).filter(Boolean)))
   // 由最後一個已開放、未完成的單元開始
@@ -97,6 +102,8 @@ export default function LifeAdventure(){
   save(prog.current)
  }
  function toggleVoice(){const v=!voice;setVoice(v);persist(done,{voice:v});try{speechSynthesis.cancel()}catch{}}
+ function toggleSound(){const v=!sound;setSound(v);prog.current={...prog.current,sfx:v};save(prog.current);sfx('tap',v)}
+ function missFx(){sfx('miss',sound);setShake(true);setTimeout(()=>setShake(false),420)}
  function goUnit(i){if(!unlocked(i))return;try{speechSynthesis.cancel()}catch{};const seen=loadUnit(i);setStep(0);setPhase(seen?'map':'intro')}
 
  // 逐字出現 + 朗讀；對話框自動捲到最新一句
@@ -137,7 +144,7 @@ export default function LifeAdventure(){
  function startShoot(){
   const others=chapters.map(c=>c.idiom).filter(x=>![ch.idiom,life.near,life.far].includes(x))
   setTargets(shuffle([ch.idiom,life.near,life.far,shuffle(others)[0]]))
-  setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setPose('aim');setDir('ur');setPhase('shoot')
+  setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setBurst(null);setPose('aim');setDir('ur');setPhase('shoot')
   speak(sentence,voice)
  }
  // 小越先轉身面向目標（選最接近的射擊角度），光束由該角度的槍口直線射向目標，不會轉彎
@@ -148,7 +155,9 @@ export default function LifeAdventure(){
    const d=aimDir(Math.atan2(ty-(g.top+g.height*.55),tx-gcx)*180/Math.PI),w=g.height*AIM[d].r
    const x1=gcx-w/2+w*AIM[d].m[0]-st.left,y1=g.top+g.height*AIM[d].m[1]-st.top,x2=tx-st.left,y2=ty-st.top
    setDir(d);setBeam({x:x1,y:y1,len:Math.hypot(x2-x1,y2-y1),deg:Math.atan2(y2-y1,x2-x1)*180/Math.PI,k:Date.now()})
+   setBurst({x:x2,y:y2,ok:isHit,k:Date.now()})
   }
+  sfx('zap',sound)
   setPose('fire');setTimeout(()=>setPose(isHit?'cheer':'aim'),isHit?520:300)
  }
  function shoot(idiom,e){
@@ -163,10 +172,11 @@ export default function LifeAdventure(){
     if(unlockScrolls([ch.idiom]))setGift(ch.idiom)
     const d={...done,[stop]:wrong===0};setDone(d);persist(d)
    }
-   speak(sentence.replace(BLANK,ch.idiom),voice)
+   speak(sentence.replace(BLANK,ch.idiom),voice);setTimeout(()=>sfx('hit',sound),120)
    return
   }
   if(wrong===0&&fresh)recordLearning({idiom:ch.idiom,kind:'answer',correct:false})
+  missFx()
   const w=wrong+1;setWrong(w);setGone([...gone,idiom])
   const h=w===1?`「${idiom}」的意思是：${meaning(idiom)}和這句話說的事不一樣，再讀一次吧。`:`提示：要找的成語，意思是「${meaning(ch.idiom)}」`
   setHint(h);speak(h,voice)
@@ -191,7 +201,7 @@ export default function LifeAdventure(){
   if(!bossReady())return
   try{speechSynthesis.cancel()}catch{}
   const b=prog.current.boss,ok=!fresh&&b&&b.run?.profileId===readPet().active&&!b.finished
-  const nb=ok?b:newBoss();saveBoss(nb);setReward(null);setBossNote('');setStep(0)
+  const nb=ok?b:newBoss();saveBoss(nb);setReward(null);setBossNote('');setCombo(0);setStep(0)
   setPhase(nb.started?'boss':'bossIntro')
  }
  // 每題：正確成語＋相近＋無關＋另一個成語
@@ -199,7 +209,7 @@ export default function LifeAdventure(){
   if(phase!=='boss'||!bq)return
   const others=LIFE.map(x=>x.idiom).filter(x=>![bq.idiom,bq.near,bq.far].includes(x))
   setTargets(shuffle([bq.idiom,bq.near,bq.far,shuffle(others)[0]]))
-  setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setPose('aim');setDir('ur')
+  setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setBurst(null);setPose('aim');setDir('ur')
   speak(bossSentence,voice)
  },[phase,boss?.i])
  function bossShoot(idiom,e){
@@ -210,6 +220,8 @@ export default function LifeAdventure(){
    setHit(true);setHint('')
    const first={...boss.first};if(!(bq.idiom in first)){first[bq.idiom]=wrong===0;recordLearning({idiom:bq.idiom,kind:'answer',correct:wrong===0})}
    unlockScrolls([bq.idiom])
+   const c=wrong===0?combo+1:0;setCombo(c)
+   setTimeout(()=>sfx(c>=3?'combo':'bossHurt',sound),120)
    const hp=boss.hp-1,joinNow=!boss.joined&&hp<=BOSS.half
    speak(bossSentence.replace(BLANK,bq.idiom),voice)
    setTimeout(()=>{
@@ -224,6 +236,7 @@ export default function LifeAdventure(){
    return
   }
   // 射錯：空白波打中小越，少一顆心；心用完時墨墨補滿
+  missFx();setCombo(0)
   const w=wrong+1;setWrong(w);setGone([...gone,idiom])
   const first=bq.idiom in boss.first?boss.first:{...boss.first,[bq.idiom]:false}
   if(!(bq.idiom in boss.first))recordLearning({idiom:bq.idiom,kind:'answer',correct:false})
@@ -271,7 +284,8 @@ export default function LifeAdventure(){
    <header className="la-top">
     <button className="la-back" onClick={()=>{try{speechSynthesis.cancel()}catch{};setPhase(phase==='map'||phase==='intro'||phase==='done'?'cover':'map')}}>{phase==='map'||phase==='intro'||phase==='done'?'← 封面':'← 地圖'}</button>
     <h1>{/^boss|cert/.test(phase)?`⚔️ ${BOSS.title}`:`🗺️ ${unit.title}`}</h1>
-    <button className="la-back" onClick={toggleVoice} aria-pressed={voice}>{voice?'🔊 開':'🔇 關'}</button>
+    <button className="la-back" onClick={toggleSound} aria-pressed={sound} aria-label={sound?'關閉音效':'開啟音效'}>{sound?'🎵':'🎵✕'}</button>
+    <button className="la-back" onClick={toggleVoice} aria-pressed={voice} aria-label={voice?'關閉朗讀':'開啟朗讀'}>{voice?'🔊 開':'🔇 關'}</button>
    </header>
 
    {phase==='map'&&<div className="la-mapview">
@@ -309,6 +323,8 @@ export default function LifeAdventure(){
      </>}
     </div>
     {!cur.portal&&<div className="la-chat-btns">
+     {/* 已完成的站重玩時，可以跳過對白直接射擊 */}
+     {phase==='story'&&stop in done&&!cur.key&&<button onClick={()=>{try{speechSynthesis.cancel()}catch{};setStep(seq.findIndex(s=>s.key))}}>⏩ 跳到關鍵句</button>}
      <button onClick={()=>speak(cur.line[1],true)} aria-label="再聽一次">🔊 再聽</button>
      <button className="la-next" onClick={next}>{step+1<seq.length?'下一句 ▶':phase==='intro'?'出發 ▶':phase==='story'?'射回成語 ▶':'回到地圖 ▶'}</button>
     </div>}
@@ -320,12 +336,13 @@ export default function LifeAdventure(){
      <div className="la-bub"><b>{CAST[sayer].name}</b><p><Said text={sentence} idiom={ch.idiom} hit={hit}/></p></div>
      <button className="la-say" onClick={()=>speak(hit?sentence.replace(BLANK,ch.idiom):sentence,true)} aria-label="朗讀句子">🔊</button>
     </div>
-    <div ref={stageRef} className="la-stage shoot" style={{backgroundImage:`url(${IMG(ch.bg)})`}}>
+    <div ref={stageRef} className={`la-stage shoot${shake?' shake':''}`} style={{backgroundImage:`url(${IMG(ch.bg)})`}}>
      <img src={IMG(hit?'moying-sad-float':'moying-float')} alt="墨影" className="la-moying fly"/>
      {targets.map((t,n)=><button key={t} className={`la-target t${n}${gone.includes(t)?' gone':''}${hit&&t===ch.idiom?' win':''}${hit&&t!==ch.idiom?' fade':''}`} onClick={e=>shoot(t,e)} disabled={hit||gone.includes(t)} aria-label={`射向「${t}」`}><GameText text={t}/></button>)}
      {beam&&<span key={beam.k} className="la-beam" style={{left:beam.x,top:beam.y,width:beam.len,transform:`rotate(${beam.deg}deg)`}}/>}
      {/* 小越拿着成語光線槍：瞄準 → 開槍 → 後座力；射中後歡呼 */}
      <img ref={gunRef} src={IMG(pose==='cheer'?'shooter-cheer':`shoot-${dir}-${pose}`)} alt="小越拿着成語光線槍" className={`la-shooter ${pose}`}/>
+     {burst&&<Burst key={'burst'+burst.k} {...burst}/>}
      {hit&&<p className="la-hitfx" role="status"><GameText text="命中！"/><small>句子修好了！</small></p>}
     </div>
     <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${ch.idiom}」：${meaning(ch.idiom)}`:hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用成語光線槍射回去。'}</p>
@@ -337,6 +354,7 @@ export default function LifeAdventure(){
      <span className="la-bossname">空白魔王</span>
      <span className="la-hp" role="progressbar" aria-valuemin={0} aria-valuemax={BOSS.hp} aria-valuenow={boss.hp} aria-label="空白魔王血量"><i style={{width:`${boss.hp/BOSS.hp*100}%`}}/></span>
      <span className="la-hpnum">{boss.hp} / {BOSS.hp}</span>
+     {combo>=2&&<span className="la-combo" key={combo}>🔥 {combo} 連擊</span>}
      <span className="la-hearts" aria-label={`小越還有 ${boss.hearts} 顆心`}>{Array.from({length:BOSS.hearts},(_,n)=><b key={n} className={n<boss.hearts?'on':''}>♥</b>)}</span>
     </div>
     <div className="la-msg big right key">
@@ -344,14 +362,15 @@ export default function LifeAdventure(){
      <div className="la-bub"><b>第 {boss.i+1} / 40 題・空白魔王把成語擦成墨跡</b><p><Said text={bossSentence} idiom={bq.idiom} hit={hit}/></p></div>
      <button className="la-say" onClick={()=>speak(hit?bossSentence.replace(BLANK,bq.idiom):bossSentence,true)} aria-label="朗讀句子">🔊</button>
     </div>
-    <div ref={stageRef} className="la-stage shoot bossfield" style={{backgroundImage:`url(${IMG(BOSS.bg)})`}}>
+    <div ref={stageRef} className={`la-stage shoot bossfield${shake?' shake':''}`} style={{backgroundImage:`url(${IMG(BOSS.bg)})`}}>
      <img src={IMG(hit?'boss-hurt':bossAtk?'boss-attack':'boss-laugh')} alt="空白魔王" className={`la-bossimg${hit?' hurt':''}`}/>
      <span className="la-pages" aria-hidden="true"><i/><i/><i/><i/><i/></span>
      {boss.joined&&<img src={IMG('moying-happy')} alt="墨墨在旁邊幫忙" className="la-momo-help"/>}
      {targets.map((t,n)=><button key={t} className={`la-target t${n}${gone.includes(t)?' gone':''}${hit&&t===bq.idiom?' win':''}${hit&&t!==bq.idiom?' fade':''}${boss.joined&&!hit&&t===bq.idiom?' glowhint':''}`} onClick={e=>bossShoot(t,e)} disabled={hit||gone.includes(t)} aria-label={`射向「${t}」`}><GameText text={t}/></button>)}
      {beam&&<span key={beam.k} className="la-beam" style={{left:beam.x,top:beam.y,width:beam.len,transform:`rotate(${beam.deg}deg)`}}/>}
      <img ref={gunRef} src={IMG(pose==='cheer'?'shooter-cheer':`shoot-${dir}-${pose}`)} alt="小越拿着成語光線槍" className={`la-shooter ${pose}`}/>
-     {hit&&<p className="la-hitfx" role="status"><GameText text="命中！"/><small>空白魔王 −1</small></p>}
+     {burst&&<Burst key={'burst'+burst.k} {...burst}/>}
+     {hit&&<p className="la-hitfx" role="status"><GameText text={combo>=2?`${combo} 連擊！`:'命中！'}/><small>空白魔王 −1</small></p>}
     </div>
     {bossNote&&<p className="la-hint ok">{bossNote}</p>}
     <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${bq.idiom}」：${meaning(bq.idiom)}`:hint||(boss.joined?'★ 墨墨歸隊了！發光的卷軸就是正確答案的提示。':'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個成語，再用成語光線槍射回去。')}</p>
@@ -379,6 +398,8 @@ export default function LifeAdventure(){
     <p>{unit.ending}</p>
     {reward&&!reward.already&&<CompletionReward reward={reward}/>}
     {worksheet}
+    {/* 第一次未射中的成語，完成單元時再溫習一次意思 */}
+    {chapters.some((_,i)=>done[i]===false)&&<div className="la-review"><h3>📝 再溫習這幾個成語</h3><ul>{chapters.map((c,i)=>done[i]===false&&<li key={c.idiom}><b>{c.idiom}</b>：{meaning(c.idiom)}</li>)}</ul></div>}
     <div className="la-actions">
      {UNITS[ui+1]&&<button className="btn btn-go" onClick={()=>goUnit(ui+1)}>前往{UNITS[ui+1].title.split('・')[0]} →</button>}
      {!UNITS[ui+1]&&<button className="btn btn-go" onClick={()=>startBoss()}>⚔️ 前往決戰空白魔王 →</button>}
@@ -519,6 +540,20 @@ export default function LifeAdventure(){
    .la-hitfx{position:absolute;left:0;right:0;top:34%;text-align:center;margin:0;font-size:clamp(2.6rem,7vw,4.6rem);z-index:5;animation:la-pop .5s;pointer-events:none}
    .la-hitfx small{display:block;font-size:1rem;font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(60,20,80,.8);margin-top:6px}
    .la-hint.ok{border-color:var(--grass);background:#eefbea}
+   /* 手感：射錯震一震、打中位置爆開 */
+   .la-stage.shake{animation:la-shake .4s}
+   @keyframes la-shake{20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+   .la-burst{position:absolute;width:0;height:0;z-index:6;pointer-events:none}
+   .la-burst i{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;animation:la-burst .6s ease-out forwards}
+   .la-burst.ok i{background:radial-gradient(circle,#fffbe0,#ffd84d 60%,#ff8db0);box-shadow:0 0 10px #ffe27a}
+   .la-burst.no i{background:#4a4370;width:11px;height:11px}
+   @keyframes la-burst{from{transform:rotate(var(--a)) translateX(0) scale(1.2);opacity:1}to{transform:rotate(var(--a)) translateX(64px) scale(.2);opacity:0}}
+   .la-review{text-align:left;background:#fff6f0;border:3px dashed #f5c6a8;border-radius:18px;padding:10px 16px;margin:0 0 16px}
+   .la-review h3{margin:0 0 4px;font-size:1.1rem}
+   .la-review ul{margin:0;padding-left:1.2em;line-height:1.9}
+   .la-review b{color:var(--berry-dark)}
+   .la-combo{font-weight:900;color:#ffd84d;animation:la-pop .5s}
+   @media(prefers-reduced-motion:reduce){.la-stage.shake,.la-burst i{animation:none}.la-burst{display:none}}
    /* 魔王關 */
    .la-units button.boss:not(:disabled){border-color:#b9b0e6;background:#f3f0ff;color:#3b2a6b}
    .la-bossbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#241f4a;color:#fff;border-radius:16px;padding:10px 14px;margin-bottom:10px;border:3px solid #e8c873}
@@ -568,8 +603,9 @@ export default function LifeAdventure(){
    @media(max-width:900px){.la-mapview{grid-template-columns:1fr}}
    @media(max-width:640px){
     .la-wrap{padding:10px 10px 40px}
-    .la-top h1{font-size:1.05rem}
-    .la-back{padding:6px 10px;font-size:.85rem}
+    .la-top{gap:6px}
+    .la-top h1{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .la-back{padding:6px 9px;font-size:.85rem}
     .la-cbtn.gold{min-width:260px}.la-cbtn{min-width:120px}
     .la-cover{background-position:68% center}
     .la-face{width:44px;height:44px}
