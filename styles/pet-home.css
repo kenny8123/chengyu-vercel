@@ -262,6 +262,8 @@
 .dd-home.dd-home .dd-action-bubble{top:26%;font-size:clamp(18px,1.7vw,26px);padding:14px 28px;border-radius:26px}
 .dd-home.dd-home .dd-stats{justify-content:flex-start;text-align:left}
 .dd-home.dd-home .dd-stats>span:first-child{justify-content:flex-start}
+/* 電腦：等級、點心、親密度平均分佈成一行（等級仍然靠左喺返回下面） */
+@media(min-width:701px){.dd-home.dd-home .dd-stats{justify-content:space-between;align-items:center}.dd-home.dd-home .dd-stats>span{display:inline-flex;align-items:center;gap:8px}}
 @media(max-width:700px){.dd-home.dd-home .dd-action-bubble{top:22%;font-size:16px;padding:9px 16px}}
 /* 稱號放入升級進度條入面 */
 .dd-xpbar{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:170px;height:32px;padding:0 14px;margin:0 6px;border-radius:999px;background:#efe3cf;border:2px solid #dcc6a4;overflow:hidden;vertical-align:middle;box-sizing:border-box}
