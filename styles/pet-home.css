@@ -247,6 +247,17 @@
 /* 五個照顧按鈕：電腦一行排五個；手機兩欄時最後一個佔滿一行 */
 @media(min-width:701px){.dd-home .dd-actions{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:700px){.dd-home .dd-actions .dd-key:last-child:nth-child(odd){grid-column:1/-1}}
+/* 聊天框取消後：電腦版小屋按螢幕大小放大（保持原圖比例），按鈕緊貼下面，一頁睇晒冇空白 */
+@media(min-width:701px){
+ .dd-home.dd-home{grid-template-columns:min(1600px,calc((100dvh - 236px)*1.777),calc(100vw - 32px));grid-template-rows:auto auto auto;height:auto;min-height:100dvh;align-content:start}
+ .dd-home.dd-home .dd-room{height:auto;aspect-ratio:1672/941;min-height:0}
+ .dd-home.dd-home .dd-console{grid-template-rows:auto;height:auto;min-height:0}
+}
+@media(max-width:700px){
+ .dd-home.dd-home{grid-template-rows:auto auto auto;height:auto;min-height:100dvh;align-content:start}
+ .dd-home.dd-home .dd-room{aspect-ratio:1/1.12;height:auto;min-height:0}
+ .dd-home.dd-home .dd-console{grid-template-rows:auto;height:auto;min-height:0}
+}
 /* 稱號放入升級進度條入面 */
 .dd-xpbar{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:170px;height:32px;padding:0 14px;margin:0 6px;border-radius:999px;background:#efe3cf;border:2px solid #dcc6a4;overflow:hidden;vertical-align:middle;box-sizing:border-box}
 .dd-xpbar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#a8e6bd,#56b984);border-radius:999px 0 0 999px}
