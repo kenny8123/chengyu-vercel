@@ -35,8 +35,8 @@ function speak(text,on){
  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/＿＿＿＿/g,'，墨跡，'));u.lang='zh-TW';u.rate=.9;speechSynthesis.speak(u)}catch{}
 }
 
-// 墨跡：被墨影吸走的成語；射中後變回成語
-function Gap({idiom,hit}){return hit?<b className="la-found">{idiom}</b>:<span className="la-ink" aria-label="被墨影吸走的成語"><i/><i/><i/></span>}
+// 墨跡：被擦走的成語；射中後變回成語
+function Gap({idiom,hit}){return hit?<b className="la-found">{idiom}</b>:<span className="la-ink" aria-label="被擦走的成語"><i/><i/><i/></span>}
 function Said({text,idiom,hit}){const [a,b]=text.split(BLANK);return <>{a}<Gap idiom={idiom} hit={hit}/>{b}</>}
 // 光束打中的位置：射中爆出星星，射錯冒出灰色墨點
 function Burst({x,y,ok}){return <span className={`la-burst${ok?' ok':' no'}`} style={{left:x,top:y}} aria-hidden="true">{Array.from({length:8},(_,n)=><i key={n} style={{'--a':`${n*45}deg`}}/>)}</span>}
@@ -69,7 +69,7 @@ export default function LifeAdventure(){
  const atBoss=l=>({bg:BOSS.bg,cast:[],line:l})
  const seq=phase==='intro'?[...(unit.prologue||[]).map(([bg,...l])=>({bg,cast:[],line:l,pro:true})),...unit.intro.map(l=>({bg:'bg-time-library',cast:[],line:l}))]
   :phase==='story'?[{portal:'穿越到回憶……'},at(['watch',ch.alert]),...ch.lines.map(at),
-    {...at([sayer,sentence]),key:true},at(['moying','嘻嘻！我把句子裏的成語吸走了，看你能不能射回去！'])]
+    {...at([sayer,sentence]),key:true},at(unit.thief?[unit.thief.who,unit.thief.line]:['moying','嘻嘻！我把句子裏的成語吸走了，看你能不能射回去！'])]
   :phase==='clue'?ch.clue.map(l=>({...at(l),bg:ch.clueBg||ch.bg}))
   :phase==='bossIntro'?BOSS.intro.map(atBoss):phase==='bossMid'?BOSS.mid.map(atBoss):phase==='bossEnd'?BOSS.ending.map(atBoss):[]
  const VN=['intro','story','clue','bossIntro','bossMid','bossEnd']
@@ -330,7 +330,9 @@ export default function LifeAdventure(){
      {unit.stops.map(([x,y],i)=>{const st=i in done?'done':i===nextStop?'now':'lock'
       return <button key={i} className={`la-stop ${st}`} style={{left:x+'%',top:y+'%'}} onClick={()=>st!=='lock'&&openStop(i)} disabled={st==='lock'} aria-label={`第 ${no(i)} 站${st==='done'?`：${chapters[i].idiom}（已完成，可重玩）`:st==='now'?'：按一下出發':'：未開放'}`}>{st==='done'?'✓':no(i)}</button>})}
      <div className="la-party" style={{left:unit.stops[heroAt][0]+'%',top:unit.stops[heroAt][1]+'%'}}>
-      <img src={IMG(walkFrom!==null?'xiaoyue-walk':'xiaoyue-bounce')} alt="小越" className="la-hero"/>     </div>
+      <img src={IMG(walkFrom!==null?'xiaoyue-walk':'xiaoyue-bounce')} alt="小越" className="la-hero"/>
+      {unit.partner&&<img src={IMG(unit.partner)} alt="墨墨和小越一起出發" className="la-partner"/>}
+     </div>
     </div>
     <div className="la-side">
      <div className="la-units" role="tablist" aria-label="選擇單元">{UNITS.map((u,i)=><button key={u.title} role="tab" aria-selected={ui===i} disabled={!unlocked(i)} className={ui===i?'on':''} onClick={()=>goUnit(i)}>{unlocked(i)?'':'🔒 '}{u.title.split('・')[0]}<small>{u.title.split('・')[1]}</small></button>)}
@@ -348,7 +350,7 @@ export default function LifeAdventure(){
       <div className="la-bg" style={{backgroundImage:`url(${IMG(cur.bg)})`}}/>
       {/* RPG 式：只顯示說話的人的半身立繪，小越在左下角、其他角色在右下角，站在對話框前面（busts.mjs 統一頭部大小） */}
       {!CAST[cur.line[0]].sys&&<img key={step} src={cur.line[0]==='moying'?IMG('moying-float'):cur.line[0]==='momo'?IMG('moying-happy'):cur.line[0]==='boss'?IMG('bust-boss-'+(cur.line[2]||'laugh')):IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}${INK.has(cur.line[0])?' moying':''}${CAST[cur.line[0]].holo?' holo':''}${CAST[cur.line[0]].boss?' bossy':''}${FACES_RIGHT.has(cur.line[2])?' noflip':''}`}/>}
-      {cur.key&&<img src={IMG('moying-suck-float')} alt="墨影正在吸走成語" className="la-moying"/>}
+      {cur.key&&<img src={IMG(unit.thief?.img||'moying-suck-float')} alt={`${unit.thief?.name||'墨影'}正在擦走成語`} className={`la-moying${unit.thief?' bossthief':''}`}/>}
       {/* 情境對話（RPG 式）：小越在左、其他角色在右，說話的人亮起；底部一個大對話框 */}
       <div className={`la-vn ${CAST[cur.line[0]].sys?'sys':CAST[cur.line[0]].holo?'sys pr':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${INK.has(cur.line[0])?' ink':''}${CAST[cur.line[0]].boss?' bossbox':''}${CAST[cur.line[0]].narr?' narr':''}`} aria-live="polite">
        <b>【{CAST[cur.line[0]].name}】</b>
@@ -373,7 +375,8 @@ export default function LifeAdventure(){
      <button className="la-say" onClick={()=>speak(hit?sentence.replace(BLANK,ch.idiom):sentence,true)} aria-label="朗讀句子">🔊</button>
     </div>
     <div ref={stageRef} className={`la-stage shoot${shake?' shake':''}`} style={{backgroundImage:`url(${IMG(ch.bg)})`}}>
-     <img src={IMG(hit?'moying-sad-float':'moying-float')} alt="墨影" className="la-moying fly"/>
+     <img src={IMG(hit?(unit.thief?.hurt||'moying-sad-float'):(unit.thief?.fly||'moying-float'))} alt={unit.thief?.name||'墨影'} className={`la-moying fly${unit.thief?' bossthief':''}`}/>
+     {unit.partner&&<img src={IMG(unit.partner)} alt="墨墨在旁邊幫忙" className="la-momo-help"/>}
      {targets.map((t,n)=><button key={t} className={`la-target t${n}${gone.includes(t)?' gone':''}${hit&&t===ch.idiom?' win':''}${hit&&t!==ch.idiom?' fade':''}`} onClick={e=>shoot(t,e)} disabled={hit||gone.includes(t)} aria-label={`射向「${t}」`}><GameText text={t}/></button>)}
      {beam&&<span key={beam.k} className="la-beam" style={{left:beam.x,top:beam.y,width:beam.len,transform:`rotate(${beam.deg}deg)`}}/>}
      {/* 小越拿着成語光線槍：瞄準 → 開槍 → 後座力；射中後歡呼 */}
@@ -489,6 +492,8 @@ export default function LifeAdventure(){
    .la-hideout{position:absolute;width:11%;transform:translate(-50%,-55%);pointer-events:none}
    .la-party{position:absolute;width:8%;transform:translate(-50%,-96%);transition:left 1.5s ease-in-out,top 1.5s ease-in-out;pointer-events:none}
    .la-hero{width:100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.3))}
+   .la-partner{position:absolute;width:95%;left:62%;bottom:18%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.3));animation:la-float 2s ease-in-out infinite}
+   .la-moying.bossthief{filter:drop-shadow(0 0 14px rgba(255,255,255,.9)) drop-shadow(0 0 6px rgba(150,110,220,.7))}
    .la-side{display:flex;flex-direction:column;gap:12px}
    .la-units{display:flex;gap:8px;flex-wrap:wrap}
    .la-units button{flex:1;min-width:96px;border:3px solid #e8d8bd;background:#fff;border-radius:14px;padding:6px 10px;font-weight:800;color:var(--choc);cursor:pointer;display:flex;flex-direction:column;line-height:1.3}
