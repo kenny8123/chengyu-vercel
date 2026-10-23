@@ -375,7 +375,7 @@ export default function LifeAdventure(){
     <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${ch.idiom}」：${meaning(ch.idiom)}`:hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用成語光線槍射回去。'}</p>
    </div>}
 
-   {phase==='boss'&&boss&&bq&&<div className="la-play">
+   {phase==='boss'&&boss&&bq&&<div className="la-play boss-play">
     {/* 魔王血量和小越的心 */}
     <div className="la-bossbar" aria-live="polite">
      <span className="la-bossname">空白魔王</span>
@@ -634,6 +634,14 @@ export default function LifeAdventure(){
    @keyframes la-pop{40%{transform:scale(1.15)}}
    @media(prefers-reduced-motion:reduce){.la-target,.la-stop.now,.la-tch,.la-stage.portal{animation:none!important}.la-party{transition:none}}
    @media(max-width:900px){.la-mapview{grid-template-columns:1fr}}
+   /* 電腦大螢幕：射擊／對話畫面按螢幕高度放大，一頁內睇晒（句子＋射擊場＋提示），兩邊唔留咁多空位 */
+   @media(min-width:901px){
+    .la-wrap{max-width:1640px}
+    .la-play{max-width:min(1500px,max(760px,calc((100dvh - 290px)*16/9)))}
+    .la-play.boss-play{max-width:min(1500px,max(760px,calc((100dvh - 360px)*16/9)))}
+    .la-stage,.la-stage.shoot{max-height:none}
+    .la-mapview{max-width:1200px}
+   }
    @media(max-width:640px){
     .la-wrap{padding:10px 10px 40px}
     .la-top{gap:6px}
