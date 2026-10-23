@@ -10,13 +10,15 @@ import {sfx} from '../components/adventureSfx'
 
 // 成語穿越者：生活成語地圖冒險（設計構思：遊戲作者）
 // 學習單地圖 × 射擊：每站穿越到回憶，句子裏的成語被吸走變成墨跡，用成語光線槍射回正確的成語，再看一條線索。
-// 單元一至三是地圖；單元四是決戰空白魔王（四十個成語輪流出題，射中一個魔王少一格血），打贏後看結局。
+// 單元一至四是地圖（每單元十站，共四十個成語）；單元五是決戰空白魔王（四十個成語輪流出題，射中一個魔王少一格血），打贏後看結局。
 const INK=new Set(['moying','momo'])   // 墨影／墨墨：用整團墨水圖，不用半身像
 const BLANK='＿＿＿＿'
 const KEY='life-adventure-v1'
 // 圖片更新後改呢個數字，瀏覽器就會重新下載，唔會顯示舊圖
 const ASSET_VERSION='20261023'
-const IMG=n=>`/images/life-adventure/${n}.webp?v=${ASSET_VERSION}`
+// 單元四的背景未畫好前用暫代圖（時空圖書館）；畫好後刪除對應項目
+const ART_TODO={...Object.fromEntries(Array.from({length:10},(_,i)=>['w'+(31+i),'bg-time-library']))}
+const IMG=n=>`/images/life-adventure/${ART_TODO[n]||n}.webp?v=${ASSET_VERSION}`
 const LEFT=new Set(['xiaoyue','dingding'])
 // 四個射擊角度：槍口（燈泡）在圖中的位置（比例）和圖的闊高比；按目標方向選最接近的角度
 const AIM={ul:{m:[.355,.166],r:481/512},ur:{m:[.77,.158],r:481/512},l:{m:[.295,.277],r:531/512},r:{m:[.814,.264],r:531/512}}
@@ -42,7 +44,7 @@ function pickVoice(){
 if(typeof window!=='undefined'&&window.speechSynthesis){pickVoice();speechSynthesis.addEventListener?.('voiceschanged',pickVoice)}
 // 每個角色不同的音高（pitch，1＝正常）和速度（rate）
 const VOICE_OF={
- xiaoyue:[1.3,.95],dingding:[1.6,.95],moying:[1.45,1.02],momo:[1.45,1],boss:[.55,.82],jianjian:[1.15,.9],watch:[1,1.02],
+ xiaoyue:[1.3,.95],dingding:[1.6,.95],moying:[1.45,1.02],momo:[1.45,1],boss:[.55,.82],jianjian:[1.15,.9],watch:[1,1.02],narrator:[.95,.88],
  brother:[1,.95],'little-brother':[1.55,.95],xiaoming:[1.25,1],xiaomei:[1.45,.95],ahhei:[1.2,1],cousin:[1.1,.95],
  mother:[1.1,.9],teacher:[1.05,.88],popo:[1.05,.82],father:[.8,.88],grandpa:[.7,.82],gongong:[.72,.82],firefighter:[.8,.95],
 }
@@ -88,7 +90,7 @@ export default function LifeAdventure(){
  // bossIntro／bossMid／bossEnd＝魔王關的開場、墨墨歸隊、結局
  const at=l=>({bg:ch.bg,cast:ch.cast,line:l})
  const atBoss=l=>({bg:BOSS.bg,cast:[],line:l})
- const seq=phase==='intro'?unit.intro.map(l=>({bg:'bg-time-library',cast:[],line:l}))
+ const seq=phase==='intro'?[...(unit.prologue||[]).map(([bg,...l])=>({bg,cast:[],line:l,pro:true})),...unit.intro.map(l=>({bg:'bg-time-library',cast:[],line:l}))]
   :phase==='story'?[{portal:'穿越到回憶……'},at(['watch',ch.alert]),...ch.lines.map(at),
     {...at([sayer,sentence]),key:true},at(['moying','嘻嘻！我把句子裏的成語吸走了，看你能不能射回去！'])]
   :phase==='clue'?ch.clue.map(l=>({...at(l),bg:ch.clueBg||ch.bg}))
@@ -241,7 +243,7 @@ export default function LifeAdventure(){
  }
  function restart(){if(!window.confirm('重新開始會清除這張地圖的進度，確定嗎？'))return;run.current=startRewardRun('adventure');setDone({});setReward(null);setWalkFrom(null);persist({});setPhase('map')}
 
- // ── 單元四：決戰空白魔王 ──
+ // ── 單元五：決戰空白魔王 ──
  // 進度存在 prog.boss：{order,i,hp,hearts,first,joined,started,finished,run}；中途離開下次可接續
  const bossReady=()=>allDone(UNITS.length-1)
  function saveBoss(b){setBoss(b);prog.current={...prog.current,boss:b};save(prog.current)}
@@ -339,7 +341,7 @@ export default function LifeAdventure(){
    {phase==='map'&&<div className="la-mapview">
     <div className="la-map">
      <img src={IMG(unit.map)} alt={`${unit.title}冒險地圖`} className="la-mapimg"/>
-     <img src={IMG('moying-float')} alt="墨影躲在這裏" className="la-hideout" style={{left:unit.hideout[0]+'%',top:unit.hideout[1]+'%'}}/>
+     <img src={IMG(unit.hideoutImg||'moying-float')} alt={unit.hideoutImg?'空白魔王躲在這裏':'墨影躲在這裏'} className="la-hideout" style={{left:unit.hideout[0]+'%',top:unit.hideout[1]+'%'}}/>
      {unit.stops.map(([x,y],i)=>{const st=i in done?'done':i===nextStop?'now':'lock'
       return <button key={i} className={`la-stop ${st}`} style={{left:x+'%',top:y+'%'}} onClick={()=>st!=='lock'&&openStop(i)} disabled={st==='lock'} aria-label={`第 ${no(i)} 站${st==='done'?`：${chapters[i].idiom}（已完成，可重玩）`:st==='now'?'：按一下出發':'：未開放'}`}>{st==='done'?'✓':no(i)}</button>})}
      <div className="la-party" style={{left:unit.stops[heroAt][0]+'%',top:unit.stops[heroAt][1]+'%'}}>
@@ -363,7 +365,7 @@ export default function LifeAdventure(){
       {!CAST[cur.line[0]].sys&&<img key={step} src={cur.line[0]==='moying'?IMG('moying-float'):cur.line[0]==='momo'?IMG('moying-happy'):cur.line[0]==='boss'?IMG('bust-boss-'+(cur.line[2]||'laugh')):IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}${INK.has(cur.line[0])?' moying':''}${CAST[cur.line[0]].holo?' holo':''}${CAST[cur.line[0]].boss?' bossy':''}${FACES_RIGHT.has(cur.line[2])?' noflip':''}`}/>}
       {cur.key&&<img src={IMG('moying-suck-float')} alt="墨影正在吸走成語" className="la-moying"/>}
       {/* 情境對話（RPG 式）：小越在左、其他角色在右，說話的人亮起；底部一個大對話框 */}
-      <div className={`la-vn ${CAST[cur.line[0]].sys?'sys':CAST[cur.line[0]].holo?'sys pr':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${INK.has(cur.line[0])?' ink':''}${CAST[cur.line[0]].boss?' bossbox':''}`} aria-live="polite">
+      <div className={`la-vn ${CAST[cur.line[0]].sys?'sys':CAST[cur.line[0]].holo?'sys pr':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${INK.has(cur.line[0])?' ink':''}${CAST[cur.line[0]].boss?' bossbox':''}${CAST[cur.line[0]].narr?' narr':''}`} aria-live="polite">
        <b>【{CAST[cur.line[0]].name}】</b>
        <p>{cur.key?(typed<cur.line[1].length?cur.line[1].slice(0,typed).replace(BLANK,'⋯⋯'):<Said text={cur.line[1]} idiom={ch.idiom} hit={false}/>):cur.line[1].slice(0,typed)}</p>
        {typed>=cur.line[1].length&&<span className="la-vn-more" aria-hidden="true">▼</span>}
@@ -372,6 +374,7 @@ export default function LifeAdventure(){
     </div>
     {!cur.portal&&<div className="la-chat-btns">
      {/* 已完成的站重玩時，可以跳過對白直接射擊 */}
+     {cur.pro&&<button onClick={()=>{try{speechSynthesis.cancel()}catch{};setStep(seq.findIndex(s=>!s.pro))}}>⏩ 跳過前情提要</button>}
      {phase==='story'&&stop in done&&!cur.key&&<button onClick={()=>{try{speechSynthesis.cancel()}catch{};setStep(seq.findIndex(s=>s.key))}}>⏩ 跳到關鍵句</button>}
      <button onClick={()=>speak(cur.line[1],true,cur.line[0])} aria-label="再聽一次">🔊 再聽</button>
      <button className="la-next" onClick={next}>{step+1<seq.length?'下一句 ▶':phase==='intro'?'出發 ▶':phase==='story'?'射回成語 ▶':'回到地圖 ▶'}</button>
@@ -539,6 +542,10 @@ export default function LifeAdventure(){
    .la-vn.sys b{color:#8ff1ff}
    .la-vn.sys p{font-family:'Noto Sans TC',monospace;letter-spacing:.03em}
    .la-vn.sys.pr{padding-left:5%;padding-right:29%}
+   /* 前情提要的旁白：暖色羊皮紙對話框 */
+   .la-vn.sys.narr{background:rgba(66,42,24,.86);border-color:#e8c873;box-shadow:0 0 0 3px rgba(66,42,24,.45),0 8px 20px rgba(0,0,0,.35)}
+   .la-vn.sys.narr b{color:#ffd98a}
+   .la-vn.sys.narr p{font-family:inherit;letter-spacing:normal}
    .la-actor.holo{filter:drop-shadow(0 0 14px rgba(111,231,255,.8)) drop-shadow(0 0 4px #bff6ff);opacity:.95}
    .la-vn b{color:#ffb35c;font-size:1.05rem;letter-spacing:.05em}
    .la-vn p{margin:4px 0 0;font-size:clamp(1.05rem,2.2vw,1.35rem);line-height:1.75;color:#fff}
