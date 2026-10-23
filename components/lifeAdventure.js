@@ -1,7 +1,7 @@
 // 成語穿越者：墨墨與空白魔王（故事構思：遊戲作者；劇本第四稿）
 // 大家說話說到一半，句子裏的成語變成墨跡。鼎鼎在開場把回溯手錶和成語光線槍交給小越：
 // 手錶帶小越穿越到之前的回憶，回到句子斷掉的一刻；之後小越獨自冒險（每站背景畫上一個世界地標，只作畫面）。
-// 每一站：回溯手錶報告 → 回到斷句前 → 生活對話 → 關鍵句（墨跡）→ 射回成語 → 一條線索。
+// 每一站：回溯手錶報告 → 回到斷句前 → 生活對話 → 關鍵句（墨跡）→ 補回成語 → 一條線索。
 // 關鍵句來自 lifeSentences.json 第一句，由 say 的角色說出（預設小越）；對白一律書面語。
 // 主線：墨墨（墨影）前期像反派、後期是正派；簡簡把成語擦成空白，單元三結尾變成空白魔王。見《成語穿越者-劇本第四稿.md》。
 
@@ -62,7 +62,7 @@ export const UNITS = [{
   ['dingding','小越，歡迎來到成語時空圖書館！我是管理員鼎鼎。'],
   ['moying','嘻嘻！四十卷卷軸裏的成語，全被我吸走了！'],
   ['dingding','糟了！大家說話說到一半，成語就變成墨跡，大家都想不起來。'],
-  ['dingding','這隻回溯手錶可以帶你穿越到之前的回憶，回到句子斷掉的一刻；這把成語光線槍，可以把成語射回句子裏。'],
+  ['dingding','這隻回溯手錶可以帶你穿越到之前的回憶，回到句子斷掉的一刻；這把成語光線槍，可以把成語補回句子裏。'],
   ['dingding','記住：先聽清楚大家說甚麼，想想哪個成語合適，才可以開槍。'],
   ['xiaoyue','交給我吧！成語穿越者小越，出發！','determined'],
  ],
@@ -407,7 +407,9 @@ export const UNITS = [{
     ['momo','我不是在偷成語，我是在救它們。'],
     ['xiaoyue','墨墨……原來你一直在救成語！','surprised'],
    ]},
-  {idiom:'包羅萬象',bg:'w29',cast:['ahhei'],clueBg:'bg-forgotten',
+  // 第 28 站墨墨已說明自己在救成語，所以第 29–30 站擦走成語的是簡簡的白光，墨墨在旁邊幫忙
+  {idiom:'包羅萬象',bg:'w29',cast:['ahhei'],clueBg:'bg-forgotten',partner:'moying-happy',
+   thief:{who:'jianjian',line:'（白光一閃）這些成語太麻煩了，擦掉吧！',img:'jianjian-talk',fly:'jianjian-smile',hurt:'jianjian-surprised',name:'簡簡的白光'},
    alert:'偵測到斷句！穿越到回憶：和阿希第一次去圖書館。',
    lines:[
     ['ahhei','小越，這間圖書館甚麼書都有。'],
@@ -421,7 +423,8 @@ export const UNITS = [{
     ['momo','空白頁越積越多，終於聚在一起，變成了一團白光——就是簡簡。'],
     ['xiaoyue','原來簡簡是從被忘記的成語變出來的……','wonder'],
    ]},
-  {idiom:'莫逆之交',bg:'w30',cast:['xiaoming'],clueBg:'bg-forgotten',
+  {idiom:'莫逆之交',bg:'w30',cast:['xiaoming'],clueBg:'bg-forgotten',partner:'moying-happy',
+   thief:{who:'jianjian',line:'（白光一閃）你們不需要這些成語，我替你們擦掉！',img:'jianjian-talk',fly:'jianjian-smile',hurt:'jianjian-surprised',name:'簡簡的白光'},
    alert:'偵測到斷句！穿越到回憶：和小明和好的那天。',
    lines:[
     ['xiaoming','小越，對不起，那天我不應該跟你吵架。'],
@@ -448,7 +451,7 @@ export const UNITS = [{
  intro:[
   ['dingding','小越，空白魔王逃走了！它躲進大家的回憶裏，要把最後十個成語也擦掉。'],
   ['momo','它每擦掉一個成語，白光就會變強一點。'],
-  ['dingding','只要你把十個成語都射回去，它就沒有力量了。'],
+  ['dingding','只要你把十個成語都補回句子裏，它就沒有力量了。'],
   ['xiaoyue','墨墨，這次我們一起出發！','determined'],
  ],
  // 每站背景：世界地標 w31–w40（只作畫面）
@@ -495,7 +498,7 @@ export const UNITS = [{
    ],
    clue:[
     ['momo','墨墨也有拿手的事：我最會把成語收好。'],
-    ['xiaoyue','我最會把成語射回去！我們真是好拍檔！','cheer'],
+    ['xiaoyue','我最會把成語補回句子裏！我們真是好拍檔！','cheer'],
    ]},
   {idiom:'與虎謀皮',bg:'w35',cast:['mother','little-brother'],
    alert:'偵測到斷句！穿越到回憶：媽媽出門買菜的那個下午。',
@@ -577,7 +580,7 @@ export const BOSS = {
  intro:[
   ['dingding','小越，空白魔王把墨墨困住了，還要把四十個成語一次過擦掉！'],
   ['boss','不用記住，不用麻煩……全部變成空白，不是更簡單嗎？'],
-  ['xiaoyue','成語不是麻煩，是大家的回憶！我一個一個射回去！','determined'],
+  ['xiaoyue','成語不是麻煩，是大家的回憶！我一個一個補回去！','determined'],
  ],
  // 魔王剩一半血時：墨墨歸隊
  mid:[

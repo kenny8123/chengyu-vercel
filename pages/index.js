@@ -1294,7 +1294,7 @@ export default function Home(){
           <div className="menu-head"><h2>📝 挑戰系統</h2><p>選擇模式，測試你對成語的理解程度</p></div>
           <div className="level-grid">
             <ModeCard modeKey="pet" displayName="🌱 寵物的家" desc="學習就是養分，累積經驗、回顧記憶，解鎖 40 套典故造型" onStart={()=>{window.location.href="/pet"}}/>
-            <ModeCard modeKey="adventure" displayName="🗺️ 成語穿越者・地圖冒險" desc="穿越到古代聽典故，再回到今天的生活，把被墨影吸走的成語射回句子裏。走完 10 站，完成一張學習單。" onStart={()=>{window.location.href="/life-adventure"}}/>
+            <ModeCard modeKey="adventure" displayName="🗺️ 成語穿越者・地圖冒險" desc="穿越到之前的回憶，讀生活對話，用成語光線槍把被擦走的成語補回句子裏。四張地圖共 40 站，最後決戰空白魔王。" onStart={()=>{window.location.href="/life-adventure"}}/>
             {/* 生活成語小教室暫時收起：頁面 /life-class 和資料都保留，日後要用時把下面一行放回 */}
             {/* <ModeCard modeKey="life" displayName="🏫 生活成語小教室" desc="先讀生活例句，再看圖和句子，從成語銀行選出適當的成語填入（　）。每張學習單 10 題。" onStart={()=>{window.location.href="/life-class"}}/> */}
             <ModeCard modeKey="video" displayName="🎬 影片答題" desc="40 抽 10，不重複。每題先看約 30 秒影片，再比較成語作答；完成後查看知識點與錯誤解析。" onStart={()=>{window.location.href="/video-challenge"}}/>

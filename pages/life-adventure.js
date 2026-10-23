@@ -9,7 +9,7 @@ import {CAST,XIAOYUE,UNITS,BOSS} from '../components/lifeAdventure'
 import {sfx,unlockSfx} from '../components/adventureSfx'
 
 // 成語穿越者：生活成語地圖冒險（設計構思：遊戲作者）
-// 學習單地圖 × 射擊：每站穿越到回憶，句子裏的成語被吸走變成墨跡，用成語光線槍射回正確的成語，再看一條線索。
+// 學習單地圖 × 射擊：每站穿越到回憶，句子裏的成語被吸走變成墨跡，用成語光線槍把正確的成語補回句子裏，再看一條線索。
 // 單元一至四是地圖（每單元十站，共四十個成語）；單元五是決戰空白魔王（四十個成語輪流出題，射中一個魔王少一格血），打贏後看結局。
 const INK=new Set(['moying','momo'])   // 墨影／墨墨：用整團墨水圖，不用半身像
 const BLANK='＿＿＿＿'
@@ -61,6 +61,8 @@ export default function LifeAdventure(){
    if(el&&el.getBoundingClientRect().bottom>innerHeight)el.scrollIntoView({block:'end',behavior:'smooth'})},60)
   return()=>clearTimeout(t)},[hint,hit,bossNote])
  const ch=chapters[stop],life=lifeOf(ch.idiom),sentence=life.sentences[0],sayer=ch.say||'xiaoyue'
+ // 擦走成語的是誰（預設墨影）、射擊時旁邊有沒有墨墨幫忙：可按單元或按站設定
+ const thief=ch.thief||unit.thief,partner=ch.partner||unit.partner
  const bq=boss&&LIFE[boss.order[boss.i]],bossSentence=bq?.sentences[1]||''   // 魔王關用另一句例句
 
  // 對白次序：intro＝開場；story＝穿越到回憶 → 手錶報告 → 生活對話 → 關鍵句（墨跡）→ 墨影；clue＝射中後的一條線索
@@ -69,7 +71,7 @@ export default function LifeAdventure(){
  const atBoss=l=>({bg:BOSS.bg,cast:[],line:l})
  const seq=phase==='intro'?[...(unit.prologue||[]).map(([bg,...l])=>({bg,cast:[],line:l,pro:true})),...unit.intro.map(l=>({bg:'bg-time-library',cast:[],line:l}))]
   :phase==='story'?[{portal:'穿越到回憶……'},at(['watch',ch.alert]),...ch.lines.map(at),
-    {...at([sayer,sentence]),key:true},at(unit.thief?[unit.thief.who,unit.thief.line]:['moying','嘻嘻！我把句子裏的成語吸走了，看你能不能射回去！'])]
+    {...at([sayer,sentence]),key:true},at(thief?[thief.who,thief.line]:['moying','嘻嘻！我把句子裏的成語吸走了，看你能不能把它補回去！'])]
   :phase==='clue'?ch.clue.map(l=>({...at(l),bg:ch.clueBg||ch.bg}))
   :phase==='bossIntro'?BOSS.intro.map(atBoss):phase==='bossMid'?BOSS.mid.map(atBoss):phase==='bossEnd'?BOSS.ending.map(atBoss):[]
  const VN=['intro','story','clue','bossIntro','bossMid','bossEnd']
@@ -337,7 +339,7 @@ export default function LifeAdventure(){
     <div className="la-side">
      <div className="la-units" role="tablist" aria-label="選擇單元">{UNITS.map((u,i)=><button key={u.title} role="tab" aria-selected={ui===i} disabled={!unlocked(i)} className={ui===i?'on':''} onClick={()=>goUnit(i)}>{unlocked(i)?'':'🔒 '}{u.title.split('・')[0]}<small>{u.title.split('・')[1]}</small></button>)}
       <button role="tab" aria-selected={false} disabled={!bossReady()} className="boss" onClick={()=>startBoss()}>{bossReady()?'⚔️ ':'🔒 '}{BOSS.title.split('・')[0]}<small>{BOSS.title.split('・')[1]}</small></button></div>
-     <p className="la-tip">{nextStop>=0?<>★ 按地圖上發光的第 <b>{no(nextStop)}</b> 站出發。先讀大家的對話，想想哪個成語適合，再把它射回句子裏。</>:'★ 十站都完成了！'}</p>
+     <p className="la-tip">{nextStop>=0?<>★ 按地圖上發光的第 <b>{no(nextStop)}</b> 站出發。先讀大家的對話，想想哪個成語適合，再用成語光線槍把它補回句子裏。</>:'★ 十站都完成了！'}</p>
      {gift&&<p className="la-tip gift" role="status">📜 成語送回圖書館了！<a href="/pet">寵物的家</a>的成語卷軸館藏打開了「{gift}」卷軸。</p>}
      {worksheet}
      {Object.keys(done).length>0&&<button className="la-link" onClick={restart}>重新開始這張地圖</button>}
@@ -350,7 +352,7 @@ export default function LifeAdventure(){
       <div className="la-bg" style={{backgroundImage:`url(${IMG(cur.bg)})`}}/>
       {/* RPG 式：只顯示說話的人的半身立繪，小越在左下角、其他角色在右下角，站在對話框前面（busts.mjs 統一頭部大小） */}
       {!CAST[cur.line[0]].sys&&<img key={step} src={cur.line[0]==='moying'?IMG('moying-float'):cur.line[0]==='momo'?IMG('moying-happy'):cur.line[0]==='boss'?IMG('bust-boss-'+(cur.line[2]||'laugh')):IMG('bust-'+(cur.line[0]==='xiaoyue'?XIAOYUE[cur.line[2]]||XIAOYUE.wave:cur.line[0]==='dingding'?'dingding-talk':CAST[cur.line[0]].talk||CAST[cur.line[0]].img))} alt={CAST[cur.line[0]].name} className={`la-actor ${cur.line[0]==='xiaoyue'?'left':'right'}${INK.has(cur.line[0])?' moying':''}${CAST[cur.line[0]].holo?' holo':''}${CAST[cur.line[0]].boss?' bossy':''}${FACES_RIGHT.has(cur.line[2])?' noflip':''}`}/>}
-      {cur.key&&<img src={IMG(unit.thief?.img||'moying-suck-float')} alt={`${unit.thief?.name||'墨影'}正在擦走成語`} className={`la-moying${unit.thief?' bossthief':''}`}/>}
+      {cur.key&&<img src={IMG(thief?.img||'moying-suck-float')} alt={`${thief?.name||'墨影'}正在擦走成語`} className={`la-moying${thief?' glowthief':''}`}/>}
       {/* 情境對話（RPG 式）：小越在左、其他角色在右，說話的人亮起；底部一個大對話框 */}
       <div className={`la-vn ${CAST[cur.line[0]].sys?'sys':CAST[cur.line[0]].holo?'sys pr':cur.line[0]==='xiaoyue'?'pl':'pr'}${cur.key?' key':''}${INK.has(cur.line[0])?' ink':''}${CAST[cur.line[0]].boss?' bossbox':''}${CAST[cur.line[0]].narr?' narr':''}`} aria-live="polite">
        <b>【{CAST[cur.line[0]].name}】</b>
@@ -364,7 +366,7 @@ export default function LifeAdventure(){
      {cur.pro&&<button onClick={()=>{try{speechSynthesis.cancel()}catch{};setStep(seq.findIndex(s=>!s.pro))}}>⏩ 跳過前情提要</button>}
      {phase==='story'&&stop in done&&!cur.key&&<button onClick={()=>{try{speechSynthesis.cancel()}catch{};setStep(seq.findIndex(s=>s.key))}}>⏩ 跳到關鍵句</button>}
      <button onClick={()=>speak(cur.line[1],true)} aria-label="再聽一次">🔊 再聽</button>
-     <button className="la-next" onClick={next}>{step+1<seq.length?'下一句 ▶':phase==='intro'?'出發 ▶':phase==='story'?'射回成語 ▶':'回到地圖 ▶'}</button>
+     <button className="la-next" onClick={next}>{step+1<seq.length?'下一句 ▶':phase==='intro'?'出發 ▶':phase==='story'?'補回成語 ▶':'回到地圖 ▶'}</button>
     </div>}
    </div>}
 
@@ -375,8 +377,8 @@ export default function LifeAdventure(){
      <button className="la-say" onClick={()=>speak(hit?sentence.replace(BLANK,ch.idiom):sentence,true)} aria-label="朗讀句子">🔊</button>
     </div>
     <div ref={stageRef} className={`la-stage shoot${shake?' shake':''}`} style={{backgroundImage:`url(${IMG(ch.bg)})`}}>
-     <img src={IMG(hit?(unit.thief?.hurt||'moying-sad-float'):(unit.thief?.fly||'moying-float'))} alt={unit.thief?.name||'墨影'} className={`la-moying fly${unit.thief?' bossthief':''}`}/>
-     {unit.partner&&<img src={IMG(unit.partner)} alt="墨墨在旁邊幫忙" className="la-momo-help"/>}
+     <img src={IMG(hit?(thief?.hurt||'moying-sad-float'):(thief?.fly||'moying-float'))} alt={thief?.name||'墨影'} className={`la-moying fly${thief?' glowthief':''}`}/>
+     {partner&&<img src={IMG(partner)} alt="墨墨在旁邊幫忙" className="la-momo-help"/>}
      {targets.map((t,n)=><button key={t} className={`la-target t${n}${gone.includes(t)?' gone':''}${hit&&t===ch.idiom?' win':''}${hit&&t!==ch.idiom?' fade':''}`} onClick={e=>shoot(t,e)} disabled={hit||gone.includes(t)} aria-label={`射向「${t}」`}><GameText text={t}/></button>)}
      {beam&&<span key={beam.k} className="la-beam" style={{left:beam.x,top:beam.y,width:beam.len,transform:`rotate(${beam.deg}deg)`}}/>}
      {/* 小越拿着成語光線槍：瞄準 → 開槍 → 後座力；射中後歡呼 */}
@@ -384,7 +386,7 @@ export default function LifeAdventure(){
      {burst&&<Burst key={'burst'+burst.k} {...burst}/>}
      {hit&&<p className="la-hitfx" role="status"><GameText text="命中！"/><small>句子修好了！</small></p>}
     </div>
-    <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${ch.idiom}」：${meaning(ch.idiom)}`:hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用成語光線槍射回去。'}</p>
+    <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${ch.idiom}」：${meaning(ch.idiom)}`:hint||'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個四字成語，再按它，用成語光線槍把成語補回句子裏。'}</p>
    </div>}
 
    {phase==='boss'&&boss&&bq&&<div className="la-play boss-play">
@@ -412,7 +414,7 @@ export default function LifeAdventure(){
      {hit&&<p className="la-hitfx" role="status"><GameText text={combo>=2?`${combo} 連擊！`:'命中！'}/><small>空白魔王 −1</small></p>}
     </div>
     {bossNote&&<p className="la-hint ok">{bossNote}</p>}
-    <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${bq.idiom}」：${meaning(bq.idiom)}`:hint||(boss.joined?'★ 墨墨歸隊了！發光的卷軸就是正確答案的提示。':'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個成語，再用成語光線槍射回去。')}</p>
+    <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${bq.idiom}」：${meaning(bq.idiom)}`:hint||(boss.joined?'★ 墨墨歸隊了！發光的卷軸就是正確答案的提示。':'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個成語，再用成語光線槍把成語補回句子裏。')}</p>
    </div>}
 
    {phase==='cert'&&boss&&<div className="la-done la-cert">
@@ -493,7 +495,7 @@ export default function LifeAdventure(){
    .la-party{position:absolute;width:8%;transform:translate(-50%,-96%);transition:left 1.5s ease-in-out,top 1.5s ease-in-out;pointer-events:none}
    .la-hero{width:100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.3))}
    .la-partner{position:absolute;width:95%;left:62%;bottom:18%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.3));animation:la-float 2s ease-in-out infinite}
-   .la-moying.bossthief{filter:drop-shadow(0 0 14px rgba(255,255,255,.9)) drop-shadow(0 0 6px rgba(150,110,220,.7))}
+   .la-moying.glowthief{filter:drop-shadow(0 0 14px rgba(255,255,255,.9)) drop-shadow(0 0 6px rgba(150,110,220,.7))}
    .la-side{display:flex;flex-direction:column;gap:12px}
    .la-units{display:flex;gap:8px;flex-wrap:wrap}
    .la-units button{flex:1;min-width:96px;border:3px solid #e8d8bd;background:#fff;border-radius:14px;padding:6px 10px;font-weight:800;color:var(--choc);cursor:pointer;display:flex;flex-direction:column;line-height:1.3}
