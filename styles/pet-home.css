@@ -244,3 +244,6 @@
 .dd-key-dialog ul.dd-key-intro{list-style:none;display:grid;gap:8px}.dd-key-intro li{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline}.dd-key-intro strong{white-space:nowrap}.dd-key-intro span{white-space:nowrap}@media(max-width:600px){.dd-key-dialog .dd-key-intro{font-size:16px;line-height:1.6}.dd-key-intro li{flex-direction:column;gap:0}.dd-key-intro span{padding-left:26px}}
 /* 對話框貼近鼎鼎頭頂 */.dd-home .dd-action-bubble{top:12%}@media(max-width:700px){.dd-home .dd-action-bubble{top:8%}}
 @media(max-width:700px){.dd-home .dd-action-bubble{top:10%}}
+/* 五個照顧按鈕：電腦一行排五個；手機兩欄時最後一個佔滿一行 */
+@media(min-width:701px){.dd-home .dd-actions{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:700px){.dd-home .dd-actions .dd-key:last-child:nth-child(odd){grid-column:1/-1}}
