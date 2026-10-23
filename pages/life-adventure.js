@@ -259,7 +259,6 @@ export default function LifeAdventure(){
   <h3>📜 學習單・{unit.title.split('・')[0]}</h3>
   <ol start={no(0)}>{chapters.map((c,i)=>{const ok=i in done
    return <li key={c.idiom} className={ok?(done[i]?'ok':'retry'):''}><Said text={lifeOf(c.idiom).sentences[0]} idiom={c.idiom} hit={ok}/></li>})}</ol>
-  <p className="la-score">第一次就射中：<b>{firstCount}</b> / 10</p>
  </aside>
 
  return <>
@@ -398,14 +397,19 @@ export default function LifeAdventure(){
     <p>{unit.ending}</p>
     {reward&&!reward.already&&<CompletionReward reward={reward}/>}
     {worksheet}
-    {/* 第一次未射中的成語，完成單元時再溫習一次意思 */}
-    {chapters.some((_,i)=>done[i]===false)&&<div className="la-review"><h3>📝 再溫習這幾個成語</h3><ul>{chapters.map((c,i)=>done[i]===false&&<li key={c.idiom}><b>{c.idiom}</b>：{meaning(c.idiom)}</li>)}</ul></div>}
     <div className="la-actions">
      {UNITS[ui+1]&&<button className="btn btn-go" onClick={()=>goUnit(ui+1)}>前往{UNITS[ui+1].title.split('・')[0]} →</button>}
      {!UNITS[ui+1]&&<button className="btn btn-go" onClick={()=>startBoss()}>⚔️ 前往決戰空白魔王 →</button>}
      <button className="btn btn-ghost" onClick={()=>setPhase('map')}>看地圖</button>
      <button className="btn btn-ghost" onClick={restart}>重新開始</button>
     </div>
+    {/* 總報告：完成單元後才顯示成績，地圖上的學習單不顯示分數 */}
+    <section className="la-report" aria-label="總報告">
+     <h3>📊 總報告</h3>
+     <p className="la-report-score">第一次就射中：<b>{firstCount}</b> / {chapters.length}</p>
+     <p><b>✅ 已掌握：</b>{chapters.filter((_,i)=>done[i]===true).map(c=>c.idiom).join('、')||'（下次加油！）'}</p>
+     {chapters.some((_,i)=>done[i]===false)&&<><p><b>📝 再溫習：</b></p><ul>{chapters.map((c,i)=>done[i]===false&&<li key={c.idiom}><b>{c.idiom}</b>：{meaning(c.idiom)}</li>)}</ul></>}
+    </section>
    </div>}
   </main>}
 
@@ -461,7 +465,6 @@ export default function LifeAdventure(){
    .la-sheet li{padding:2px 0;border-bottom:1px dashed #efe3cf;color:#8b7461}
    .la-sheet li.ok,.la-sheet li.retry{color:var(--choc)}
    .la-sheet li.retry .la-found{color:var(--sun-dark)}
-   .la-score{margin:8px 0 0;font-weight:700}
    .la-link{background:none;border:none;color:var(--choc-soft);text-decoration:underline;cursor:pointer;align-self:flex-start}
    .la-ink{display:inline-block;position:relative;width:4.4em;height:1.05em;vertical-align:-.15em;margin:0 .15em;background:#2e2852;border-radius:48% 52% 44% 56%/60% 42% 58% 40%;box-shadow:inset 0 -.12em .2em rgba(0,0,0,.35)}
    .la-ink i{position:absolute;background:#2e2852;border-radius:50%}
@@ -548,10 +551,12 @@ export default function LifeAdventure(){
    .la-burst.ok i{background:radial-gradient(circle,#fffbe0,#ffd84d 60%,#ff8db0);box-shadow:0 0 10px #ffe27a}
    .la-burst.no i{background:#4a4370;width:11px;height:11px}
    @keyframes la-burst{from{transform:rotate(var(--a)) translateX(0) scale(1.2);opacity:1}to{transform:rotate(var(--a)) translateX(64px) scale(.2);opacity:0}}
-   .la-review{text-align:left;background:#fff6f0;border:3px dashed #f5c6a8;border-radius:18px;padding:10px 16px;margin:0 0 16px}
-   .la-review h3{margin:0 0 4px;font-size:1.1rem}
-   .la-review ul{margin:0;padding-left:1.2em;line-height:1.9}
-   .la-review b{color:var(--berry-dark)}
+   .la-report{text-align:left;background:#fff;border:3px solid #e8d8bd;border-radius:18px;padding:12px 18px;margin:20px 0 0;line-height:1.8}
+   .la-report h3{margin:0 0 6px;font-size:1.2rem}
+   .la-report p{margin:4px 0}
+   .la-report-score{font-size:1.15rem;font-weight:700}
+   .la-report ul{margin:0;padding-left:1.2em}
+   .la-report li b{color:var(--berry-dark)}
    .la-combo{font-weight:900;color:#ffd84d;animation:la-pop .5s}
    @media(prefers-reduced-motion:reduce){.la-stage.shake,.la-burst i{animation:none}.la-burst{display:none}}
    /* 魔王關 */
