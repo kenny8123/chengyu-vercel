@@ -50,6 +50,11 @@ export default function LifeAdventure(){
  const [pose,setPose]=useState('aim'),[dir,setDir]=useState('ur'),[gift,setGift]=useState(null)
  const [boss,setBoss]=useState(null),[bossNote,setBossNote]=useState(''),[bossAtk,setBossAtk]=useState(false)
  const run=useRef(null),stageRef=useRef(null),gunRef=useRef(null)
+ // 手機畫面矮：射錯／射中後的提示在射擊場下面，看不到時就把畫面輕輕捲下去
+ useEffect(()=>{if(!hint&&!hit&&!bossNote)return
+  const t=setTimeout(()=>{const els=document.querySelectorAll('.la-hint'),el=els[els.length-1]
+   if(el&&el.getBoundingClientRect().bottom>innerHeight)el.scrollIntoView({block:'end',behavior:'smooth'})},60)
+  return()=>clearTimeout(t)},[hint,hit,bossNote])
  const ch=chapters[stop],life=lifeOf(ch.idiom),sentence=life.sentences[0],sayer=ch.say||'xiaoyue'
  const bq=boss&&LIFE[boss.order[boss.i]],bossSentence=bq?.sentences[1]||''   // 魔王關用另一句例句
 
