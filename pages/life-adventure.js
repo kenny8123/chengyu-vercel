@@ -526,19 +526,20 @@ export default function LifeAdventure(){
    .la-stage.portal{animation:la-zoom 1.6s ease-in}
    .la-portal-text{position:absolute;inset:auto 0 12%;text-align:center;font-size:clamp(1.6rem,4vw,2.6rem);margin:0}
    .la-bg{position:absolute;inset:-12px;background-size:cover;background-position:center;filter:blur(1.5px) brightness(.95)}
-   .la-actor{position:absolute;bottom:0;height:56%;width:auto;max-width:30%;object-fit:cover;object-position:top center;z-index:4;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));animation:la-in .3s ease-out}
+   /* 立繪用 contain：較闊的圖（例如小越攤手、頭頂問號）會整張縮細顯示，唔會被切走邊位 */
+   .la-actor{position:absolute;bottom:0;height:56%;width:auto;max-width:36%;object-fit:contain;object-position:center bottom;z-index:4;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));animation:la-in .3s ease-out}
    .la-actor.left{left:1%;scale:-1 1}
    .la-actor.left.noflip{scale:1 1}
    .la-actor.right{right:1%}
    .la-actor.moying{height:44%;bottom:6%;object-fit:contain}
    @keyframes la-in{from{opacity:0;transform:translateY(6%)}}
    .la-vn{position:absolute;left:2%;right:2%;bottom:3%;z-index:3;min-height:27%;background:rgba(24,22,58,.86);border:3px solid #e8c873;border-radius:14px;padding:10px 18px 14px;color:#fff;box-shadow:0 0 0 3px rgba(24,22,58,.5),0 8px 20px rgba(0,0,0,.35);cursor:pointer}
-   .la-vn.pl{padding-left:29%}.la-vn.pr{padding-right:29%}
+   .la-vn.pl{padding-left:35%}.la-vn.pr{padding-right:35%}
    /* 回溯手錶、簡簡：科技聲音，用青藍色全息對話框 */
    .la-vn.sys{background:rgba(8,48,70,.86);border-color:#6fe7ff;box-shadow:0 0 0 3px rgba(8,48,70,.45),0 0 18px rgba(111,231,255,.45);padding-left:5%;padding-right:5%}
    .la-vn.sys b{color:#8ff1ff}
    .la-vn.sys p{font-family:'Noto Sans TC',monospace;letter-spacing:.03em}
-   .la-vn.sys.pr{padding-left:5%;padding-right:29%}
+   .la-vn.sys.pr{padding-left:5%;padding-right:35%}
    /* 前情提要的旁白：暖色羊皮紙對話框 */
    .la-vn.sys.narr{background:rgba(66,42,24,.86);border-color:#e8c873;box-shadow:0 0 0 3px rgba(66,42,24,.45),0 8px 20px rgba(0,0,0,.35)}
    .la-vn.sys.narr b{color:#ffd98a}
@@ -684,12 +685,14 @@ export default function LifeAdventure(){
     .la-target.t0{left:4%;top:24%}.la-target.t1{left:50%;top:34%}.la-target.t2{left:6%;top:50%}.la-target.t3{left:48%;top:63%}
     .la-stage.scene{aspect-ratio:3/4;max-height:66vh}
     /* 手機：角色企喺對話框上面，文字用盡對話框闊度，唔會被立繪逼到好窄 */
-    .la-actor{max-width:52%;height:40%;bottom:33%}
+    .la-actor{max-width:68%;height:40%;bottom:33%}
     .la-actor.moying{height:30%;bottom:34%}
     .la-actor.bossy{height:44%}
     .la-vn{min-height:30%;padding:8px 14px 12px;z-index:5}
     .la-vn.pl,.la-vn.pr,.la-vn.sys,.la-vn.sys.pr{padding-left:14px;padding-right:14px}
     .la-vn.pr b{display:block;text-align:right}
+    .la-chat-btns{gap:6px;flex-wrap:wrap}
+    .la-chat-btns button{white-space:nowrap;padding:9px 12px;font-size:.92rem}
     .la-shooter{height:30%}
    }
   `}</style>
