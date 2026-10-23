@@ -32,7 +32,7 @@ const faceOf=(sp,mood,talking)=>sp==='dingding'?IMG(talking?'dingding-talk':'din
 
 function speak(text,on){
  if(!on||typeof window==='undefined'||!window.speechSynthesis)return
- try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/＿＿＿＿/g,'，墨跡，'));u.lang='zh-HK';u.rate=.9;speechSynthesis.speak(u)}catch{}
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/＿＿＿＿/g,'，墨跡，'));u.lang='zh-TW';u.rate=.9;speechSynthesis.speak(u)}catch{}
 }
 
 // 墨跡：被墨影吸走的成語；射中後變回成語
