@@ -275,5 +275,7 @@
 .dd-xpbar b{position:relative;font-size:17px;font-weight:900;letter-spacing:.06em;color:#2f1f12;white-space:nowrap;text-shadow:0 0 3px #fff,0 0 3px #fff,0 1px 0 #fff}
 @media(max-width:700px){.dd-xpbar{min-width:136px;height:28px}.dd-xpbar b{font-size:15px}}
 /* 親密度用同一款膠囊字；粉紅色代表距離解鎖下一套造型的進度 */
-.dd-bondbar{margin:0}
+.dd-bondbar,.dd-foodbar{margin:0}
+/* 點心：同一款膠囊字，用暖黃色底（點心冇進度，所以唔畫進度條） */
+.dd-foodbar{background:linear-gradient(90deg,#fff1c9,#ffe19a);border-color:#e8c97f}
 .dd-bondbar i{background:linear-gradient(90deg,#ffd0de,#ff8fb1)}
