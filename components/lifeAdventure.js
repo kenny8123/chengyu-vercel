@@ -389,7 +389,7 @@ export const UNITS = [{
     ['momo','我不是在偷成語，我是在救它們。'],
     ['xiaoyue','墨墨……原來你一直在救成語！','surprised'],
    ]},
-  {idiom:'包羅萬象',bg:'w29',cast:['ahhei'],clueBg:'bg-time-library',
+  {idiom:'包羅萬象',bg:'w29',cast:['ahhei'],clueBg:'bg-forgotten',
    alert:'偵測到斷句！穿越到回憶：和阿希第一次去圖書館。',
    lines:[
     ['ahhei','小越，這間圖書館甚麼書都有。'],
@@ -403,7 +403,7 @@ export const UNITS = [{
     ['momo','空白頁越積越多，終於聚在一起，變成了一團白光——就是簡簡。'],
     ['xiaoyue','原來簡簡是從被忘記的成語變出來的……','wonder'],
    ]},
-  {idiom:'莫逆之交',bg:'w30',cast:['xiaoming'],clueBg:'bg-time-library',
+  {idiom:'莫逆之交',bg:'w30',cast:['xiaoming'],clueBg:'bg-forgotten',
    alert:'偵測到斷句！穿越到回憶：和小明和好的那天。',
    lines:[
     ['xiaoming','小越，對不起，那天我不應該跟你吵架。'],
@@ -424,7 +424,7 @@ export const UNITS = [{
 export const BOSS = {
  title:'單元四・決戰空白魔王',
  hp:40, hearts:5, half:20,
- bg:'bg-time-library',
+ bg:'bg-boss-arena',
  intro:[
   ['dingding','小越，空白魔王要把四十個成語一次過擦掉！'],
   ['boss','不用記住，不用麻煩……全部變成空白，不是更簡單嗎？'],
