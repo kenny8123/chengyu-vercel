@@ -298,9 +298,9 @@ export const UNITS = [{
   ['dingding','這一次，我們去把真相找出來吧。'],
   ['xiaoyue','好！不管是誰把成語擦掉，我都要找出來！','determined'],
  ],
- // 背景暫用現有場景，之後換成世界地標版本
+ // 每站背景：世界地標 w21–w30（只作畫面）
  chapters:[
-  {idiom:'禮尚往來',bg:'bg-living-room',cast:['mother'],
+  {idiom:'禮尚往來',bg:'w21',cast:['mother'],
    alert:'偵測到斷句！穿越到回憶：中秋節鄰居來送月餅的那天。',
    lines:[
     ['mother','小越，鄰居陳太太送來一盒月餅。'],
@@ -311,7 +311,7 @@ export const UNITS = [{
     ['jianjian','小越，送你一張「簡化貼紙」！貼上它，以後就不用再記成語了。'],
     ['xiaoyue','謝謝你……不過，我還是想自己記住。','think'],
    ]},
-  {idiom:'爭先恐後',bg:'bg-school-hall',cast:['xiaoming'],
+  {idiom:'爭先恐後',bg:'w22',cast:['xiaoming'],
    alert:'偵測到斷句！穿越到回憶：小息鐘聲響起的一刻。',
    lines:[
     ['xiaoming','快！小息了，我們去搶籃球場！'],
@@ -322,7 +322,7 @@ export const UNITS = [{
     ['xiaoyue','墨影和一道白光，同時衝向同一個成語！','surprised'],
     ['xiaoyue','墨影快了一步……那道白光好像很不高興。','wonder'],
    ]},
-  {idiom:'立竿見影',bg:'bg-living-room',cast:['mother'],
+  {idiom:'立竿見影',bg:'w23',cast:['mother'],
    alert:'偵測到斷句！穿越到回憶：我開始早睡早起的第一個星期。',
    lines:[
     ['mother','小越，你最近每天九點就睡覺，真乖。'],
@@ -333,7 +333,7 @@ export const UNITS = [{
     ['xiaoyue','我用回溯手錶慢慢重看那一刻……','think'],
     ['xiaoyue','先有一道白光把成語擦成空白，墨影才衝過去搶救！先擦掉成語的，不是墨影！','surprised'],
    ]},
-  {idiom:'吳牛喘月',bg:'bg-park',cast:['little-brother'],
+  {idiom:'吳牛喘月',bg:'w24',cast:['little-brother'],
    alert:'偵測到斷句！穿越到回憶：弟弟在公園大叫的那個下午。',
    lines:[
     ['little-brother','哥哥，那邊有一隻狗！救命呀！'],
@@ -344,7 +344,7 @@ export const UNITS = [{
     ['little-brother','哥哥，墨影是不是也像狗一樣會咬人？'],
     ['xiaoyue','看起來可怕，不一定是壞蛋。我想，墨影也是這樣。','think'],
    ]},
-  {idiom:'異曲同工',bg:'bg-library',cast:['brother'],
+  {idiom:'異曲同工',bg:'w25',cast:['brother'],
    alert:'偵測到斷句！穿越到回憶：和哥哥一起溫習的週末。',
    lines:[
     ['brother','小越，我把課文畫成圖畫來溫習。'],
@@ -355,7 +355,7 @@ export const UNITS = [{
     ['xiaoyue','白光又來擦成語了！我開槍，墨影接住，我們一起把成語救回來了！','cheer'],
     ['moying','……謝謝。'],
    ]},
-  {idiom:'格殺勿論',bg:'bg-school-hall',cast:['xiaoming','teacher'],say:'xiaoming',
+  {idiom:'格殺勿論',bg:'w26',cast:['xiaoming','teacher'],say:'xiaoming',
    alert:'偵測到斷句！穿越到回憶：班際話劇綵排。',
    lines:[
     ['teacher','同學們，話劇綵排開始！小明演守城將軍。'],
@@ -366,7 +366,7 @@ export const UNITS = [{
     ['jianjian','（白光突然變得刺眼）所有麻煩的字，都要擦掉！'],
     ['xiaoyue','簡簡……你剛才的聲音，好可怕。','surprised'],
    ]},
-  {idiom:'半斤八兩',bg:'bg-living-room',cast:['brother'],
+  {idiom:'半斤八兩',bg:'w27',cast:['brother'],
    alert:'偵測到斷句！穿越到回憶：派測驗卷的那個晚上。',
    lines:[
     ['brother','小越，這次測驗你考幾分？'],
@@ -377,7 +377,7 @@ export const UNITS = [{
     ['watch','緊急通訊：鼎鼎報告，圖書館底層「遺忘書庫」的空白頁，不見了一大堆！'],
     ['xiaoyue','遺忘書庫？那是甚麼地方？','puzzled'],
    ]},
-  {idiom:'少見多怪',bg:'bg-living-room',cast:['cousin'],
+  {idiom:'少見多怪',bg:'w28',cast:['cousin'],
    alert:'偵測到斷句！穿越到回憶：表弟第一次來我家吃水果。',
    lines:[
     ['cousin','哇！這是甚麼？好臭，好可怕！'],
@@ -389,7 +389,7 @@ export const UNITS = [{
     ['momo','我不是在偷成語，我是在救它們。'],
     ['xiaoyue','墨墨……原來你一直在救成語！','surprised'],
    ]},
-  {idiom:'包羅萬象',bg:'bg-library',cast:['ahhei'],clueBg:'bg-time-library',
+  {idiom:'包羅萬象',bg:'w29',cast:['ahhei'],clueBg:'bg-time-library',
    alert:'偵測到斷句！穿越到回憶：和阿希第一次去圖書館。',
    lines:[
     ['ahhei','小越，這間圖書館甚麼書都有。'],
@@ -403,7 +403,7 @@ export const UNITS = [{
     ['momo','空白頁越積越多，終於聚在一起，變成了一團白光——就是簡簡。'],
     ['xiaoyue','原來簡簡是從被忘記的成語變出來的……','wonder'],
    ]},
-  {idiom:'莫逆之交',bg:'bg-school-hall',cast:['xiaoming'],clueBg:'bg-time-library',
+  {idiom:'莫逆之交',bg:'w30',cast:['xiaoming'],clueBg:'bg-time-library',
    alert:'偵測到斷句！穿越到回憶：和小明和好的那天。',
    lines:[
     ['xiaoming','小越，對不起，那天我不應該跟你吵架。'],
