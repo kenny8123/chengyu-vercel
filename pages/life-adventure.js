@@ -30,9 +30,30 @@ const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch{return nu
 const save=x=>{try{localStorage.setItem(KEY,JSON.stringify(x))}catch{}}
 const faceOf=(sp,mood,talking)=>sp==='dingding'?IMG(talking?'dingding-talk':'dingding-wave'):sp==='xiaoyue'?IMG(XIAOYUE[mood]||XIAOYUE.wave):sp==='moying'?IMG('moying-giggle'):IMG(CAST[sp].img)
 
-function speak(text,on){
+// 朗讀：自動揀部機最自然的國語聲（台灣國語優先；Natural／Online／Premium／Enhanced 等高質聲優先）
+let bestVoice=null
+function pickVoice(){
+ try{
+  const vs=speechSynthesis.getVoices().filter(v=>/^(zh|cmn)/i.test(v.lang)&&!/HK|yue|粵|廣東/i.test(v.lang+v.name))
+  const score=v=>(/TW|Taiwan|臺灣|台灣/i.test(v.lang+v.name)?4:0)+(/Natural|Online|Neural|Premium|Enhanced|優化|高品質/i.test(v.name)?8:0)+(/Google/i.test(v.name)?3:0)+(v.localService?0:1)
+  bestVoice=vs.sort((a,b)=>score(b)-score(a))[0]||null
+ }catch{}
+}
+if(typeof window!=='undefined'&&window.speechSynthesis){pickVoice();speechSynthesis.addEventListener?.('voiceschanged',pickVoice)}
+// 每個角色不同的音高（pitch，1＝正常）和速度（rate）
+const VOICE_OF={
+ xiaoyue:[1.3,.95],dingding:[1.6,.95],moying:[1.45,1.02],momo:[1.45,1],boss:[.55,.82],jianjian:[1.15,.9],watch:[1,1.02],
+ brother:[1,.95],'little-brother':[1.55,.95],xiaoming:[1.25,1],xiaomei:[1.45,.95],ahhei:[1.2,1],cousin:[1.1,.95],
+ mother:[1.1,.9],teacher:[1.05,.88],popo:[1.05,.82],father:[.8,.88],grandpa:[.7,.82],gongong:[.72,.82],firefighter:[.8,.95],
+}
+function speak(text,on,who){
  if(!on||typeof window==='undefined'||!window.speechSynthesis)return
- try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/＿＿＿＿/g,'，墨跡，'));u.lang='zh-TW';u.rate=.9;speechSynthesis.speak(u)}catch{}
+ try{
+  speechSynthesis.cancel();if(!bestVoice)pickVoice()
+  const u=new SpeechSynthesisUtterance(text.replace(/＿＿＿＿/g,'，墨跡，')),[pitch,rate]=VOICE_OF[who]||[1,.92]
+  if(bestVoice)u.voice=bestVoice
+  u.lang=bestVoice?.lang||'zh-TW';u.pitch=pitch;u.rate=rate;speechSynthesis.speak(u)
+ }catch{}
 }
 
 // 墨跡：被墨影吸走的成語；射中後變回成語
@@ -138,7 +159,7 @@ export default function LifeAdventure(){
  useEffect(()=>{
   if(!cur)return
   if(cur.portal){const t=setTimeout(next,1600);return()=>clearTimeout(t)}
-  setTyped(0);speak(cur.line[1],voice)
+  setTyped(0);speak(cur.line[1],voice,cur.line[0])
   const len=cur.line[1].length;let n=0
   const t=setInterval(()=>{n+=1;setTyped(n);if(n>=len)clearInterval(t)},45)
   return()=>clearInterval(t)
@@ -173,7 +194,7 @@ export default function LifeAdventure(){
   const others=chapters.map(c=>c.idiom).filter(x=>![ch.idiom,life.near,life.far].includes(x))
   setTargets(shuffle([ch.idiom,life.near,life.far,shuffle(others)[0]]))
   setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setBurst(null);setPose('aim');setDir('ur');setPhase('shoot')
-  speak(sentence,voice)
+  speak(sentence,voice,sayer)
  }
  // 小越先轉身面向目標（選最接近的射擊角度），光束由該角度的槍口直線射向目標，不會轉彎
  function aimAt(e,isHit){
@@ -200,7 +221,7 @@ export default function LifeAdventure(){
     if(unlockScrolls([ch.idiom]))setGift(ch.idiom)
     const d={...done,[stop]:wrong===0};setDone(d);persist(d)
    }
-   speak(sentence.replace(BLANK,ch.idiom),voice);setTimeout(()=>sfx('hit',sound),120)
+   speak(sentence.replace(BLANK,ch.idiom),voice,sayer);setTimeout(()=>sfx('hit',sound),120)
    return
   }
   if(wrong===0&&fresh)recordLearning({idiom:ch.idiom,kind:'answer',correct:false})
@@ -352,7 +373,7 @@ export default function LifeAdventure(){
     {!cur.portal&&<div className="la-chat-btns">
      {/* 已完成的站重玩時，可以跳過對白直接射擊 */}
      {phase==='story'&&stop in done&&!cur.key&&<button onClick={()=>{try{speechSynthesis.cancel()}catch{};setStep(seq.findIndex(s=>s.key))}}>⏩ 跳到關鍵句</button>}
-     <button onClick={()=>speak(cur.line[1],true)} aria-label="再聽一次">🔊 再聽</button>
+     <button onClick={()=>speak(cur.line[1],true,cur.line[0])} aria-label="再聽一次">🔊 再聽</button>
      <button className="la-next" onClick={next}>{step+1<seq.length?'下一句 ▶':phase==='intro'?'出發 ▶':phase==='story'?'射回成語 ▶':'回到地圖 ▶'}</button>
     </div>}
    </div>}
@@ -361,7 +382,7 @@ export default function LifeAdventure(){
     <div className={`la-msg big ${LEFT.has(sayer)?'left':'right'} key`}>
      <img src={faceOf(sayer,'think',false)} alt="" className="la-face"/>
      <div className="la-bub"><b>{CAST[sayer].name}</b><p><Said text={sentence} idiom={ch.idiom} hit={hit}/></p></div>
-     <button className="la-say" onClick={()=>speak(hit?sentence.replace(BLANK,ch.idiom):sentence,true)} aria-label="朗讀句子">🔊</button>
+     <button className="la-say" onClick={()=>speak(hit?sentence.replace(BLANK,ch.idiom):sentence,true,sayer)} aria-label="朗讀句子">🔊</button>
     </div>
     <div ref={stageRef} className={`la-stage shoot${shake?' shake':''}`} style={{backgroundImage:`url(${IMG(ch.bg)})`}}>
      <img src={IMG(hit?'moying-sad-float':'moying-float')} alt="墨影" className="la-moying fly"/>
