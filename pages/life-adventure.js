@@ -103,22 +103,34 @@ export default function LifeAdventure(){
  }
  function toggleVoice(){const v=!voice;setVoice(v);persist(done,{voice:v});try{speechSynthesis.cancel()}catch{}}
  function toggleSound(){const v=!sound;setSound(v);prog.current={...prog.current,sfx:v};save(prog.current)}
- // 遊戲作者提供的聲音：按鈕聲（按任何按鈕）、角色對話時的背景音樂（對話時循環播放，射擊時停）
- const btnSfx=useRef(null),talkBgm=useRef(null)
+ // 遊戲作者提供的聲音：按鈕聲（按任何按鈕）＋四段背景音樂，按畫面切換、循環播放
+ // 封面／地圖／完成＝cover；角色對話＝talk；射擊＝stage；決戰空白魔王＝boss
+ const btnSfx=useRef(null),bgms=useRef({}),nowBgm=useRef(null)
  useEffect(()=>{
   btnSfx.current=new Audio('/audio/life-adventure/button.mp3');btnSfx.current.volume=.35
-  talkBgm.current=new Audio('/audio/life-adventure/dialogue-bgm.mp3');talkBgm.current.loop=true;talkBgm.current.volume=.22
-  return()=>talkBgm.current?.pause()
+  const make=(file,vol)=>{const a=new Audio(`/audio/life-adventure/${file}.mp3`);a.loop=true;a.volume=vol;a.preload='none';return a}
+  bgms.current={cover:make('cover-bgm',.2),talk:make('dialogue-bgm',.22),stage:make('stage-bgm',.18),boss:make('boss-bgm',.2)}
+  return()=>Object.values(bgms.current).forEach(a=>a.pause())
  },[])
  useEffect(()=>{
   const onClick=e=>{const b=e.target.closest?.('button,a');if(!b||b.disabled||b.classList.contains('la-target'))return
    if(!sound||!btnSfx.current)return;try{btnSfx.current.currentTime=0;btnSfx.current.play().catch(()=>{})}catch{}}
   document.addEventListener('click',onClick,true);return()=>document.removeEventListener('click',onClick,true)
  },[sound])
+ const bgmName=VN.includes(phase)?'talk':phase==='shoot'?'stage':phase==='boss'?'boss':'cover'
  useEffect(()=>{
-  const a=talkBgm.current;if(!a)return
-  if(sound&&VN.includes(phase))a.play().catch(()=>{});else a.pause()
- },[phase,sound])
+  const want=sound?bgms.current[bgmName]:null
+  Object.values(bgms.current).forEach(a=>{if(a!==want)a.pause()})
+  nowBgm.current=want
+  want?.play().catch(()=>{})
+ },[bgmName,sound])
+ // 瀏覽器要等玩家第一次按畫面才准播聲，所以第一下按的時候補播；切去其他分頁時暫停
+ useEffect(()=>{
+  const kick=()=>{const a=nowBgm.current;if(a&&a.paused&&!document.hidden)a.play().catch(()=>{})}
+  const vis=()=>{const a=nowBgm.current;if(!a)return;if(document.hidden)a.pause();else a.play().catch(()=>{})}
+  document.addEventListener('pointerdown',kick);document.addEventListener('visibilitychange',vis)
+  return()=>{document.removeEventListener('pointerdown',kick);document.removeEventListener('visibilitychange',vis)}
+ },[])
  function missFx(){sfx('miss',sound);setShake(true);setTimeout(()=>setShake(false),420)}
  function goUnit(i){if(!unlocked(i))return;try{speechSynthesis.cancel()}catch{};const seen=loadUnit(i);setStep(0);setPhase(seen?'map':'intro')}
 
