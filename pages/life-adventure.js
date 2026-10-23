@@ -471,7 +471,7 @@ export default function LifeAdventure(){
    .la-ink i:nth-child(1){width:.38em;height:.38em;left:-.22em;top:.1em}
    .la-ink i:nth-child(2){width:.26em;height:.42em;left:40%;bottom:-.3em;border-radius:40% 40% 50% 50%}
    .la-ink i:nth-child(3){width:.3em;height:.3em;right:-.25em;top:-.12em}
-   .la-found{color:var(--grass-dark);background:#eafbe9;border-radius:6px;padding:0 .2em;margin:0 .1em;animation:la-pop .5s}
+   .la-found{white-space:nowrap;color:var(--grass-dark);background:#eafbe9;border-radius:6px;padding:0 .2em;margin:0 .1em;animation:la-pop .5s}
    .la-play{max-width:1000px;margin:0 auto}
    .la-stage{position:relative;aspect-ratio:16/9;max-height:60vh;width:100%;background-size:cover;background-position:center;border-radius:18px;overflow:hidden;box-shadow:0 10px 26px rgba(90,61,43,.25);cursor:pointer;user-select:none}
    .la-stage.portal{animation:la-zoom 1.6s ease-in}
