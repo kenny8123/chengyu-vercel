@@ -6,7 +6,7 @@ import {outfitAsset} from '../components/outfitAssets'
 import CATALOG from '../components/petCatalog.json'
 import LIFE from '../components/lifeSentences.json'
 import {CAST,XIAOYUE,UNITS,BOSS} from '../components/lifeAdventure'
-import {sfx} from '../components/adventureSfx'
+import {sfx,unlockSfx} from '../components/adventureSfx'
 
 // 成語穿越者：生活成語地圖冒險（設計構思：遊戲作者）
 // 學習單地圖 × 射擊：每站穿越到回憶，句子裏的成語被吸走變成墨跡，用成語光線槍射回正確的成語，再看一條線索。
@@ -16,9 +16,7 @@ const BLANK='＿＿＿＿'
 const KEY='life-adventure-v1'
 // 圖片更新後改呢個數字，瀏覽器就會重新下載，唔會顯示舊圖
 const ASSET_VERSION='20261023'
-// 單元四的背景未畫好前用暫代圖（時空圖書館）；畫好後刪除對應項目
-const ART_TODO={...Object.fromEntries(Array.from({length:10},(_,i)=>['w'+(31+i),'bg-time-library']))}
-const IMG=n=>`/images/life-adventure/${ART_TODO[n]||n}.webp?v=${ASSET_VERSION}`
+const IMG=n=>`/images/life-adventure/${n}.webp?v=${ASSET_VERSION}`
 const LEFT=new Set(['xiaoyue','dingding'])
 // 四個射擊角度：槍口（燈泡）在圖中的位置（比例）和圖的闊高比；按目標方向選最接近的角度
 const AIM={ul:{m:[.355,.166],r:481/512},ur:{m:[.77,.158],r:481/512},l:{m:[.295,.277],r:531/512},r:{m:[.814,.264],r:531/512}}
@@ -32,30 +30,9 @@ const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch{return nu
 const save=x=>{try{localStorage.setItem(KEY,JSON.stringify(x))}catch{}}
 const faceOf=(sp,mood,talking)=>sp==='dingding'?IMG(talking?'dingding-talk':'dingding-wave'):sp==='xiaoyue'?IMG(XIAOYUE[mood]||XIAOYUE.wave):sp==='moying'?IMG('moying-giggle'):IMG(CAST[sp].img)
 
-// 朗讀：自動揀部機最自然的國語聲（台灣國語優先；Natural／Online／Premium／Enhanced 等高質聲優先）
-let bestVoice=null
-function pickVoice(){
- try{
-  const vs=speechSynthesis.getVoices().filter(v=>/^(zh|cmn)/i.test(v.lang)&&!/HK|yue|粵|廣東/i.test(v.lang+v.name))
-  const score=v=>(/TW|Taiwan|臺灣|台灣/i.test(v.lang+v.name)?4:0)+(/Natural|Online|Neural|Premium|Enhanced|優化|高品質/i.test(v.name)?8:0)+(/Google/i.test(v.name)?3:0)+(v.localService?0:1)
-  bestVoice=vs.sort((a,b)=>score(b)-score(a))[0]||null
- }catch{}
-}
-if(typeof window!=='undefined'&&window.speechSynthesis){pickVoice();speechSynthesis.addEventListener?.('voiceschanged',pickVoice)}
-// 每個角色不同的音高（pitch，1＝正常）和速度（rate）
-const VOICE_OF={
- xiaoyue:[1.3,.95],dingding:[1.6,.95],moying:[1.45,1.02],momo:[1.45,1],boss:[.55,.82],jianjian:[1.15,.9],watch:[1,1.02],narrator:[.95,.88],
- brother:[1,.95],'little-brother':[1.55,.95],xiaoming:[1.25,1],xiaomei:[1.45,.95],ahhei:[1.2,1],cousin:[1.1,.95],
- mother:[1.1,.9],teacher:[1.05,.88],popo:[1.05,.82],father:[.8,.88],grandpa:[.7,.82],gongong:[.72,.82],firefighter:[.8,.95],
-}
-function speak(text,on,who){
+function speak(text,on){
  if(!on||typeof window==='undefined'||!window.speechSynthesis)return
- try{
-  speechSynthesis.cancel();if(!bestVoice)pickVoice()
-  const u=new SpeechSynthesisUtterance(text.replace(/＿＿＿＿/g,'，墨跡，')),[pitch,rate]=VOICE_OF[who]||[1,.92]
-  if(bestVoice)u.voice=bestVoice
-  u.lang=bestVoice?.lang||'zh-TW';u.pitch=pitch;u.rate=rate;speechSynthesis.speak(u)
- }catch{}
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/＿＿＿＿/g,'，墨跡，'));u.lang='zh-TW';u.rate=.9;speechSynthesis.speak(u)}catch{}
 }
 
 // 墨跡：被墨影吸走的成語；射中後變回成語
@@ -147,12 +124,20 @@ export default function LifeAdventure(){
   nowBgm.current=want
   want?.play().catch(()=>{})
  },[bgmName,sound])
- // 瀏覽器要等玩家第一次按畫面才准播聲，所以第一下按的時候補播；切去其他分頁時暫停
+ // 瀏覽器要等玩家按畫面才准播聲；iPhone 更要求每段音樂都「在按下的一刻」播過一次。
+ // 所以第一下按的時候：把其他音樂靜音試播一下（解鎖），再播現在這段；音效引擎也一併喚醒。切去其他分頁時暫停。
  useEffect(()=>{
-  const kick=()=>{const a=nowBgm.current;if(a&&a.paused&&!document.hidden)a.play().catch(()=>{})}
+  let primed=false
+  const kick=()=>{
+   if(!primed){primed=true;unlockSfx()
+    Object.values(bgms.current).forEach(a=>{if(a===nowBgm.current)return;a.muted=true;a.play().then(()=>{if(a!==nowBgm.current){a.pause();a.currentTime=0}a.muted=false}).catch(()=>{a.muted=false})})}
+   const a=nowBgm.current;if(a&&a.paused&&!document.hidden)a.play().catch(()=>{})
+  }
   const vis=()=>{const a=nowBgm.current;if(!a)return;if(document.hidden)a.pause();else a.play().catch(()=>{})}
-  document.addEventListener('pointerdown',kick);document.addEventListener('visibilitychange',vis)
-  return()=>{document.removeEventListener('pointerdown',kick);document.removeEventListener('visibilitychange',vis)}
+  // iPhone 的手指點擊要用 touchend／click 才算「按下」，pointerdown 不算
+  for(const ev of ['touchend','click','keydown'])document.addEventListener(ev,kick,true)
+  document.addEventListener('visibilitychange',vis)
+  return()=>{for(const ev of ['touchend','click','keydown'])document.removeEventListener(ev,kick,true);document.removeEventListener('visibilitychange',vis)}
  },[])
  function missFx(){sfx('miss',sound);setShake(true);setTimeout(()=>setShake(false),420)}
  function goUnit(i){if(!unlocked(i))return;try{speechSynthesis.cancel()}catch{};const seen=loadUnit(i);setStep(0);setPhase(seen?'map':'intro')}
@@ -161,7 +146,7 @@ export default function LifeAdventure(){
  useEffect(()=>{
   if(!cur)return
   if(cur.portal){const t=setTimeout(next,1600);return()=>clearTimeout(t)}
-  setTyped(0);speak(cur.line[1],voice,cur.line[0])
+  setTyped(0);speak(cur.line[1],voice)
   const len=cur.line[1].length;let n=0
   const t=setInterval(()=>{n+=1;setTyped(n);if(n>=len)clearInterval(t)},45)
   return()=>clearInterval(t)
@@ -196,7 +181,7 @@ export default function LifeAdventure(){
   const others=chapters.map(c=>c.idiom).filter(x=>![ch.idiom,life.near,life.far].includes(x))
   setTargets(shuffle([ch.idiom,life.near,life.far,shuffle(others)[0]]))
   setGone([]);setWrong(0);setHint('');setHit(false);setBeam(null);setBurst(null);setPose('aim');setDir('ur');setPhase('shoot')
-  speak(sentence,voice,sayer)
+  speak(sentence,voice)
  }
  // 小越先轉身面向目標（選最接近的射擊角度），光束由該角度的槍口直線射向目標，不會轉彎
  function aimAt(e,isHit){
@@ -223,7 +208,7 @@ export default function LifeAdventure(){
     if(unlockScrolls([ch.idiom]))setGift(ch.idiom)
     const d={...done,[stop]:wrong===0};setDone(d);persist(d)
    }
-   speak(sentence.replace(BLANK,ch.idiom),voice,sayer);setTimeout(()=>sfx('hit',sound),120)
+   speak(sentence.replace(BLANK,ch.idiom),voice);setTimeout(()=>sfx('hit',sound),120)
    return
   }
   if(wrong===0&&fresh)recordLearning({idiom:ch.idiom,kind:'answer',correct:false})
@@ -376,7 +361,7 @@ export default function LifeAdventure(){
      {/* 已完成的站重玩時，可以跳過對白直接射擊 */}
      {cur.pro&&<button onClick={()=>{try{speechSynthesis.cancel()}catch{};setStep(seq.findIndex(s=>!s.pro))}}>⏩ 跳過前情提要</button>}
      {phase==='story'&&stop in done&&!cur.key&&<button onClick={()=>{try{speechSynthesis.cancel()}catch{};setStep(seq.findIndex(s=>s.key))}}>⏩ 跳到關鍵句</button>}
-     <button onClick={()=>speak(cur.line[1],true,cur.line[0])} aria-label="再聽一次">🔊 再聽</button>
+     <button onClick={()=>speak(cur.line[1],true)} aria-label="再聽一次">🔊 再聽</button>
      <button className="la-next" onClick={next}>{step+1<seq.length?'下一句 ▶':phase==='intro'?'出發 ▶':phase==='story'?'射回成語 ▶':'回到地圖 ▶'}</button>
     </div>}
    </div>}
@@ -385,7 +370,7 @@ export default function LifeAdventure(){
     <div className={`la-msg big ${LEFT.has(sayer)?'left':'right'} key`}>
      <img src={faceOf(sayer,'think',false)} alt="" className="la-face"/>
      <div className="la-bub"><b>{CAST[sayer].name}</b><p><Said text={sentence} idiom={ch.idiom} hit={hit}/></p></div>
-     <button className="la-say" onClick={()=>speak(hit?sentence.replace(BLANK,ch.idiom):sentence,true,sayer)} aria-label="朗讀句子">🔊</button>
+     <button className="la-say" onClick={()=>speak(hit?sentence.replace(BLANK,ch.idiom):sentence,true)} aria-label="朗讀句子">🔊</button>
     </div>
     <div ref={stageRef} className={`la-stage shoot${shake?' shake':''}`} style={{backgroundImage:`url(${IMG(ch.bg)})`}}>
      <img src={IMG(hit?'moying-sad-float':'moying-float')} alt="墨影" className="la-moying fly"/>

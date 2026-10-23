@@ -19,4 +19,6 @@ const SOUNDS={
  combo:c=>[784,988,1175,1568].forEach((f,i)=>tone(c,{type:'sine',f1:f,len:.16,at:i*.05,vol:.12})),
  tap:c=>tone(c,{type:'sine',f1:660,f2:880,len:.06,vol:.06}),
 }
+// iPhone：要在玩家按下的一刻喚醒音效引擎，並播一下無聲的聲音，之後的音效才會出聲
+export function unlockSfx(){const c=audio();if(!c)return;try{const b=c.createBuffer(1,1,22050),s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start(0)}catch{}}
 export function sfx(name,on){if(!on)return;const c=audio();if(c)try{SOUNDS[name]?.(c)}catch{}}

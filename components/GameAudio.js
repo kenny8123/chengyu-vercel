@@ -21,8 +21,9 @@ export default function GameAudio(){
   const visibility=()=>{sync();if(document.hidden)up.pause()}
   const duck=()=>{bg.volume=.04},restore=()=>{bg.volume=.16}
   up.addEventListener('play',duck);up.addEventListener('ended',restore);up.addEventListener('pause',restore)
-  document.addEventListener('pointerdown',activate);document.addEventListener('keydown',activate);document.addEventListener('visibilitychange',visibility)
-  return()=>{document.removeEventListener('pointerdown',activate);document.removeEventListener('keydown',activate);document.removeEventListener('visibilitychange',visibility);bg.removeEventListener('play',onPlay);bg.removeEventListener('pause',onPause);bg.pause();up.pause();bg.removeAttribute('src');up.removeAttribute('src');bg.load();up.load()}
+  // iPhone 的手指點擊要 touchend／click 才算「按下」，所以三個都聽
+  for(const ev of ['pointerdown','touchend','click','keydown'])document.addEventListener(ev,activate);document.addEventListener('visibilitychange',visibility)
+  return()=>{for(const ev of ['pointerdown','touchend','click','keydown'])document.removeEventListener(ev,activate);document.removeEventListener('visibilitychange',visibility);bg.removeEventListener('play',onPlay);bg.removeEventListener('pause',onPause);bg.pause();up.pause();bg.removeAttribute('src');up.removeAttribute('src');bg.load();up.load()}
  },[])
  // 每次進入鼎鼎的家都重新開啟音樂並即時嘗試播放；瀏覽器未允許自動播放時，第一下點擊畫面就會開始
  useEffect(()=>{const a=music.current;if(!a)return;if(router.pathname==='/pet'){enabledRef.current=true;setEnabled(true);try{localStorage.removeItem('game-bgm-muted')}catch{};if(!document.hidden)a.play().then(()=>{unlocked.current=true}).catch(()=>{})}else a.pause()},[router.pathname])
