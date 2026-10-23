@@ -106,7 +106,7 @@ export default function LifeAdventure(){
  // 遊戲作者提供的聲音：按鈕聲（按任何按鈕）、角色對話時的背景音樂（對話時循環播放，射擊時停）
  const btnSfx=useRef(null),talkBgm=useRef(null)
  useEffect(()=>{
-  btnSfx.current=new Audio('/audio/life-adventure/button.mp3');btnSfx.current.volume=.5
+  btnSfx.current=new Audio('/audio/life-adventure/button.mp3');btnSfx.current.volume=.35
   talkBgm.current=new Audio('/audio/life-adventure/dialogue-bgm.mp3');talkBgm.current.loop=true;talkBgm.current.volume=.22
   return()=>talkBgm.current?.pause()
  },[])
