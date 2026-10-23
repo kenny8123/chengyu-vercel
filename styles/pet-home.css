@@ -258,8 +258,12 @@
  .dd-home.dd-home .dd-room{aspect-ratio:1/1.12;height:auto;min-height:0}
  .dd-home.dd-home .dd-console{grid-template-rows:auto;height:auto;min-height:0}
 }
+/* 電腦：鼎鼎跟小屋大細一齊縮放（約小屋高度六成），企喺地氈中間；唔再用固定最大高度，大螢幕唔會變細 */
+@media(min-width:701px){
+ .dd-home.dd-home .dd-resident,.dd-home.dd-home .dd-resident.dd-sleep{left:50%;bottom:3%;width:58%;height:60%;max-height:none;transform:translateX(-50%)}
+}
 /* 對話泡泡貼近鼎鼎頭頂、字大啲；等級那行靠左，放在「返回」下面 */
-.dd-home.dd-home .dd-action-bubble{top:26%;font-size:clamp(18px,1.7vw,26px);padding:14px 28px;border-radius:26px}
+.dd-home.dd-home .dd-action-bubble{top:24%;font-size:clamp(18px,1.7vw,26px);padding:14px 28px;border-radius:26px}
 .dd-home.dd-home .dd-stats{justify-content:flex-start;text-align:left}
 .dd-home.dd-home .dd-stats>span:first-child{justify-content:flex-start}
 /* 電腦：等級、點心、親密度平均分佈成一行（等級仍然靠左喺返回下面） */
