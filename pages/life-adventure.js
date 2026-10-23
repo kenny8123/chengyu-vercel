@@ -102,7 +102,23 @@ export default function LifeAdventure(){
   save(prog.current)
  }
  function toggleVoice(){const v=!voice;setVoice(v);persist(done,{voice:v});try{speechSynthesis.cancel()}catch{}}
- function toggleSound(){const v=!sound;setSound(v);prog.current={...prog.current,sfx:v};save(prog.current);sfx('tap',v)}
+ function toggleSound(){const v=!sound;setSound(v);prog.current={...prog.current,sfx:v};save(prog.current)}
+ // 遊戲作者提供的聲音：按鈕聲（按任何按鈕）、角色對話時的背景音樂（對話時循環播放，射擊時停）
+ const btnSfx=useRef(null),talkBgm=useRef(null)
+ useEffect(()=>{
+  btnSfx.current=new Audio('/audio/life-adventure/button.mp3');btnSfx.current.volume=.5
+  talkBgm.current=new Audio('/audio/life-adventure/dialogue-bgm.mp3');talkBgm.current.loop=true;talkBgm.current.volume=.22
+  return()=>talkBgm.current?.pause()
+ },[])
+ useEffect(()=>{
+  const onClick=e=>{const b=e.target.closest?.('button,a');if(!b||b.disabled||b.classList.contains('la-target'))return
+   if(!sound||!btnSfx.current)return;try{btnSfx.current.currentTime=0;btnSfx.current.play().catch(()=>{})}catch{}}
+  document.addEventListener('click',onClick,true);return()=>document.removeEventListener('click',onClick,true)
+ },[sound])
+ useEffect(()=>{
+  const a=talkBgm.current;if(!a)return
+  if(sound&&VN.includes(phase))a.play().catch(()=>{});else a.pause()
+ },[phase,sound])
  function missFx(){sfx('miss',sound);setShake(true);setTimeout(()=>setShake(false),420)}
  function goUnit(i){if(!unlocked(i))return;try{speechSynthesis.cancel()}catch{};const seen=loadUnit(i);setStep(0);setPhase(seen?'map':'intro')}
 
