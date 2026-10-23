@@ -107,12 +107,13 @@ export default function LifeAdventure(){
  function toggleSound(){const v=!sound;setSound(v);prog.current={...prog.current,sfx:v};save(prog.current)}
  // 遊戲作者提供的聲音：按鈕聲（按任何按鈕）＋四段背景音樂，按畫面切換、循環播放
  // 封面／地圖／完成＝cover；角色對話＝talk；射擊＝stage；決戰空白魔王＝boss
- const btnSfx=useRef(null),bgms=useRef({}),nowBgm=useRef(null)
+ // 背景音樂只用「一個」播放器換曲（手機上幾個播放器會互相干擾、亂串）；每首記住播到哪裏，換回來時接着播
+ const BGM={cover:['cover-bgm',.2],talk:['dialogue-bgm',.22],stage:['stage-bgm',.18],boss:['boss-bgm',.2]}
+ const btnSfx=useRef(null),bgm=useRef(null),bgmPos=useRef({})
  useEffect(()=>{
   btnSfx.current=new Audio('/audio/life-adventure/button.mp3');btnSfx.current.volume=.35
-  const make=(file,vol)=>{const a=new Audio(`/audio/life-adventure/${file}.mp3`);a.loop=true;a.volume=vol;a.preload='none';return a}
-  bgms.current={cover:make('cover-bgm',.2),talk:make('dialogue-bgm',.22),stage:make('stage-bgm',.18),boss:make('boss-bgm',.2)}
-  return()=>Object.values(bgms.current).forEach(a=>a.pause())
+  bgm.current=new Audio();bgm.current.loop=true
+  return()=>bgm.current?.pause()
  },[])
  useEffect(()=>{
   const onClick=e=>{const b=e.target.closest?.('button,a');if(!b||b.disabled||b.classList.contains('la-target'))return
@@ -120,22 +121,26 @@ export default function LifeAdventure(){
   document.addEventListener('click',onClick,true);return()=>document.removeEventListener('click',onClick,true)
  },[sound])
  const bgmName=VN.includes(phase)?'talk':phase==='shoot'?'stage':phase==='boss'?'boss':'cover'
+ const wantBgm=useRef(null);wantBgm.current=sound?bgmName:null
  useEffect(()=>{
-  const want=sound?bgms.current[bgmName]:null
-  Object.values(bgms.current).forEach(a=>{if(a!==want)a.pause()})
-  nowBgm.current=want
-  want?.play().catch(()=>{})
+  const a=bgm.current;if(!a)return
+  if(!sound){a.pause();return}
+  if(a.dataset.track!==bgmName){
+   if(a.dataset.track)bgmPos.current[a.dataset.track]=a.currentTime
+   const [file,vol]=BGM[bgmName];a.pause();a.src=`/audio/life-adventure/${file}.mp3`;a.dataset.track=bgmName;a.volume=vol
+   const pos=bgmPos.current[bgmName]||0;if(pos)a.addEventListener('loadedmetadata',()=>{if(a.dataset.track===bgmName)a.currentTime=pos},{once:true})
+  }
+  if(!document.hidden)a.play().catch(()=>{})
  },[bgmName,sound])
- // 瀏覽器要等玩家按畫面才准播聲；iPhone 更要求每段音樂都「在按下的一刻」播過一次。
- // 所以第一下按的時候：把其他音樂靜音試播一下（解鎖），再播現在這段；音效引擎也一併喚醒。切去其他分頁時暫停。
+ // 瀏覽器要等玩家按畫面才准播聲（iPhone 要「按下的一刻」播）：每次按畫面時，如果音樂應該在播但停了，就補播；
+ // 第一次按時也喚醒音效引擎。切去其他分頁時暫停。
  useEffect(()=>{
   let primed=false
   const kick=()=>{
-   if(!primed){primed=true;unlockSfx()
-    Object.values(bgms.current).forEach(a=>{if(a===nowBgm.current)return;a.muted=true;a.play().then(()=>{if(a!==nowBgm.current){a.pause();a.currentTime=0}a.muted=false}).catch(()=>{a.muted=false})})}
-   const a=nowBgm.current;if(a&&a.paused&&!document.hidden)a.play().catch(()=>{})
+   if(!primed){primed=true;unlockSfx()}
+   const a=bgm.current;if(a&&wantBgm.current&&a.dataset.track&&a.paused&&!document.hidden)a.play().catch(()=>{})
   }
-  const vis=()=>{const a=nowBgm.current;if(!a)return;if(document.hidden)a.pause();else a.play().catch(()=>{})}
+  const vis=()=>{const a=bgm.current;if(!a||!wantBgm.current)return;if(document.hidden)a.pause();else a.play().catch(()=>{})}
   // iPhone 的手指點擊要用 touchend／click 才算「按下」，pointerdown 不算
   for(const ev of ['touchend','click','keydown'])document.addEventListener(ev,kick,true)
   document.addEventListener('visibilitychange',vis)
@@ -678,9 +683,13 @@ export default function LifeAdventure(){
     .la-target{padding:4px 8px}
     .la-target.t0{left:4%;top:24%}.la-target.t1{left:50%;top:34%}.la-target.t2{left:6%;top:50%}.la-target.t3{left:48%;top:63%}
     .la-stage.scene{aspect-ratio:3/4;max-height:66vh}
-    .la-actor{max-width:40%;height:46%}
-    .la-vn{min-height:32%;padding:8px 12px 12px}
-    .la-vn.pl{padding-left:38%}.la-vn.pr{padding-right:38%}.la-vn.sys{padding-left:5%;padding-right:5%}.la-vn.sys.pr{padding-right:38%}
+    /* 手機：角色企喺對話框上面，文字用盡對話框闊度，唔會被立繪逼到好窄 */
+    .la-actor{max-width:52%;height:40%;bottom:33%}
+    .la-actor.moying{height:30%;bottom:34%}
+    .la-actor.bossy{height:44%}
+    .la-vn{min-height:30%;padding:8px 14px 12px;z-index:5}
+    .la-vn.pl,.la-vn.pr,.la-vn.sys,.la-vn.sys.pr{padding-left:14px;padding-right:14px}
+    .la-vn.pr b{display:block;text-align:right}
     .la-shooter{height:30%}
    }
   `}</style>
