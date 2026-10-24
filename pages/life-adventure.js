@@ -7,6 +7,7 @@ import CATALOG from '../components/petCatalog.json'
 import LIFE from '../components/lifeSentences.json'
 import {CAST,XIAOYUE,UNITS,BOSS} from '../components/lifeAdventure'
 import {sfx,unlockSfx} from '../components/adventureSfx'
+import {logShot} from '../components/researchLog'
 
 // 成語穿越者：生活成語地圖冒險（設計構思：遊戲作者）
 // 學習單地圖 × 射擊：每站穿越到回憶，句子裏的成語被吸走變成墨跡，用成語光線槍把正確的成語補回句子裏，再看一條線索。
@@ -208,6 +209,7 @@ export default function LifeAdventure(){
   const isHit=idiom===ch.idiom
   aimAt(e,isHit)
   const fresh=!(stop in done)
+  logShot({mode:'地圖',unit:ui+1,station:no(stop),idiom:ch.idiom,chosen:idiom,correct:isHit,attempt:wrong+1,replay:!fresh})
   if(isHit){
    setHit(true);setHint('')
    if(fresh){
@@ -259,6 +261,7 @@ export default function LifeAdventure(){
   if(hit||gone.includes(idiom)||!bq)return
   const isHit=idiom===bq.idiom
   aimAt(e,isHit);setBossNote('')
+  logShot({mode:'魔王',unit:5,station:boss.i+1,idiom:bq.idiom,chosen:idiom,correct:isHit,attempt:wrong+1,replay:false})
   if(isHit){
    setHit(true);setHint('')
    const first={...boss.first};if(!(bq.idiom in first)){first[bq.idiom]=wrong===0;recordLearning({idiom:bq.idiom,kind:'answer',correct:wrong===0})}
