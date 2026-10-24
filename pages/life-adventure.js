@@ -180,7 +180,7 @@ export default function LifeAdventure(){
   if(phase==='story'){startShoot();return}
   if(phase==='clue')backToMap()
   if(phase==='bossIntro'||phase==='bossMid'){saveBoss({...boss,started:true});setPhase('boss');return}
-  if(phase==='bossEnd')setPhase('cert')
+  if(phase==='bossEnd')setPhase('diary')
  }
  function start(){if(introSeen)setPhase('map');else{setStep(0);setPhase('intro')}}
  function openStop(i){setStop(i);setStep(0);setHit(false);setHint('');setWrong(0);setGone([]);setGift(null);setPhase('story')}
@@ -325,7 +325,7 @@ export default function LifeAdventure(){
   {phase!=='cover'&&<main className="la-wrap">
    <header className="la-top">
     <button className="la-back" onClick={()=>{try{speechSynthesis.cancel()}catch{};setPhase(phase==='map'||phase==='intro'||phase==='done'?'cover':'map')}}>{phase==='map'||phase==='intro'||phase==='done'?'← 封面':'← 地圖'}</button>
-    <h1>{/^boss|cert/.test(phase)?`⚔️ ${BOSS.title}`:`🗺️ ${unit.title}`}</h1>
+    <h1>{/^boss|cert|diary/.test(phase)?`⚔️ ${BOSS.title}`:`🗺️ ${unit.title}`}</h1>
     <button className="la-back" onClick={toggleSound} aria-pressed={sound} aria-label={sound?'關閉音效':'開啟音效'}>{sound?'🎵':'🎵✕'}</button>
     <button className="la-back" onClick={toggleVoice} aria-pressed={voice} aria-label={voice?'關閉朗讀':'開啟朗讀'}>{voice?'🔊 開':'🔇 關'}</button>
    </header>
@@ -420,6 +420,20 @@ export default function LifeAdventure(){
     </div>
     {bossNote&&<p className="la-hint ok">{bossNote}</p>}
     <p className={`la-hint${hint?' on':''}${hit?' ok':''}`}>{hit?`「${bq.idiom}」：${meaning(bq.idiom)}`:hint||(boss.joined?'★ 墨墨歸隊了！發光的卷軸就是正確答案的提示。':'★ 讀一讀上面那句話，想想墨跡那裏應該是哪個成語，再用成語光線槍把成語補回句子裏。')}</p>
+   </div>}
+
+   {/* 結局後的收尾頁：小越的日記 */}
+   {phase==='diary'&&<div className="la-done la-diary">
+    <h2><GameText text="小越的日記"/></h2>
+    <div className="la-diary-page">
+     <img src={IMG('xiaoyue-bounce')} alt="小越" className="la-diary-face"/>
+     {BOSS.diary.map(t=><p key={t}>{t}</p>)}
+     <p className="la-diary-sign">—— 成語穿越者・小越</p>
+    </div>
+    <div className="la-actions">
+     <button className="btn btn-ghost" onClick={()=>speak(BOSS.diary.join(''),true)}>🔊 聽日記</button>
+     <button className="btn btn-go" onClick={()=>{try{speechSynthesis.cancel()}catch{};setPhase('cert')}}>看結局證書 →</button>
+    </div>
    </div>}
 
    {phase==='cert'&&boss&&<div className="la-done la-cert">
@@ -640,6 +654,10 @@ export default function LifeAdventure(){
    .la-cert-name{font-size:1.4rem;font-weight:900;color:var(--choc)}
    .la-cert-list{text-align:left;display:inline-block;line-height:2;font-weight:600}
    .la-cert-credit{color:var(--choc-soft);font-size:.9rem}
+   .la-diary-page{position:relative;text-align:left;margin:16px auto;max-width:620px;background:repeating-linear-gradient(#fffdf6 0 2.05em,#e9dcc4 2.05em calc(2.05em + 1px));border:3px solid #e8d8bd;border-radius:18px;padding:18px 20px 14px;line-height:2.05;font-size:1.05rem;color:var(--choc);box-shadow:0 8px 20px rgba(90,61,43,.15)}
+   .la-diary-page p{margin:0}
+   .la-diary-face{float:right;width:78px;margin:0 0 6px 10px}
+   .la-diary-sign{text-align:right;font-weight:700;color:var(--choc-soft)}
    @media(prefers-reduced-motion:reduce){.la-pages i,.la-bossimg,.la-momo-help{animation:none}}
    .la-hint{margin:12px 0 0;background:#fffaf0;border:3px dashed #e8d8bd;border-radius:16px;padding:10px 14px;line-height:1.7;font-weight:500}
    .la-hint.on{border-color:var(--berry);background:#fff0f4}
