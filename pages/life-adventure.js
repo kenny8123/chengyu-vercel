@@ -433,6 +433,7 @@ export default function LifeAdventure(){
      {BOSS.diary.map(t=><p key={t}>{t}</p>)}
      <p className="la-diary-sign">—— 成語穿越者・小越</p>
     </div>
+    <p className="la-cert-credit">設計及開發：沈偉棠</p>
     <div className="la-actions">
      <button className="btn btn-ghost" onClick={()=>speak(BOSS.diary.join(''),true)}>🔊 聽日記</button>
      <button className="btn btn-go" onClick={()=>{try{speechSynthesis.cancel()}catch{};setPhase('cert')}}>看結局證書 →</button>
@@ -448,7 +449,7 @@ export default function LifeAdventure(){
      <li>成語卷軸館藏：<b>{(readPet().profiles[readPet().active]?.scrolls||[]).length}</b> / 40 卷</li>
     </ul>
     {reward&&!reward.already&&<CompletionReward reward={reward}/>}
-    <p className="la-cert-credit">故事構思：遊戲作者</p>
+    <p className="la-cert-credit">設計及開發：沈偉棠</p>
     <div className="la-actions">
      <a className="btn btn-go" href="/pet">去卷軸館藏看明信片 →</a>
      <button className="btn btn-ghost" onClick={()=>{if(window.confirm('再挑戰一次空白魔王？'))startBoss(true)}}>再挑戰魔王</button>
